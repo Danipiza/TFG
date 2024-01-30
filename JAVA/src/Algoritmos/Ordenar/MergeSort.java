@@ -26,10 +26,10 @@ public class MergeSort {
 	
 	public void mergesort(int a[],int izq, int der){
 	    if (izq < der){
-	            int m=(izq+der)/2;
-	            mergesort(a,izq, m);
-	            mergesort(a,m+1, der);                                                                                
-	            merge(a,izq, m, der);                                                                                 
+            int m=(izq+der)/2;
+            mergesort(a,izq, m);
+            mergesort(a,m+1, der);                                                                                
+            merge(a,izq, m, der);                                                                                 
 	    }
 	}	
 		

@@ -24,7 +24,7 @@ public class InsertionSort {
 	
 	public void sort(int[] a) {
 		int n = a.length;
-		for(int i = 1; i<n ; i++) {
+		for(int i = 1; i<n; i++) {
 			if(a[i-1]>a[i]) mueve(a,i);
 		}
 	}

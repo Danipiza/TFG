@@ -1,41 +1,21 @@
 package Main;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.util.StringTokenizer;
 
+import Algoritmos.Buscar.*;
 import Algoritmos.Ordenar.*;
+import Mejoras.SequentialSearch.SeqHilos;
 
 
 public class Main {
 	
-	
-	private static void crearArraySinDuplicados(int[] a, int n, boolean neg) {
-		List<Integer> nums = new ArrayList<Integer>();
-		if(!neg) 	// [1, n] 
-			for(int i = 1; i<=n; i++) { nums.add(i); }		
-		else  		// [-n/2, n/2)
-			for(int i = -n/2; i<n/2; i++) { nums.add(i); }	
 		
-		Random r = new Random();
-		int j=0;
-		for(int i = 0; i<n; i++) {
-			j = r.nextInt(n-i);
-			a[i] = nums.get(j);
-			nums.remove(j);
-		}
-		
-	}
-	
-	private static void crearArrayConDuplicados(int[] a, int n, boolean neg) {
-		Random r = new Random();
-		
-		if(!neg) 	// [1, n] 
-			for(int i = 0; i<n; i++) { a[i] = r.nextInt(n)+1; }		
-		else  		// [-n/2, n/2]
-			for(int i = 0; i<n; i++) { a[i] = r.nextInt(n+1)-n/2; }			
-	}
-	
 	private static void imprimeArray(int[] a) {
 		for(int x: a) System.out.print(x + " ");
 		System.out.println();
@@ -49,8 +29,62 @@ public class Main {
 		SelectionSort selectionSort = new SelectionSort();
 		MergeSort mergeSort = new MergeSort();
 		
+		SequentialSearch sequencialSearch = new SequentialSearch(); 
+		BinarySearch binarySearch = new BinarySearch();
 		
-		int[] b = new int[100000];
+		
+		
+		
+		int[] a = new int[100000];
+		String t;
+		int num, i = 0;
+		try {
+            // Abre el archivo 
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("datos4.txt")));
+            String linea = br.readLine(); // Lee la línea del archivo            
+            br.close(); // Cierra el BufferedReader
+
+            // StringTokenizer divide la linea en tokens
+            if (linea != null) {                
+                StringTokenizer tokenizer = new StringTokenizer(linea);
+                
+                while (tokenizer.hasMoreTokens()) {
+                    t = tokenizer.nextToken();
+                    num = Integer.parseInt(t);
+                    a[i++] = num;
+                }
+            } else System.out.println("El archivo esta vacio");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+		
+		SeqHilos p = new SeqHilos(a);
+		
+		long comienzo, fin, total;
+		
+		
+		try {
+			p.ex(61309);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		
+		comienzo = System.nanoTime();
+		sequencialSearch.search(a, 61309, 0, a.length-1);		
+		fin = System.nanoTime();
+		total = fin - comienzo;
+		System.out.println("(Normal) Tarda: " + total + " nanosegundos");
+		
+		/*if(binarySearch.search(a, 77)) {
+			System.out.println("Esta en el array, en la posicion " + binarySearch.getPos());
+		}
+		else System.out.println("No esta en el array");*/
+		
+		
+		
+		
+		/*int[] b = new int[100000];
 		crearArraySinDuplicados(b,100000,true);
 		imprimeArray(b);
 		long comienzo = System.currentTimeMillis();

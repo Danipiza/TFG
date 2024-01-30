@@ -18,11 +18,11 @@ public class QuickSort {
 		int pivote = a[der], posPivote = der--;		
 		int eIzq = a[izq], eDer = a[der];
 		int tmp = 0;
-		while(izq<der) {
-			while(eIzq<pivote) { izq++; eIzq=a[izq]; }
-			while(eDer>pivote && izq<der) { der--; eDer=a[der]; }
+		while(izq < der) {
+			while(eIzq < pivote) { izq++; eIzq=a[izq]; }
+			while(eDer > pivote && izq<der) { der--; eDer=a[der]; }
 			
-			if(izq<der) { // swap
+			if(izq < der) { // swap
 				tmp = a[izq];
 				a[izq] = a[der];
 				a[der] = tmp;

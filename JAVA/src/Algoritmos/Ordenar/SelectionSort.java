@@ -11,14 +11,14 @@ public class SelectionSort {
 	
 	private void swap(int[] a, int i, int j) {
 		int tmp = a[i];
-		a[i]=a[j];
-		a[j]=tmp;
+		a[i] = a[j];
+		a[j] = tmp;
 	}
 	
 	public void sort(int[] a) {
 		int n = a.length;
 		int minE = 0, pos = 0;
-		for(int i = 0; i < n-1; i++) {
+		for(int i = 0; i<n-1; i++) {
 			minE = a[i];
 			pos = i;
 			for(int j = i+1; j < n; j++) {
