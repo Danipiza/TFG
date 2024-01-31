@@ -7,18 +7,22 @@
 
 # TODO
 
+<<<<<<< HEAD
 ## Reducir el tiempo de ejecución
 - No usar recursión
 - No acceder mucho a memoria, tambien accesos secuenciales, mejora la eficiencia debido al rendimiento del caché. 
 - Paralelismo
 - Bibliotecas estándar
 
+=======
+>>>>>>> c6a73e97524d66f0fceb82dec7f2bad7dbe1161c
 # Mejoras
 
 ---
 ## Búsquedas
 ---
 
+<<<<<<< HEAD
 ## [Busq. Lineal](https://www.geeksforgeeks.org/linear-search/)
 Es la búsqueda más sencilla y simple, recorre todos los elementos de un array buscando un elemento, si no encuentra el valor en la posicion i-esima, avanza a la siguiente posicion, así hasta encontrar el valor o recorrer todo el array.
 ### Costes
@@ -66,6 +70,28 @@ Puede ser interesante reducir el tiempo de ejecucion añadiendo hilos que proces
 ### Cálculo ideal del Número de Hilos
 Crear y gestionar demasiados hilos pueden generar un costo adicional, tanto en espacio como en tiempo.
 
+=======
+## Busq. Lineal (Sequential Search)
+### Division del Espacio de Búsqueda:
+Cada hilo realiza una búsqueda lineal, asignando un espacio de busqueda a cada hilo, para reducir el tiempo de ejecución.
+Se puede reducir el tiempo de ejecucion de lineal a logaritmico, produciendo, potencias de 2, hilos.
+
+### Manejo de Sincronización:
+Utilizando mecanismos de sincronización, como cerrojos, semáforos o monitores. Asi reduciendo el tiempo de cómputo de los hilos y terminar su ejecución cuando 1 hilo encuentre el parámetro buscado. Evitando problemas de concurrencia, y asegurando accesos seguros a los datos compartidos, en este caso a una posible variable booleana "encontrado".
+
+### Manejo de Interrupciones y Cancelaciones:
+Mecanismos que manejan interrupciones y cancelaciones de la búsqueda.
+
+### Cálculo ideal del Número de Hilos:
+Crear y gestionar demasiados hilos pueden generar un costo adicional, tanto en espacio como en tiempo.
+
+### Uso de Bibliotecas Específicas para la Concurrencia:
+Algunos lenguajes de programación ofrecen bibliotecas específicas para operaciones concurrentes y paralelas. (facilita la implementación)
+
+---
+
+## Busq. Binaria (Binary Search)
+>>>>>>> c6a73e97524d66f0fceb82dec7f2bad7dbe1161c
 
 
 
