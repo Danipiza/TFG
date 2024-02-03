@@ -15,7 +15,18 @@ import Mejoras.SequentialSearch.SeqHilos;
 
 public class Main {
 	
+	
+	private static boolean compruebaOrden(int[] a, int n) {
 		
+		for(int i=1;i<n;i++) {
+			if(a[i]!=a[i-1]+1) { 
+				//val=a[i]; 
+				return false;
+			} 
+		}
+		return true;
+	}
+	
 	private static void imprimeArray(int[] a) {
 		for(int x: a) System.out.print(x + " ");
 		System.out.println();
@@ -33,14 +44,18 @@ public class Main {
 		BinarySearch binarySearch = new BinarySearch();
 		
 		
+		/*int[] a = {1,3,6,8,10,2,4,5,9};		
+		imprimeArray(a);		
+		mergeSort.merge(a, 0, 8);		
+		imprimeArray(a);*/
 		
 		
-		int[] a = new int[100000];
+		int[] a = new int[10000];
 		String t;
 		int num, i = 0;
 		try {
             // Abre el archivo 
-            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("datos4.txt")));
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream("datos10000.txt")));
             String linea = br.readLine(); // Lee la línea del archivo            
             br.close(); // Cierra el BufferedReader
 
@@ -57,6 +72,21 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+		
+		/*for(i=0;i<100;i++) {
+			System.out.print(a[i] + " ");
+		}
+		System.out.println();*/
+		mergeSort.mergesort(a, 0, 9999);
+		/*for(i=0;i<100;i++) {
+			System.out.print(a[i] + " ");
+		}*/
+		
+		System.out.println();
+		if(compruebaOrden(a, 10000))System.out.println("Ordenado");
+		else System.out.println("No Ordenado");
+		
+		System.out.println();
 		
 		SeqHilos p = new SeqHilos(a);
 		
@@ -113,6 +143,7 @@ public class Main {
 		
 		//mergeSort.mergesort(b, 0, b.length-1);
 		//imprimeArray(a);
+		
 	}
 
 }

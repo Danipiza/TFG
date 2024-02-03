@@ -70,11 +70,10 @@ int main() {
     size_t archivoTam;
     int arrayTam;
 
-    printf("Ingrese una cadena de caracteres: ");
-    fgets(archivo, sizeof(archivo), stdin);
-    archivoTam = strlen(archivo);
-    archivo[archivoTam-1]='.'; // quita el salto de linea
-    strcat(archivo, "txt");
+    printf("Ingrese una cadena de caracteres para el archivo: ");
+    scanf("%s", archivo);
+    archivoTam = strlen(archivo);    
+    strcat(archivo, ".txt");
     
 
     printf("Ingrese el tamaño del array: ");
@@ -102,7 +101,7 @@ int main() {
     fclose(file); // Cierra el archivo abierto
     free(array); // Libera la memoria 
 
-    printf("Datos almacenados en %s correctamente.\n", "datos.txt");    
+    printf("Datos almacenados en %s correctamente.\n", archivo);    
     
 	return 0;
 }
