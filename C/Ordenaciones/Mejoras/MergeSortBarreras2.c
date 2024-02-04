@@ -1,4 +1,5 @@
-// 1. IMPLEMENTACION CON POTENCIAS DE 2 HILOS
+// 2. IMPLEMENTACION CON LOG(n) HILOS
+// Si el numero de hilos es impar los ultimos ultimo hilo procesa 3 comparaciones de array
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +24,6 @@ int arrayOrdenado(int n);
 void printArray(int n);
 int leeArchivo();
 
-int potenciaCercana(double n);
 
 pthread_barrier_t barrera;
 
@@ -40,8 +40,6 @@ int* a;
 // En el hilo se asigna a los impares (primeros) porque asi tambien lo procesa el merge
 // Si no lo procesa mal
 
-
-// Mejorar poniendo solo una funcion para los hilos, añadiendo otro valor al struct
 void *funcion_merge1(void *arg) {
     DatosHilo *datos = (DatosHilo *)arg;
     int izq = datos->izq;
@@ -70,7 +68,7 @@ void *funcion_merge2(void *arg) {
 
 int main() {    
     int n=leeArchivo();
-    int NUM_HILOS=potenciaCercana(log2(n));
+    int NUM_HILOS=ceil(log2(n));
 
     if(NUM_HILOS%2==1) NUM_HILOS--;
 
@@ -85,7 +83,8 @@ int main() {
     
     printf("Creando hilos\n");  
     int tmp=n/NUM_HILOS;
-    int impar=(n%NUM_HILOS==0?0:1);
+    int hilosMod=n%NUM_HILOS;
+    int aux=hilosMod;
 
     int cont=0;
     for (int i = 0; i < NUM_HILOS; i++) { 
@@ -93,7 +92,7 @@ int main() {
 
         datos[i].izq=0+cont;
         cont+=tmp-1;
-        if(i%2==0)cont+=impar; 
+        if(hilosMod-->0)cont++; 
         datos[i].der=cont;
         cont++;
         pthread_create(&hilos[i], NULL, funcion_merge1, &datos[i]);        
@@ -106,17 +105,19 @@ int main() {
     pthread_barrier_destroy(&barrera); // Destruir la barrera
     printArray(n);
 
-    NUM_HILOS/=2;
-
+    //int impar=NUM_HILOS%2!=0;
+    //NUM_HILOS/=2;
+    NUM_HILOS=ceil(NUM_HILOS/2.0);
+    
     // Segunda parte
-    while(NUM_HILOS!=0){
+    while(NUM_HILOS!=1){
         printf("\n");
         // Inicializar barrera
         pthread_barrier_init(&barrera, NULL, NUM_HILOS);
 
         printf("Creando hilos\n");  
         tmp=n/NUM_HILOS;
-        impar=(n%NUM_HILOS==0?0:1);
+        hilosMod=n%NUM_HILOS;
 
         cont=0;
         for (int i = 0; i < NUM_HILOS; i++) { 
@@ -124,7 +125,7 @@ int main() {
 
             datos[i].izq=0+cont;
             cont+=tmp-1;
-            if(i%2==0)cont+=impar;
+            if(hilosMod-->0)cont++; 
             datos[i].der=cont;
             cont++;
             pthread_create(&hilos[i], NULL, funcion_merge2, &datos[i]);        
@@ -136,10 +137,10 @@ int main() {
         }        
         
         pthread_barrier_destroy(&barrera); // Destruir la barrera
-        NUM_HILOS/=2;
+        NUM_HILOS=ceil(NUM_HILOS/2.0);
         printArray(n);
     }
-    
+    merge(0,n-1);
 
     printf("Todos los hilos han terminado\n");
 
@@ -240,18 +241,3 @@ int leeArchivo(){
 
     return arrayTam;
 }
-
-int potenciaCercana(double n) {
-    int pot=1;    
-    double minDif=abs(n-pot), tmp;  
-    int ret=1;  
-    while(1){
-        pot*=2;
-        tmp=abs(n-pot);
-        if(tmp>=minDif) return ret;
-        ret=pot;
-        minDif=tmp;
-    }
-    //return ret;
-}
-
