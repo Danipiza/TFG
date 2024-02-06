@@ -4,14 +4,14 @@
 #include <string.h>
 #include <math.h>
 #include <mpi.h>
-//#include <climits>
 
 #define MASTER 0 // Master process
-#define END_OF_PROCESSING -2 // End of processing
 #define INF INT_MAX
 
+
 // COMPILAR
-// mpicc sequentialSearchMPI.c -o sequentialSearchMPIc -lm
+// mpicc binarySearchMPI.c -o binarySearchMPI -lm
+// mpiexec -n <numProc> ./binarySearchMPI
 
 
 /*
@@ -28,9 +28,10 @@ int arrayOrdenado(int* a, int n);
 
 int main(int argc, char *argv[]){
     // Variables MPI
-  	int myrank, tag, numProc;		// rank y tag de MPI y el numero de procesos creados (el primero es el master)
+  	int myrank, tag, numProc, numWorkers;		// rank y tag de MPI y el numero de procesos creados (el primero es el master)
     MPI_Status status;			    // status para mas info 
                                         // (entre esta info esta el proceso que recibe al usar anysource)
+    int END_OF_PROCESSING = -2;
 
     // Variable para calculo de tiempo de ejecicion
     double timeStart, timeEnd;	
@@ -40,7 +41,7 @@ int main(int argc, char *argv[]){
     // tamaño de los arrays 
     int n;      
 
-    int x;                    
+    int x=78;                    
     
     // Variables del proceso MPI
     int punt, izq, der;
@@ -64,7 +65,7 @@ int main(int argc, char *argv[]){
     MPI_Init (&argc, &argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &myrank);	
     MPI_Comm_size(MPI_COMM_WORLD, &numProc); // Numero de procesos al ejecutar el programa
-
+    numWorkers=numProc-1;
     // CONTROL DE ERRORES
     /*if (<Error>){
         if (myrank == MASTER) {
@@ -83,7 +84,7 @@ int main(int argc, char *argv[]){
 
         if(!arrayOrdenado(a,n)) {            
             printf ("El array de entrada tiene que estar ordenado\n");        
-            MPI_Finalize();
+            MPI_Abort(MPI_COMM_WORLD,-1);
             exit(-1);		
         }
 
@@ -108,86 +109,118 @@ int main(int argc, char *argv[]){
     if (myrank == MASTER){
         // Init
         punt=0;
-        tamProc=n/numProc;  
-        modProc=n%numProc;    
+        tamProc=n/numWorkers;  
+        modProc=n%numWorkers;    
 
         // Distribucion inicial
-        for (i=1; i<numProc-1; i++) {            
-            // Envia izq
-            MPI_Send (&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-            punt+=tamProc+((i-1)<modProc?1:0);
-            MPI_Send (&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD);
-            // update
-            punt++;							
+        if(tamProc>=1){
+            for(i=1;i<=numWorkers;i++){
+                printf("MASTER. envia izq: %d\n", punt);
+                MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // Envia izq
+                // Si el tamaño del array no es multiplo del nuumero de procesos, se asigna el espacio restante a los primeros
+                punt+=tamProc-1+((i-1)<modProc?1:0); 
+                printf("MASTER. envia der: %d\n", punt);
+                MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // Envia der
+                punt++;
+            }
+        }
+        else {  // Hay mas procesos que elementos en el array
+                // Se asigna un valor a los primeros procesos
+            for(i=1;i<=modProc;i++){ 
+                MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // Envia izq
+                MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // Envia der
+                punt++;
+            }
+            for(i=modProc+1;i<=numWorkers;i++){
+                MPI_Send(&END_OF_PROCESSING, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // amp?
+                numWorkers--; // Reduce en numero de workers activos
+            }
         }
 
-        // Hay mas elementos a procesar
-        while (encontrado==-1) {		
-            //pos=-1;	
-            // Recibe los resultados de algun worker
-            //printf("PADRE. Esperando\n");
-            izq=-1;
-            for(int i=1;i<numProc;i++){
+
+        // Todavia no ha finalizado la busqueda
+        while (encontrado==-1) {	
+            // Recibe los resultados de los workers activos
+            punt=-1;
+            for(int i=1;i<=numWorkers;i++) { // workers activos
                 MPI_Recv(&aux, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
-                if (aux==-2){ // encontrado
+                if (aux==-2) { // valor encontrado
+                    timeEnd = MPI_Wtime();
                     MPI_Recv(&encontrado, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);                    
                 }
-                else if(aux!=-1){
+                else if(aux!=-1) { // esta en el intervalo,
                     izq=aux;
+                    punt=izq;
                     MPI_Recv(&der, 1, MPI_INT, i, tag, MPI_COMM_WORLD, &status);
                 }	            
-            }            
-            //printf("PADRE. Recibe, pos: %d, val: %d\n", pos, val);	
+            }            	
             
             // Fin
-            if(izq==-1){
-                printf("El valor: %d, no esta en el array\n", x);
-            }
-            else if(encontrado!=-1){
+            if(encontrado!=-1) { // Se ha encontrado el valor se mandan los mensajes de finalizacion a los workers activos
                 printf("El valor: %d, esta en la posicion %d\n", x, encontrado);
-            }
-
-            if(arrayProc==n){
-                printf("No hay mas elementos que procesar\n", encontrado);
-                timeEnd = MPI_Wtime();
-                for(int i=1;i<numProc;i++){
-                    MPI_Send(END_OF_PROCESSING, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // amp?
+                for(int i=1;i<=numWorkers;i++){
+                    MPI_Send(&END_OF_PROCESSING, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // amp?
                 }
-                //MPI_Abort(MPI_COMM_WORLD, 0);
-            }		
+                break;
+            }
+            else if(punt==-1) { // punt No se actualiza por lo que el valor existe en el array
+                timeEnd = MPI_Wtime();
+                printf("El valor: %d, no esta en el array\n", x);
+                for(int i=1;i<=numWorkers;i++) {
+                    MPI_Send(&END_OF_PROCESSING, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // amp?
+                }
+                break;
+            }             
+            	
 
-            // Procesa los datos recibidos
-            // Si la posicion en el array b esta ocupado, es porque es el mismo valor
-            // y busca el siguiente espacio disponible
-            while(b[pos]!=INF) pos++;
-            b[pos]=val;
-
-
-            // Envia el siguiente valor a procesar       
-            MPI_Send (&a[arrayProc], 1, MPI_INT, status.MPI_SOURCE, tag, MPI_COMM_WORLD);
-            // Update
-            arrayProc++;							
+            // Procesa los datos recibidos            
+            tamProc=der-izq+1;
+            modProc=tamProc%numWorkers;  
+            tamProc=tamProc/numWorkers;  
+            if(tamProc>=1){
+                for(i=1;i<=numWorkers;i++){
+                    MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // izq
+                    punt+=tamProc-1+((i-1)<modProc?1:0);
+                    MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // der
+                    punt++;
+                }
+            }
+            else { 
+                for(i=1;i<=modProc;i++){
+                    MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // izq
+                    MPI_Send(&punt, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // der
+                    punt++;
+                }
+                for(i=modProc+1;i<=numWorkers;i++){
+                    MPI_Send(&END_OF_PROCESSING, 1, MPI_INT, i, tag, MPI_COMM_WORLD); // amp?
+                    numWorkers--;
+                }
+            }             						
         }
         
-        printf("Tiempo de ejecucion: %f\n", timeEnd-timeStart);	
-        arrayOrdenado(b,n); // Comprueba si esta ordenado        		
+        printf("Tiempo de ejecucion: %f\n", timeEnd-timeStart);	             		
     }		
     else { // workers
-        while(pos!=-2) {
-            //printf("HIJO. Elemento a buscar %d\n",x);
-            // Recibe el valor del array a procesar
-            MPI_Recv (&val, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD, &status);
-            if(pos==-2) break;
+        while(1) {            
+            // Recibe izq 
+            MPI_Recv (&izq, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD, &status);
+            if(izq==-2) break;
+            // Recibe der
+            MPI_Recv (&der, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD, &status);
 
-            //printf("HIJO, %d. izq: %d, der: %d\n", myrank, izq, der);
-            cont=0;
-            for(i=0;i<n;i++){
-                if(a[i]<pos) cont++;
+            // Procesar
+            encontrado=-1;            
+            if(a[der]>=x&&a[izq]<=x) {
+                encontrado=izq;
+                if(a[der]==x) { encontrado=-2; pos=der; }
+                else if(a[izq]==x) { encontrado=-2; pos=izq; }
             }
             
-            MPI_Send(&cont, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD);
-            MPI_Send(&val, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD); 
-            printf("HIJO, %d. Envia la posicion: %d, con valor: %d\n", myrank, cont, val);               
+            
+            MPI_Send(&encontrado, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD);
+            if(encontrado==-2) MPI_Send(&pos, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD);
+            else if(encontrado==izq) MPI_Send(&der, 1, MPI_INT, MASTER, tag, MPI_COMM_WORLD);
+            //printf("HIJO, %d. Envia: %d\n", myrank, encontrado);               
         }    
     }
 		// End MPI environment
@@ -255,7 +288,8 @@ void printArray(int* a, int n){
 
 int arrayOrdenado(int* a, int n){
     for(int i=1;i<n;i++){
-        if(a[i]!=a[i-1]+1)return 0;
+        //if(a[i]!=a[i-1]+1) return 0;
+        if(a[i]<a[i-1]) return 0;
     }
     return 1;
 }

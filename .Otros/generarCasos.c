@@ -3,10 +3,15 @@
 #include <string.h>
 #include <time.h>
 
-int duplicados, neg;
+int duplicados, neg, ordenado;
 
 void menu(){
     printf("MENU -------------------\n");
+
+    printf("Ordenado:\n");
+    printf("0: No ordenado\n");    
+    printf("1: Ordenado\n");    
+    scanf("%d", &ordenado);
 
     printf("Elige:\n");
     printf("0: Sin duplicados\n");    
@@ -22,28 +27,28 @@ void menu(){
 }
 
 void crearArraySinDuplicados(int a[], int n, int neg) {
-    int* nums = (int*)malloc(n * sizeof(int));
+    int* nums = (int*)malloc(n*sizeof(int));
 
     // Inicialización del array nums
     if (!neg) {  // [1, n]
-        for (int i = 0; i < n; i++) {
-            nums[i] = i + 1;
+        for (int i=0;i<n;i++) {
+            nums[i]=i+1;
         }
     } else {  // [-n/2, n/2)
-        for (int i = 0; i < n; i++) {
-            nums[i] = i - n / 2;
+        for (int i=0;i<n;i++) {
+            nums[i]=i-n/2;
         }
     }
 
     srand(time(NULL)); // Inicialización de la semilla para la generación de números aleatorios
-    int j = 0;
-    for (int i = 0; i < n; i++) {
-        j = rand() % (n - i);
-        a[i] = nums[j];
+    int j=0;
+    for (int i=0;i<n;i++) {
+        j=rand()%(n-i);
+        a[i]=nums[j];
 
         // Eliminar el elemento seleccionado del array nums
-        for (int k = j; k < n - i - 1; k++) {
-            nums[k] = nums[k + 1];
+        for (int k=j;k<n-i-1;k++) {
+            nums[k]=nums[k+1];
         }
     }
 
@@ -54,13 +59,32 @@ void crearArrayConDuplicados(int a[], int n, int neg) {
     srand(time(NULL));
 
     if (!neg) {  // [1, n]
-        for (int i = 0; i < n; i++) {
-            a[i] = rand() % n + 1;
+        for (int i=0;i<n;i++) {
+            a[i]=rand()%n+1;
         }
     } else {  // [-n/2, n/2]
-        for (int i = 0; i < n; i++) {
-            a[i] = rand() % (n + 1) - n / 2;
+        for (int i=0;i<n;i++) {
+            a[i]=rand()%(n+1)-n/2;
         }
+    }
+}
+
+void crearArrayOrdenadoSinDuplicados(int a[], int n, int neg){
+    for(int i=0-((n/2)*neg); i < n-((n/2)*neg);i++){
+        a[i+(50*neg)]=i;
+    }
+}
+
+void crearArrayOrdenadoConDuplicados(int a[], int n, int neg){
+    int i, j, r;
+    
+    i=0;
+    j=0-((n/2)*neg);
+    srand(time(NULL));
+    while(i<n){
+        r=rand()%10;
+        if(r<5) a[i++]=j;  
+        else j++;       
     }
 }
 
@@ -78,11 +102,18 @@ int main() {
 
     printf("Ingrese el tamaño del array: ");
     scanf("%d", &arrayTam);
-    int *array = (int *)malloc(arrayTam * sizeof(int));
+    int *array = (int *)malloc(arrayTam*sizeof(int));
     
     menu();
-    if(duplicados>0) crearArraySinDuplicados(array, arrayTam, neg);
-    else crearArraySinDuplicados(array, arrayTam, neg);
+    if(duplicados){
+        if(ordenado) crearArrayOrdenadoConDuplicados(array, arrayTam, neg);
+        else crearArrayConDuplicados(array, arrayTam, neg);
+    }
+    else {
+        if(ordenado) crearArrayOrdenadoSinDuplicados(array, arrayTam, neg);
+        else crearArraySinDuplicados(array, arrayTam, neg);
+    }
+    
 
     FILE *file;
     // Abre el archivo en modo escritura (No existe, lo crea. Si existe, lo trunca)
@@ -93,7 +124,7 @@ int main() {
     }
 
     // Escribe el array en el archivo
-    for (int i = 0; i < arrayTam; i++) {
+    for (int i=0;i<arrayTam;i++) {
         fprintf(file, "%d ", array[i]);
     }
 
