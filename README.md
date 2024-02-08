@@ -4,21 +4,119 @@
 
 #### Dirigido por: Alberto Núñez Covarrubias
 ---
+# Índice
 
-## ÍNDICE
-- [MPI](#mpi)
-- [Mejoras](#mejoras)
-- [Búsquedas](#búsquedas)
-- [Ordenaciones](#ordenaciones)
-- [IA](#ia)
+1. [Algoritmos Básicos](#algoritmos-básicos)
+2. [MPI](#mpi)
+3. [Arboles de Decisión](#arboles-de-decisión)
+4. [Redes Neuronales](#redes-neuronales)
+
+---
+  
+## Algoritmos Básicos
+
+### Búsquedas
+
+#### Busq. Lineal (Sequential Search)
+(Array) Es la búsqueda más sencilla y simple, recorre todos los elementos de un array buscando un elemento, si no encuentra el valor en la posicion i-esima, avanza a la siguiente posición.
+
+__Costes__
+``` 
+Temporal: O(n), en el caso peor recorre todo el array.
+Espacial. O(1), solo se necesita un puntero para recorrer el array.
+```
+
+#### Busq. Binaria (Binary Search)
+(Array) Búsqueda que implementa un algoritmo de divide y vencerás. El array tiene que estar ordenado, así divide el espacio de busqueda a la mitad con cada iteracion del bucle.
+
+__Costes__
+```
+Temporal: O(log n), en el caso peor hace logaritmo en base 2 de n comparaciones.
+Espacial. O(1), solo se necesitan dos punteros para recorrer el array.
+```
+
+#### Busq. en Anchura (BFS)
+(Grafo) Búsqueda que se implementa con una cola. Se parte de un vértice y se expande por niveles.
+__Costes__
+```
+Temporal: O(V+A), en el caso peor recorre todos los vertices y las aristas del grafo.
+Espacial. O(V), en el caso peor almacena todos los vertices en la cola.
+```
+
+#### Busq. en Profundidad (DFS)
+(Grafo) Búsqueda que implementa un algoritmo de vuelta atrás. Se puede usar una pila para que no sea recursivo. Se parte de un vértice y se expande hasta que no pueda más, y vuelve atrás.
+
+__Costes__
+```
+Temporal: O(V+A), en el caso peor recorre todos los vertices y las aristas del grafo.
+Espacial. O(V), en el caso peor almacena todos los vertices en la cola.
+```
+
+#### Busq. por Dijkstra 
 
 
-# TODO
+__Costes__
+```
+Temporal: 
+Espacial.
+```
 
+#### Busq. por Floyd 
+Búsqueda que implementa 
 
+__Costes__
+```
+Temporal: O(V^3)
+Espacial. 
+```
 
+---
 
+### Ordenaciones
 
+#### BubbleSort
+Búsqueda que implementa 
+
+__Costes__
+```
+Temporal: O(V^3)
+Espacial. 
+```
+#### InsertionSort
+Búsqueda que implementa 
+
+__Costes__
+```
+Temporal: O(V^3)
+Espacial. 
+```
+#### MergeSort
+Búsqueda que implementa 
+
+__Costes__
+```
+Temporal: O(V^3)
+Espacial. 
+```
+#### QuickSort
+Búsqueda que implementa 
+
+__Costes__
+```
+Temporal: O(V^3)
+Espacial. 
+```
+
+#### SelectionSort
+Búsqueda que implementa 
+
+__Costes__
+```
+Temporal: O(V^3)
+Espacial. 
+```
+
+### Mejoras
 
 
 
@@ -27,20 +125,6 @@
 - No acceder mucho a memoria, tambien accesos secuenciales, mejora la eficiencia debido al rendimiento del caché. 
 - Paralelismo
 - Bibliotecas estándar
-
-# Mejoras
-
----
-## Búsquedas
----
-
-## [Busq. Lineal](https://www.geeksforgeeks.org/linear-search/)
-Es la búsqueda más sencilla y simple, recorre todos los elementos de un array buscando un elemento, si no encuentra el valor en la posicion i-esima, avanza a la siguiente posicion, así hasta encontrar el valor o recorrer todo el array.
-### Costes
-#### Temporal: O(n), en el caso peor recorre todo el array.
-#### Espacial. O(1), solo se necesita un puntero para recorrer el array.
----
-### Mejoras
 
 ### Division del Espacio de Búsqueda
 Cada hilo realiza una búsqueda lineal, asignando un espacio de busqueda a cada hilo, para reducir el tiempo de ejecución.
@@ -61,11 +145,7 @@ Algunos lenguajes de programación ofrecen bibliotecas específicas para operaci
 ---
 ---
 
-## Busq. Binaria (Binary Search)
-Búsqueda que implementa un algoritmo de divide y vencerás. Divide el espacio de busqueda a la mitad con cada iteracion del bucle. El array tiene que estar ordenado puesto que haciendo la comparacion con el valor medio del espacio de búsqueda, se queda con el espacio donde podría estar el valor deseado.
-### Costes
-#### Temporal: O(log n), en el caso peor hace logaritmo en base 2 de n comparaciones, es cuando no está en el array o encuentra el valor cuando el espacio de búsqueda solo tiene ese elemento.
-#### Espacial. O(1), solo se necesitan dos punteros para recorrer el array, inicio, fin de la búsqueda y m, para la posicion del medio de la búsqueda.
+
 ---
 ### Mejoras
 
@@ -231,5 +311,11 @@ int main (int argc, char* argv[] ) {
 ```
 ![Master_Worker](https://github.com/Danipiza/TFG/assets/98972125/bb3bb7ab-b896-4638-a83b-ec256823baf5)
 
+---
 
-## IA
+
+## Arboles de Decisión
+
+---
+
+## Redes Neuronales
