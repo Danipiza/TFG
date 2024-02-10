@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include "mpi.h"
 
+// mpicc prueba2.c -o prueba2 -lm
+// mpiexec -n 5 ./prueba2
+
 int rank, numProcesos, resultado, num;
 int main (int argc, char* argv[] ) {
     int i;
@@ -14,12 +17,12 @@ int main (int argc, char* argv[] ) {
     square=(int*)malloc((numProcesos-1)*sizeof(int));
 
     if (rank == 0){
-        for (i=2; i<=numProcesos; i++){
-            MPI_Send(&i, 1, MPI_INTEGER, i-1, 1, MPI_COMM_WORLD);
+        for (i=1; i<=numProcesos; i++){
+            MPI_Send(&i, 1, MPI_INTEGER, i, 1, MPI_COMM_WORLD);
         }
         for (i=1; i<numProcesos; i++){
             MPI_Recv(&(square[i-1]), 1, MPI_INTEGER, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status);
-            printf("Recibido de %d\n", status.MPI_SOURCE);
+            printf("MASTER. Recibido de %d\n", status.MPI_SOURCE);
         }
         for (i=1; i<numProcesos; i++){
             resultado += square[i-1];
