@@ -8,8 +8,10 @@
 
 1. [Algoritmos Básicos](#algoritmos-básicos)
 2. [MPI](#mpi)
-3. [Arboles de Decisión](#arboles-de-decisión)
-4. [Redes Neuronales](#redes-neuronales)
+3. [Aprendizaje por Refuerzo](aprendizaje-por-refuerzo)
+4. [Programación Evolutiva](programación-evolutiva)
+5. [Aprendizaje no Supervisado](aprendizaje-no-supervisado)
+6. [Redes Neuronales](#redes-neuronales)
 
 ---
   
@@ -313,8 +315,14 @@ int main (int argc, char* argv[] ) {
 
 ---
 
+## Aprendizaje por Refuerzo
 
-## Arboles de Decisión
+## Programación Evolutiva
+
+## Aprendizaje no Supervisado
+
+
+
 
 ---
 
