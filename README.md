@@ -8,8 +8,10 @@
 
 1. [Algoritmos Básicos](#algoritmos-básicos)
 2. [MPI](#mpi)
-3. [Arboles de Decisión](#arboles-de-decisión)
-4. [Redes Neuronales](#redes-neuronales)
+3. [Aprendizaje por Refuerzo](aprendizaje-por-refuerzo)
+4. [Programación Evolutiva](programación-evolutiva)
+5. [Aprendizaje no Supervisado](aprendizaje-no-supervisado)
+6. [Redes Neuronales](#redes-neuronales)
 
 ---
   
@@ -313,8 +315,84 @@ int main (int argc, char* argv[] ) {
 
 ---
 
+## Aprendizaje por Refuerzo
 
-## Arboles de Decisión
+Mejorar un problema de aprendizaje por refuerzo con workers/hilos se puede lograr con varias estrategias. El contexto del problema es muy importante.
+
+- __Distribución de Tareas__: Distribuir el trabajo en paralelo. EJ: Entrenando un agente en un entorno complejo, se puede dividir el proceso de entrenamiento en varios workers/hilos, cada uno responsable de explorar una parte del espacio de acciones o de estados.
+
+- __Varias Exploraciones__: Cada worker/hilo realiza una exploración independiente y luego comparta sus experiencias con los demás hilos, de manera que el agente pueda aprender de varias experiencias simultaneas.
+  
+- __Explotación y evaluación simultáneas__: Además de explorar el entorno, puedes utilizar hilos para realizar simultáneamente la explotación (es decir, tomar decisiones basadas en el conocimiento actual del agente) y la evaluación (es decir, medir el desempeño del agente en el entorno). Esto puede acelerar el proceso de aprendizaje al permitir que el agente ajuste su estrategia más rápidamente.
+
+- __Optimización de Hiperparámetros__: alpha, beta y gamma son los hiperparámetros que se usan para almacenar las experiencias del agente. Con vairos workers/hilos con diferentes hiperparámetros así comprobando de forma paralela cual sería la mejor configuracion. EJ, con técnicas como la __búsqueda aleatoria__ u __optimización bayesiana distribuida__ para encontrar la mejor configuración de hiperparámetros para el modelo de aprendizaje por refuerzo.
+
+- __Implementación Eficiente de Algoritmos__: Hay algoritmos de aprendizaje por refuerzo, que se pueden paralelizar manera eficiente.
+
+ [__A3C (Asynchronous Advantage Actor-Critic)__](https://www.activeloop.ai/resources/glossary/asynchronous-advantage-actor-critic-a-3-c/#:~:text=A3C%2C%20or%20Asynchronous%20Advantage%20Actor,form%20of%20rewards%20or%20penalties.)  visto en la asignatura IA1, básicamente el agente recibe un feedback de la operación que ha ejecutado, dando recompensas (si es negativa es una penalización).
+ 
+ [__PPO (Proximal Policy Optimization)__](https://openai.com/research/openai-baselines-ppo)
+
+---
+
+## Programación Evolutiva
+
+Los algoritmos genéticos son una herramienta dentro del campo de la inteligencia artificial que imita los procesos de selección natural y evolución para encontrar soluciones óptimas a problemas complejos.
+
+__Plantilla básica de una Algoritmo Evolutivo__
+``` 
+poblacion = iniciar_poblacion(tam_poblacion);
+evaluar_poblacion(poblacion);
+while(<<condición>>){
+  seleccion = seleccionar_poblacion();
+  // Reproducción
+  cruzar_poblacion(seleccion, prob_cruce);
+  mutar_poblacion(seleccion, prob_muta);
+  // Elegir que individuos pasan a la siguiente generacion
+  eleccion_poblacion(poblacion, seleccionados);
+  evaluar_poblacion();
+}
+```
+
+- Inicializar Población:
+Para inicializar la población, se pasa por parámetro el tamaño de la poblacion, y se inicializan todos los Individuos.
+
+Los Individuos suelen ser un array de bits, por lo que se recorre el individuo, es decir, el cromosoma y con un numero random se genera cada alelo del cromosoma.
+
+Cada individuo puede tener muchos bits, debido a un tamaño de cromosoma elevado. Si tenemos muchos individuos y el tamaño del cromosoma es muy grande se puede distribuir la carga
+de trabajo entre varios workers/hilos para que generen una parte y envien al master lo generado.
+
+- Evaluar Población:
+Para evaluar la población, se reciben los individuos de la población y se calcula su fitness, como de buenos son estos individuos para el problema a resolver.
+
+La funcion de aptitud calcula el fitness, recibiendo el array de bits de un individuo. 
+
+Dependiendo del problema, puede ser un calculo rápido con el fenotipo asociado al individuo, o un cálculo que requiera recorrer todo el array de bits. Se puede distribuir la carga de trabajo entre varios workers/hilos para calcular el fitness de una parte de la población. (Como a la hora de inicializar)
+
+- Seleccionar Población:
+Para seleccionar la poblacion, hay varios métodos, ruleta, torneo, estocástico universal...
+
+Se recibe el fitness de la población y el método se encarga de elegir individuos, puede elegir a los mejores o elegir de manera justa.
+
+Por ejemplo en el método de ruleta se selecciona un número de individuos de la población de manera aleatoria, pero teniendo en cuenta su adaptabilidad, por lo que los mejores individuos tienen más probabilidades de ser escogidos. Se puede realizar un distribucion para que varios workers/hilos seleccionen una parte de la población.
+
+- Cruzar Población:
+Una vez seleccionados los individuos de la población, con una probabilidad de cruce que se pasa por parámetro se seleccionan 2 individuos aleatorios y se cruzan dependiendo de la probabilidad, si no se quedan como están.
+
+Hay varios métodos para el cruce, unos mas simples y otros más complejos. Por ello se puede gestionar este proceso con workers/hilos que reciban una parte de los individuos seleccionados y devuelvan esa parte una vez realizada el cruce.
+
+- Mutar Población:
+Cuando ya se han cruzado los elementos seleccionados estos pasan a una etapa de mutación, en la cual con una probabilidad de mutación, se recorre los alelos de los individuos seleccionados y cruzados para aplicar diversidad.
+
+Al igual que con el cruce hay varios métodos, simples y complejos, que se pueden paralelizar con workers/hilos. 
+
+
+---
+
+## Aprendizaje no Supervisado
+
+
+
 
 ---
 
