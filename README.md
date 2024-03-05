@@ -6,117 +6,14 @@
 ---
 # Índice
 
-1. [Algoritmos Básicos](#algoritmos-básicos)
-2. [MPI](#mpi)
-3. [Aprendizaje por Refuerzo](aprendizaje-por-refuerzo)
-4. [Programación Evolutiva](programación-evolutiva)
-5. [Aprendizaje no Supervisado](aprendizaje-no-supervisado)
-6. [Redes Neuronales](#redes-neuronales)
+1. [MPI](#mpi)
+2. [Aprendizaje por Refuerzo](aprendizaje-por-refuerzo)
+3. [Programación Evolutiva](programación-evolutiva)
+4. [Aprendizaje no Supervisado](aprendizaje-no-supervisado)
+5. [Redes Neuronales](#redes-neuronales)
 
 ---
   
-## Algoritmos Básicos
-
-### Búsquedas
-
-#### Busq. Lineal (Sequential Search)
-(Array) Es la búsqueda más sencilla y simple, recorre todos los elementos de un array buscando un elemento, si no encuentra el valor en la posicion i-esima, avanza a la siguiente posición.
-
-__Costes__
-``` 
-Temporal: O(n), en el caso peor recorre todo el array.
-Espacial. O(1), solo se necesita un puntero para recorrer el array.
-```
-
-#### Busq. Binaria (Binary Search)
-(Array) Búsqueda que implementa un algoritmo de divide y vencerás. El array tiene que estar ordenado, así divide el espacio de busqueda a la mitad con cada iteracion del bucle.
-
-__Costes__
-```
-Temporal: O(log n), en el caso peor hace logaritmo en base 2 de n comparaciones.
-Espacial. O(1), solo se necesitan dos punteros para recorrer el array.
-```
-
-#### Busq. en Anchura (BFS)
-(Grafo) Búsqueda que se implementa con una cola. Se parte de un vértice y se expande por niveles.
-__Costes__
-```
-Temporal: O(V+A), en el caso peor recorre todos los vertices y las aristas del grafo.
-Espacial. O(V), en el caso peor almacena todos los vertices en la cola.
-```
-
-#### Busq. en Profundidad (DFS)
-(Grafo) Búsqueda que implementa un algoritmo de vuelta atrás. Se puede usar una pila para que no sea recursivo. Se parte de un vértice y se expande hasta que no pueda más, y vuelve atrás.
-
-__Costes__
-```
-Temporal: O(V+A), en el caso peor recorre todos los vertices y las aristas del grafo.
-Espacial. O(V), en el caso peor almacena todos los vertices en la cola.
-```
-
-#### Busq. por Dijkstra 
-
-
-__Costes__
-```
-Temporal: 
-Espacial.
-```
-
-#### Busq. por Floyd 
-Búsqueda que implementa 
-
-__Costes__
-```
-Temporal: O(V^3)
-Espacial. 
-```
-
----
-
-### Ordenaciones
-
-#### BubbleSort
-Búsqueda que implementa 
-
-__Costes__
-```
-Temporal: O(V^3)
-Espacial. 
-```
-#### InsertionSort
-Búsqueda que implementa 
-
-__Costes__
-```
-Temporal: O(V^3)
-Espacial. 
-```
-#### MergeSort
-Búsqueda que implementa 
-
-__Costes__
-```
-Temporal: O(V^3)
-Espacial. 
-```
-#### QuickSort
-Búsqueda que implementa 
-
-__Costes__
-```
-Temporal: O(V^3)
-Espacial. 
-```
-
-#### SelectionSort
-Búsqueda que implementa 
-
-__Costes__
-```
-Temporal: O(V^3)
-Espacial. 
-```
 
 ### Mejoras
 
