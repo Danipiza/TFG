@@ -70,8 +70,14 @@ void crearArrayConDuplicados(int a[], int n, int neg) {
 }
 
 void crearArrayOrdenadoSinDuplicados(int a[], int n, int neg){
-    for(int i=0-((n/2)*neg); i < n-((n/2)*neg);i++){
-        a[i+(50*neg)]=i;
+    for(int i=0; i < n;i++){
+        a[i]=i-((n/2)*neg);
+    }
+}
+
+void crearArrayOrdenadoDescSinDuplicados(int a[], int n, int neg){
+    for(int i=n; i>=0;i--){
+        a[n-i]=i-((n/2)*neg);
     }
 }
 
@@ -88,23 +94,39 @@ void crearArrayOrdenadoConDuplicados(int a[], int n, int neg){
     }
 }
 
+void crearArrayOrdenadoDescConDuplicados(int a[], int n, int neg){
+    int i, j, r;
+    
+    i=0;
+    j=n*(0.5)*neg;
+    srand(time(NULL));
+    while(i<n){
+        r=rand()%10;
+        if(r<5) a[i++]=j;  
+        else j--;       
+    }
+}
 
-int main() {    
-    char archivo[96]; 
+
+int main(int argc, char** argv) {    
+    //char archivo[96]; 
+    char* archivo; 
     size_t archivoTam;
     int arrayTam;
 
-    printf("Ingrese una cadena de caracteres para el archivo: ");
-    scanf("%s", archivo);
+    //printf("Ingrese una cadena de caracteres para el archivo: ");
+    //scanf("%s", archivo);
+    archivo=argv[1];
     archivoTam = strlen(archivo);    
-    strcat(archivo, ".txt");
+    strcat(archivo, "Desc.txt");
     
 
-    printf("Ingrese el tamaño del array: ");
-    scanf("%d", &arrayTam);
+    //printf("Ingrese el tamaño del array: ");
+    //scanf("%d", &arrayTam);
+    arrayTam=atoi(argv[1]);
     int *array = (int *)malloc(arrayTam*sizeof(int));
     
-    menu();
+    /*menu();
     if(duplicados){
         if(ordenado) crearArrayOrdenadoConDuplicados(array, arrayTam, neg);
         else crearArrayConDuplicados(array, arrayTam, neg);
@@ -112,8 +134,8 @@ int main() {
     else {
         if(ordenado) crearArrayOrdenadoSinDuplicados(array, arrayTam, neg);
         else crearArraySinDuplicados(array, arrayTam, neg);
-    }
-    
+    }*/
+    crearArrayOrdenadoDescSinDuplicados(array, arrayTam, 0);
 
     FILE *file;
     // Abre el archivo en modo escritura (No existe, lo crea. Si existe, lo trunca)

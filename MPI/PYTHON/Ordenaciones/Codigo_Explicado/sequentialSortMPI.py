@@ -1,19 +1,27 @@
 from mpi4py import MPI
 import sys
-import math
-import time
-
-# TODO FALTA TERMINARLO
-
-#define MASTER 0 # Master process
-#define END_OF_PROCESSING 0 # End of processing
+import os
 
 # COMPILAR
-# mpirun -np 5 python <name>.py
+# mpiexec -np 5 python prueba1.py
 
-MASTER = 0
-END_OF_PROCESSING=-2
-INF=sys.maxsize
+# Este programa tiene (np-1) workers, cada worker recibe un elemento
+#   que envia el master para realizar el recorrido en el array
+
+"""
+COSTE O(N^2)
+
+100000 10;70.1 - 30;56.0 - 15;56.3 - 25;
+            MPI (20)    MPI(50)     NORMAL
+10000       0.51                    4.5
+100000      55          55.9        440.4
+1000000    
+"""
+
+
+
+
+
 
 # PROBAR, AL ENVIAR DATOS, 
 # - ES MAS EFICIENTE ENVIAR UNA PARTE DEL ARRAY
@@ -21,18 +29,21 @@ INF=sys.maxsize
 # - ENVIAR TODO EL ARRAY CON MPI_Bcast()
 
 
-def main():
-    # Variables MPI
-  	
+def main():  	
+    MASTER = 0              # int.
+    END_OF_PROCESSING=-2
+    INF=sys.maxsize
 
-    timeStart=0.0           # double.
+    timeStart=0.0           # double. Para medir el tiempo de ejecucion
     timeEnd=0.0
-    END_OF_PROCESSING=-2    # int.
+    
     
     # Arrays 
-    a=[]                    # int[]. Entrada
-    b=[]                    # int[]. Salida          
+    a=[]                    # int[]. Array Entrada
+    b=[]                    #        Salida Salida          
     n=0                     # int.   Tamaño de los arrays                           
+
+
 
     # Variables usadas en el proceso MPI    
     arrayProc=0             # int. Puntero de la parte procesada del array a
@@ -65,19 +76,6 @@ def main():
     if myrank==MASTER: 
         a,n=leeArchivo() 
         b=[(INF) for i in range(n)]
-
-        """# Envia el tamaño de los arrays a los workers
-        comm.bcast(n, root=0)        
-        # Envia el array entero a los workers, lo necesitan entero
-        comm.bcast(a, root=0)     
-        else:
-        print("Worker",myrank) 
-        # Recibe el tamaño de los arrays
-        n= comm.bcast(n, root=0)                        
-        # Recibe el array entero
-        a = comm.bcast(a, root=0)  
-        print("Worker",myrank, "Lee array:",a, "de tam:",n)   
-        """
     
 
     # Envia el tamaño de los arrays a los workers
@@ -85,8 +83,6 @@ def main():
     # Envia el array entero a los workers, lo necesitan entero
     a=comm.bcast(a, root=MASTER)  
     
-    if myrank!=0: print("Worker:",myrank,"Array:",a,"tam",n)  
-    else : print("Master")
 
     # Comienza el timer una vez inicializado todo
     timeStart = MPI.Wtime()
@@ -94,8 +90,7 @@ def main():
     if myrank==MASTER:
         # Init
         arrayProc=0;        
-        print("Init")
-        # Distribucion inicial
+        
         if numWorkers<=n:  
             for i in range(1, numWorkers+1):                           
                 # Envia val
@@ -135,6 +130,7 @@ def main():
             comm.send(a[arrayProc], dest=status.source)   
             # Update
             arrayProc+=1
+            #if arrayProc%(n//10)==0: print("10%",MPI.Wtime()-timeStart)
 
             # Fin
             if arrayProc==n: break	
@@ -178,7 +174,6 @@ def main():
             comm.send(val, dest=0)
             
           
-    if myrank==0: print(b)
     # End MPI environment
     #MPI.Finalize()
 
@@ -187,6 +182,7 @@ def main():
 
 
 
+# TODO COMPROBAR SI FUNCIONA
 def leeArchivo():
     """
     return:
@@ -194,37 +190,28 @@ def leeArchivo():
     tam: int.       Tamaño del array leido
     """
     
-    file_name = input("Introduce un nombre del fichero: ")
-    array = []    
+    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))    
+    nombre_fichero=input("Introduce un nombre del fichero: ")    
+    path=os.path.join(tfg_directorio, ".Otros","ficheros","No_Ordenados", nombre_fichero+".txt")
+    
+       
     tam=0    
+    array = [] 
     try:        
-        with open(file_name, 'r') as archivo: # modo lectura
-            # Lee las lineas del archivo
-            for linea in archivo:
-                # Divide por espacios
-                numeros_en_linea = linea.split()                
-                
-                # Convertir de string a int
+        with open(path, 'r') as archivo: # modo lectura
+            for linea in archivo: # Solo hay una linea                
+                numeros_en_linea = linea.split() # Divide por espacios                               
                 for numero in numeros_en_linea:
                     array.append(int(numero))
                     tam+=1
     
     except FileNotFoundError:
-        print("El archivo '{}' no existe.".format(file_name))
+        print("El archivo '{}' no existe.".format(nombre_fichero+".txt"))
     
     return array, tam
 
+   
 
-    
-#printArray([(i) for i in range(20)], 20)
-def printArray(a, n):
-    print("Array:")
-    for i in range(n):
-        print(a[i], end=" ")    
-    print()    
-
-#a,tam=leeArchivo()
-#printArray(a, tam)
 
 def arrayOrdenado(a, n):
     """
