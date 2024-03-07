@@ -148,7 +148,7 @@ class MainWindow:
 
     def ejecuta(self):
         try:
-            """AG.set_valores(self.poblacion_text.get(),
+            AG.set_valores(self.poblacion_text.get(),
                self.generaciones_text.get(),
                self.seleccion_combo.get(),
                self.cruce_combo.get(),
@@ -158,7 +158,7 @@ class MainWindow:
                self.precision_text.get(),
                self.funcion_combo.get(),
                self.numGenes_text.get(),
-               self.elitismo_text.get())"""
+               self.elitismo_text.get())
             self.AG.ejecuta()
             self.AG.printMejor()
             

@@ -3,13 +3,13 @@ import random
 
 class Individuo:  
     def __init__(self, num, tam_genes, xMax, xMin):
-        self.num = num              # Numero de genes (int)
-        self.tam_genes = tam_genes  # Tamaño de cada gen (int[])
-        self.genes = []             # Array de bits, con todos los genes
-        self.fenotipos = []         # Valor real
-        self.xMax=xMax              # Valores maximos de cada gen
-        self.xMin=xMin              # Valores minimos de cada gen
-        self.fitness=0              # Valor de aptitud del individuo
+        self.num = num                                      # Numero de genes (int)
+        self.tam_genes = tam_genes                          # Tamaño de cada gen (int[])
+        self.genes = []                                     # Array de bits, con todos los genes
+        self.fenotipos = [(0.0) for _ in range(num)]        # Valor real
+        self.xMax=xMax                                      # Valores maximos de cada gen
+        self.xMin=xMin                                      # Valores minimos de cada gen
+        self.fitness=0                                      # Valor de aptitud del individuo
 
         # Inicializa de forma aleatoria el individuo
         for i in range(num):
@@ -35,7 +35,7 @@ class Individuo:
     # Calcula los valores reales de cada gen del individuo
     def calcular_fenotipos(self):
         for i in range(self.num):
-            self.fenotipos.append(self.calcular_fenotipo(i))
+            self.fenotipos[i]=(self.calcular_fenotipo(i))
 	
     # Calcula el valor real de un gen
     def calcular_fenotipo(self, i):
