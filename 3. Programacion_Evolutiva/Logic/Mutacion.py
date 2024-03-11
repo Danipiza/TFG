@@ -1,4 +1,10 @@
+import sys
+import os
 import random
+
+sys.path.append(os.path.abspath("Model"))
+
+from Model import Individuo
 
 class Mutacion:
     def __init__(self, p):
@@ -6,13 +12,11 @@ class Mutacion:
     
     def mut_basicaBin(self, selec):
         ret=[]
-
-        for ind in selec:            
-            for i in range(ind.num):
-                for j in range(len(ind.genes[i])):
-                    if random.random() < self.p:                        
-                        ind.genes[i][j]=(ind.genes[i][j]+1)%2
-
-            ret.append(ind)
-
+        for ind in selec:
+            act=Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind)
+            for c in range(len(ind.genes)):
+                for j in range(len(ind.genes[c].v)):
+                    if random.random()<self.p:
+                        act.genes[c].v[j]=(act.genes[c].v[j]+1)%2
+            ret.append(Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=act))
         return ret

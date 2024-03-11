@@ -1,37 +1,23 @@
-import random
-import time
 import sys
 import os
+import random
 import math
 
-# Importar las bibliotecas con los archivos
 
+sys.path.append(os.path.abspath("View"))
 sys.path.append(os.path.abspath("Model"))
-sys.path.append(os.path.abspath("Utils"))
-import Cruce
+
+import Cruce 
 import Mutacion
 import Funcion
 import Seleccion
 from Model import Individuo
+from View import MainWindow
 
-
-
-"""
-Ejemplo del laberinto
-
-inicializar()
-evaluar()
-while()
-    seleccionar()
-    cruce()
-    mutacion()
-    evaluar()
-
-"""
-
-
-class AlgoritmoGenetico:
-    def __init__(self):
+class AlgoritmoGenetico():
+    def __init__(self,MainWindow):
+        self.MW=MainWindow
+        
         self.funcion=None           # Funcion
         self.seleccion=None         # Seleccion
         self.cruce=None             # Cruce
@@ -40,7 +26,6 @@ class AlgoritmoGenetico:
         self.poblacion=[]           # Individuo[]
         self.tam_genes=[]           # int[]
         self.tam_individuo=0        # int
-
 
         self.tam_poblacion=0        # int
         self.generaciones=0         # int
@@ -55,151 +40,205 @@ class AlgoritmoGenetico:
         self.fitness_total=0        # double
         self.prob_seleccion=[]      # double
         self.prob_seleccionAcum=[]  # double[]
+
+
+        self.progreso_generaciones=[[],[],[]]
+
+    def set_valores(self,tam_poblacion, generaciones, seleccion_idx, cruce_idx, prob_cruce, mutacion_idx,
+                    prob_mut, precision, funcion_idx, num_genes, elitismo):
+        
+        self.poblacion=[]
+        self.tam_poblacion=tam_poblacion    # 400
+        self.generaciones=generaciones      # 100
+        self.prob_cruce = prob_cruce        # 0.6		
+        self.prob_mut = prob_mut            # 0.05
+
+        self.funcion_idx=funcion_idx
+        # TODO FUNCIONES
+        if funcion_idx==0: self.funcion=Funcion.Funcion1()
+        elif funcion_idx==1: self.funcion=Funcion.Funcion2()
+        elif funcion_idx==2: self.funcion=Funcion.Funcion3()
+        elif funcion_idx==3: self.funcion=Funcion.Funcion4(self.num_genes)
+        else: self.funcion=Funcion.Funcion5(self.num_genes)
+        
+        self.seleccion_idx=seleccion_idx
+        self.seleccion=Seleccion.Seleccion(tam_poblacion,True)
+        
+        self.cruce_idx=cruce_idx
+        self.cruce=Cruce.Cruce(prob_cruce)    
+        
+        self.mutacion_idx=mutacion_idx
+        self.mutacion=Mutacion.Mutacion(prob_mut)
+
+        self.num_genes=num_genes # 2
+        self.tam_genes=self.tamGenes(precision)
+        self.mejor_total = float('-inf')
+
+        self.elitismo=elitismo        
         
 
+    def tamGenes(self, precision):   
+        ret = []
+        for i in range(self.num_genes):
+            ret.append(self.tamGen(precision, self.funcion.xMin[i], self.funcion.xMax[i]))
+        return ret
+
+    def tamGen(self, precision, min, max):
+        return math.ceil((math.log10(((max-min)/precision)+1)/math.log10(2)))
+
+    def ejecuta(self):
+        selec=[]
+
+        self.init_poblacion()    
+        self.evaluacion_poblacion()
+                
         
-
+        while self.generaciones > 0:
+            selec = self.seleccion_poblacion(self.tam_poblacion, 5)
+            
+            """print("Generacion:", self.generaciones)
+            for ind in selec:
+                ind.print_individuo()"""
+            
+            self.poblacion = self.cruce_poblacion(selec)
+            self.poblacion = self.mutacion_poblacion(selec)
+            
+            self.evaluacion_poblacion()
+            
+            """print("Fin")
+            for ind in self.poblacion:
+                ind.print_individuo()"""
+            
+            self.generaciones-=1
         
+            
+        #print(self.progreso_generaciones)
+        self.MW.Plot2D(self.progreso_generaciones)
+
+        print(self.mejor_total)
+
+
+    def init_poblacion(self):
+        self.poblacion = [Individuo.Individuo(self.num_genes, self.tam_genes, self.funcion.xMax, self.funcion.xMin, ind=None) for _ in range(self.tam_poblacion)]
+
+
+    # TODO 
+        # DESPLAZAMIENTO
+        # PRESION SELECTIVA
+    def evaluacion_poblacion(self):
         
-        
+        self.fitness_total=0
+        self.prob_seleccion = [(0) for _ in range(self.tam_poblacion)]
+        self.prob_seleccionAcum = [(0) for _ in range(self.tam_poblacion)]
+        mejor_generacion = float('-inf')
 
-        
-
-        """tam_poblacion,generaciones,
-                    seleccion, cruce, prob_cruce,mutacion,prob_mut,
-                    precision,funcion,num_genes,elitismo"""
-
-        
-
-
-    def set_valores(self):       
-        
-        self.tam_poblacion=100
-        self.generaciones=100    
-        
-
-        self.funcion=Funcion.Funcion1([10.0,10.0],[-10.0,-10.0])
-        self.seleccion = Seleccion.Seleccion(self.tam_poblacion, True)  
-        self.cruce=Cruce.Cruce(0.6) 
-        self.mutacion=Mutacion.Mutacion(0.05) 
-
-        self.precision = 0.001
-        self.num_genes=2
-        self.tam_genes=self.tamGenes() 
-        print(self.tam_genes)
-    
-    # TODO
-    """def set_valores(self, tam_poblacion,generaciones,
-                    seleccion, cruce, prob_cruce,mutacion,prob_mut,
-                    precision,funcion,num_genes,elitismo):
-        
-        self.tam_poblacion=tam_poblacion
-        self.generaciones=generaciones
-        #self.seleccion=seleccion   
-        #self.seleccion = Seleccion.Seleccion(self.tam_poblacion, True)
-        
-        #self.cruce=cruce
-        #self.cruce=Cruce.Cruce(0.6) 
-        #self.prob_cruce=prob_cruce
-        #self.mutacion=Mutacion.Mutacion(0.05) 
-        
-        self.mutacion=mutacion
-        self.prob_mut=prob_mut
-        self.precision=precision
-        #self.funcion=funcion
-        #self.funcion=Funcion.Funcion1([10.0,10.0],[-10.0,-10.0])
-        self.num_genes=num_genes
-        self.elitismo=elitismo
-
-        self.tam_genes=self.tamGenes() """
-
-    def init_poblacion(self):   
-        self.poblacion = [Individuo.Individuo(self.num_genes, self.tam_genes,[10,10],[-10,-10]) for _ in range(self.tam_poblacion)]
+        if self.funcion_idx<4:
+            for i in range(self.tam_poblacion):            
+                self.poblacion[i].calcular_fenotipo()
+			
+		
 
 
-    # funcion 
-    def evalua_poblacion(self):
-
-        self.fitness_total = 0
-        self.prob_seleccion = [0.0] * self.tam_poblacion
-        self.prob_seleccionAcum = [0.0] * self.tam_poblacion
-        
-        mejor_generacion=0
-
+        fit=0.0
         for i in range(self.tam_poblacion):
-            self.poblacion[i].calcular_fenotipos()
-            self.poblacion[i].fitness = self.funcion.fitness(self.poblacion[i].fenotipos)
-            self.fitness_total += self.poblacion[i].fitness
-            if mejor_generacion < self.poblacion[i].fitness:
-                mejor_generacion=self.poblacion[i].fitness
+            fit=self.funcion.fitness(self.poblacion[i].fenotipo)
+            self.poblacion[i].fitness=fit
+            self.fitness_total+=fit
+            if fit>mejor_generacion: mejor_generacion=fit
 
-        if self.mejor_total<mejor_generacion :
-            self.mejor_total=mejor_generacion
+        if mejor_generacion>self.mejor_total: self.mejor_total=mejor_generacion
+
+        self.progreso_generaciones[0].append(self.mejor_total)
+        self.progreso_generaciones[1].append(mejor_generacion)
+        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
+        #self.progreso_generaciones.append([self.mejor_total, 
+        #                                   mejor_generacion, 
+        #                                   (self.fitness_total/self.tam_poblacion)])
         
-        tmp=0.0
+
         acum=0.0
         for i in range(self.tam_poblacion):
-            tmp = self.poblacion[i].fitness / self.fitness_total
-            self.prob_seleccion[i] = tmp
-            acum += tmp
-            self.prob_seleccionAcum[i] = acum    
+            self.prob_seleccion[i] = self.poblacion[i].fitness/self.fitness_total
+            acum+=self.prob_seleccion[i]
+            self.prob_seleccionAcum[i]=acum
 
+    def seleccion_poblacion(self, tam_seleccionados, k):         
+        #return self.seleccion.ruleta(self.poblacion, self.prob_seleccionAcum, tam_seleccionados)
+        return self.seleccion.tornedoDeterministico(self.poblacion, tam_seleccionados, k)
 
-    
-    def selecciona_poblacion(self):     
-        #return seleccion.ruleta(poblacion,prob_seleccionAcum,tam_poblacion)
-        return self.seleccion.torneo_deterministico(self.poblacion,3,self.tam_poblacion)
-
-    def cruza_poblacion(self,seleccion):          
-        return self.cruce.cruce_monopuntoBin(seleccion)
-
-    def muta_poblacion(self):    
-        return self.mutacion.mut_basicaBin(self.poblacion)
-
-    def tamGenes(self) : # int[] 
-        ret = [0 for _ in range(self.num_genes)]
-        print(ret)
+    def cruce_poblacion(self, selec):
+        n=len(selec)
+        ret=[(None) for _ in range(n)]
+        if n%2==1:
+            ret[n-1] = Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[n-1])
+            n-=1
         
-        for i in range (self.num_genes):  
-            ret[i] = self.tamGen(self.funcion.minimos[i], self.funcion.maximos[i])
-            self.tam_individuo += ret[i]     
+        long_genes=[len(selec[0].genes[i].v) for i in range(len(selec[0].genes))]
+        corte_maximo=-1
+        for l in long_genes:
+            corte_maximo+=l
+        i=0
+
+        ind1=[]
+        ind2=[]
+        while i<n:
+            ind1=Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[i])
+            ind2=Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[i + 1])
+            """print("  (ANTES): ", end="") 
+            ind1.print_individuo()
+            print("  (ANTES): ", end="") 
+            ind2.print_individuo()"""
+            
+            rand=random.random()
+            if rand<self.prob_cruce:                                               
+                corte=random.randint(1,corte_maximo)
+                #print("({}) CORTA EN: {}".format(i,corte))
+                cont=0
+                j=0
+                for k in range(corte):
+                    tmp=ind1.genes[cont].v[j]
+                    ind1.genes[cont].v[j]=ind2.genes[cont].v[j]
+                    ind2.genes[cont].v[j]=tmp
+                    j+=1
+                    if j==long_genes[cont]:
+                        cont+=1
+                        j=0
+            
+            
+            """print("(DESPUES): ", end="") 
+            ind1.print_individuo()
+            print("(DESPUES): ", end="") 
+            ind2.print_individuo()"""
+            
+            """print("RET: (ANT)")
+            #for ind in ret:
+            for j in range(i):
+                ret[j].print_individuo()
+            print("\n\n")"""
+
+            ret[i] = Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind1)
+            ret[i+1] = Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind2)
+            #ret.append(ind2)
+            i += 2     
+            """print("RET: (DESP)")
+            #for ind in ret:
+            for j in range(i):
+                ret[j].print_individuo()
+            print("\n\n")  """        
+        
+        """print("Cruce:")
+        for ind in ret:
+            ind.print_individuo()"""
+        
+        return ret
+
+    def mutacion_poblacion(self, selec):
+        ret=[]
+        #if self.mutacion_idx == 0: ret = self.mutacion.mut_basicaBin(selec)
+        ret = self.mutacion.mut_basicaBin(selec)
 
         return ret
 
 
-    def tamGen(self, min, max) :
-        return math.ceil((math.log10(((max - min) / self.precision) + 1) / math.log10(2)))
-
-
     
-
-    def printMejor(self):
-        print(self.mejor_total)
-
-    def ejecuta(self):    
-        #global poblacion
-
-        self.set_valores()
-
-        
-        start_time = time.time()
-        
-        self.init_poblacion()
-        self.evalua_poblacion()    
-        for i in range(self.generaciones):
-            selec = self.selecciona_poblacion()    
-            #print_poblacion(selec)
-            self.poblacion = self.cruza_poblacion(selec)    
-            #print_poblacion(poblacion)
-            self.poblacion = self.muta_poblacion()
-            #print_poblacion(poblacion)
-            self.evalua_poblacion()
-        
-
-        end_time = time.time()
-        print("Tiempo de ejecucion:",  end_time - start_time)
-        #print_poblacion()
     
-"""ag=AlgoritmoGenetico()
-ag.ejecuta()
-ag.printMejor()"""

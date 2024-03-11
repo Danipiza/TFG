@@ -2,9 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 import os
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 sys.path.append(os.path.abspath("Logic"))
 
+from Logic import Cruce
 from Logic import AlgoritmoGenetico as AG
 """ pip install matplotlib
 import matplotlib.pyplot as plt
@@ -24,20 +28,19 @@ class MainWindow:
         self.numGenes_text=None
         self.elitismo_text=None
         
-        self.AG=AG.AlgoritmoGenetico()
+        self.AG=AG.AlgoritmoGenetico(self)
 
         self.options_label=None
         self.result_label=None
         
         self.initGUI()
-        
-    
+            
     def initGUI(self):
         # Crea la ventana principal
         # Create the main window
         root = tk.Tk()
         root.title("Algoritmo Genetico")
-        root.geometry("600x500")
+        root.geometry("1000x700")
 
         
 
@@ -64,22 +67,17 @@ class MainWindow:
         
 
 
-        
-       
-
-      
-
         # POBLACION - TEXT
         tk.Label(root, text="Poblacion:").grid(row=0, column=0, padx=7, pady=7, sticky="w")
         self.poblacion_text = tk.Entry(root,width=23)        
         self.poblacion_text.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-        self.poblacion_text.insert(0, "100")  # Por defecto
+        self.poblacion_text.insert(0, "100")  
 
         # GENERACIONES - TEXT
         tk.Label(root, text="Generaciones:").grid(row=1, column=0, padx=7, pady=7, sticky="w")
         self.generaciones_text = tk.Entry(root,width=23)
         self.generaciones_text.grid(row=1, column=1, padx=5, pady=5, sticky="w")
-        self.generaciones_text.insert(0, "100")  
+        self.generaciones_text.insert(0, "100")   
 
         # Create combo boxes        
         tk.Label(root, text="Met. Seleccion:").grid(row=2, column=0, padx=7, pady=7, sticky="w")
@@ -95,7 +93,7 @@ class MainWindow:
         tk.Label(root, text="Prob. Cruce:").grid(row=4, column=0, padx=7, pady=7, sticky="w")
         self.probCruce_text = tk.Entry(root,width=23)        
         self.probCruce_text.grid(row=4, column=1, padx=5, pady=5, sticky="w")
-        self.probCruce_text.insert(0, "0.5")  
+        self.probCruce_text.insert(0, "0.6")  
 
         tk.Label(root, text="Met. Mutación:").grid(row=5, column=0, padx=7, pady=7, sticky="w")
         self.mutacion_combo = ttk.Combobox(root, values=mutacion_opt)        
@@ -142,52 +140,67 @@ class MainWindow:
         self.options_label = tk.Label(root, text="")
         self.options_label.grid(row=13, column=1, columnspan=2, padx=5, pady=5)
 
+
+        # Add canvas for plot
+        self.fig, self.ax = plt.subplots()
+        self.canvas = FigureCanvasTkAgg(self.fig, master=root)
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.grid(row=0, column=2, rowspan=11, padx=10, pady=10)
+
+        # Bind close event
+        root.protocol("WM_DELETE_WINDOW", self.cierra)
+
         # Start 
         root.mainloop()
 
-
     def ejecuta(self):
         try:
-            AG.set_valores(self.poblacion_text.get(),
-               self.generaciones_text.get(),
-               self.seleccion_combo.get(),
-               self.cruce_combo.get(),
-               self.probCruce_text.get(),
-               self.mutacion_combo.get(),
-               self.probMutacion_text.get(),
-               self.precision_text.get(),
-               self.funcion_combo.get(),
-               self.numGenes_text.get(),
-               self.elitismo_text.get())
-            self.AG.ejecuta()
-            self.AG.printMejor()
             
-            """v_poblacion = float(self.poblacion_text.get())
-            v_generaciones = float(self.generaciones_text.get())
-            self.result_label.config(text=f"Sum: {value1 + value2}")
-
-            selected_option1 = self.seleccion_combo.get()
-            selected_option2 = self.cruce_combo.get()
-            self.options_label.config(text=f"Selected options: {selected_option1}, {selected_option2}")"""
+            self.AG=AG.AlgoritmoGenetico(self)
+            #print(self.seleccion_combo.current())
+            
+            self.AG.set_valores(int(self.poblacion_text.get()),
+                                int(self.generaciones_text.get()),
+                                self.seleccion_combo.current(),
+                                self.cruce_combo.current(),
+                                float(self.probCruce_text.get()),
+                                self.mutacion_combo.current(),
+                                float(self.probMutacion_text.get()),
+                                float(self.precision_text.get()),
+                                self.funcion_combo.current(),
+                                int(self.numGenes_text.get()),
+                                int(self.elitismo_text.get()))               
+            
+            self.AG.ejecuta()
+            
         except ValueError:
             self.result_label.config(text="Datos inválidos")
+    
+    def Plot2D(self,vals):       
+        self.ax.clear()
 
-    """def Plot2D():
-        # Sample plot data
-        x = [1, 2, 3, 4, 5]
-        y = [2, 3, 5, 7, 11]
+        x=[(i) for i in range(len(vals[0]))]
+        
+        y1=vals[0]
+        y2=vals[1]
+        y3=vals[2]
+        
+        self.ax.plot(x, y1, color='b', label='Mejor Absoluto')
+        self.ax.plot(x, y2, color='r', label='Mejor de la Generacion')
+        self.ax.plot(x, y3, color='g', label='Media')
+        self.ax.set_xlabel('Generaciones')
+        self.ax.set_ylabel('Fitness')
+        self.ax.legend()
 
-        # Create a figure and axis
-        fig, ax = plt.subplots()
-        ax.plot(x, y)
-        ax.set_xlabel('X Label')
-        ax.set_ylabel('Y Label')
-        ax.set_title('Sample Plot')
+        # Draw plot
+        self.canvas.draw()
 
-        # Create a canvas for plotting
-        canvas = FigureCanvasTkAgg(fig, master=root)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.grid(row=0, column=2, rowspan=11, padx=10, pady=10)"""
+    def cierra(self):
+        plt.close()
+        sys.exit()
+    
+
+
 
     
         
