@@ -80,3 +80,24 @@ class Cruce:
     def cruce_uniforme():
         # TODO
         return ""
+    
+    def PMX():
+        # TODO
+        return ""
+    
+    def OX():
+        # TODO
+        return ""
+    
+    def OX_PP():
+        # TODO
+        return ""
+    
+    def CX():
+        # TODO
+        return ""
+    
+    def CO():
+        # TODO
+        return ""
+    

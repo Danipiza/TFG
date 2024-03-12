@@ -2,9 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 import os
-# TODO DESCOMENTAR
-"""import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg"""
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 sys.path.append(os.path.abspath("Logic"))
 
@@ -133,7 +132,7 @@ class MainWindow:
         self.result_label = tk.Label(root, text="Optimo:")
         self.result_label.grid(row=12, column=1, columnspan=2, padx=5, pady=5)
 
-        """ TODO DESCOMENTAR
+        
         # Add canvas for plot
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.fig, master=root)
@@ -142,7 +141,7 @@ class MainWindow:
 
         # Bind close event
         root.protocol("WM_DELETE_WINDOW", self.cierra)
-        """
+        
         # Start 
         root.mainloop()
 
@@ -168,8 +167,8 @@ class MainWindow:
             
         except ValueError:
             self.result_label.config(text="Datos inválidos")
-    """ TODO DESCOMENTAR
-    def Plot2D(self,vals):       
+    
+    def Plot2D(self,vals, ind):       
         self.ax.clear()
 
         x=[(i) for i in range(len(vals[0]))]
@@ -184,10 +183,15 @@ class MainWindow:
         self.ax.set_xlabel('Generaciones')
         self.ax.set_ylabel('Fitness')
         self.ax.legend()
-
+        
+        
         # Draw plot
         self.canvas.draw()
-    """
+        texto="Optimo: {}\n".format(ind.fitness)
+        for i in range(len(ind.genes)):
+            texto+="Variable {}: {}\n".format(i+1,ind.fenotipo[i])
+        self.result_label.config(text=texto)
+    
 
     def cierra(self):
         plt.close()

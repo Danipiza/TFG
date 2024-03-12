@@ -20,3 +20,24 @@ class Mutacion:
                         act.genes[c].v[j]=(act.genes[c].v[j]+1)%2
             ret.append(Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=act))
         return ret
+
+    def inversion():
+        # TODO
+        return ""
+
+    def intercambio():
+        # TODO
+        return ""
+    
+    def insercion():
+        # TODO
+        return ""
+    
+
+    
+    def heuristica():
+        # TODO
+        return ""    
+    def dfs():
+        # TODO
+        return ""

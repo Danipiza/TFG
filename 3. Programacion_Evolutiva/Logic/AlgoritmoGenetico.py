@@ -58,7 +58,7 @@ class AlgoritmoGenetico():
                 
 
         self.funcion_idx=funcion_idx
-        # TODO FUNCIONES
+
         if funcion_idx==0: self.funcion=Funcion.Funcion1()
         elif funcion_idx==1: self.funcion=Funcion.Funcion2()
         elif funcion_idx==2: self.funcion=Funcion.Funcion3()
@@ -66,7 +66,7 @@ class AlgoritmoGenetico():
         else: self.funcion=Funcion.Funcion5(self.num_genes)
         
         self.seleccion_idx=seleccion_idx
-        self.seleccion=Seleccion.Seleccion(tam_poblacion,True)
+        self.seleccion=Seleccion.Seleccion(tam_poblacion, self.funcion.opt)
         
         self.cruce_idx=cruce_idx
         self.cruce=Cruce.Cruce(prob_cruce)    
@@ -101,26 +101,18 @@ class AlgoritmoGenetico():
         while self.generaciones > 0:
             selec = self.seleccion_poblacion(self.tam_poblacion, 5)
             
-            """print("Generacion:", self.generaciones)
-            for ind in selec:
-                ind.print_individuo()"""
-            
             self.poblacion = self.cruce_poblacion(selec)
-            self.poblacion = self.mutacion_poblacion(selec)
+            self.poblacion = self.mutacion_poblacion(self.poblacion)
             
-            self.evaluacion_poblacion()
-            
-            """print("Fin")
-            for ind in self.poblacion:
-                ind.print_individuo()"""
+            self.evaluacion_poblacion()            
             
             self.generaciones-=1
         
             
-        # TODO DESCOMENTAR
-        #self.MW.Plot2D(self.progreso_generaciones)
+        self.MW.Plot2D(self.progreso_generaciones, self.mejor_ind)
 
-        print(self.mejor_total)
+        # TODO UCM ORDENA
+        #print(self.mejor_total)
 
 
     def init_poblacion(self):
@@ -128,7 +120,6 @@ class AlgoritmoGenetico():
 
 
     # TODO 
-        # DESPLAZAMIENTO
         # PRESION SELECTIVA
     def evaluacion_poblacion(self):
         
@@ -203,10 +194,26 @@ class AlgoritmoGenetico():
             self.prob_seleccionAcum[i]=acum
         """
 
+    """ret = seleccion.estocasticoUniversal1(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite);
+				break;
+			case 4:
+				ret = seleccion.estocasticoUniversal2(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite);
+				break;
+			case 5:
+				ret = seleccion.truncamiento(poblacion, prob_seleccion, 0.5, tam_poblacion-tam_elite);
+				break;
+			case 6:
+				ret = seleccion.restos(poblacion, prob_seleccion, prob_seleccionAcum, tam_poblacion-tam_elite);"""
     def seleccion_poblacion(self, tam_seleccionados, k):         
         ret=[]
         if self.seleccion_idx==0: ret=self.seleccion.ruleta(self.poblacion, self.prob_seleccionAcum, tam_seleccionados)
-        else: ret= self.seleccion.tornedoDeterministico(self.poblacion, tam_seleccionados, k)
+        elif self.seleccion_idx==1: ret= self.seleccion.tornedoDeterministico(self.poblacion, tam_seleccionados, k)
+        elif self.seleccion_idx==2: ret= self.seleccion.torneoProbabilistico(self.poblacion, k, 0.9, tam_seleccionados)
+        elif self.seleccion_idx==3: ret= self.seleccion.estocasticoUniversal1(self.poblacion,self.prob_seleccionAcum,tam_seleccionados)
+        elif self.seleccion_idx==4: ret= self.seleccion.estocasticoUniversal2(self.poblacion,self.prob_seleccionAcum,tam_seleccionados)
+        elif self.seleccion_idx==5: ret= self.seleccion.truncamiento(self.poblacion,self.prob_seleccion, 0.5, tam_seleccionados)
+        elif self.seleccion_idx==6: ret= self.seleccion.restos(self.poblacion,self.prob_seleccion, self.prob_seleccionAcum, tam_seleccionados)
+        else: ret=[] # TODO RANKING
         return ret
 
     def cruce_poblacion(self, selec):
