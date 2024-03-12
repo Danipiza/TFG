@@ -18,9 +18,15 @@ class Funcion(ABC):
     @abstractmethod
     def cmp(self,a,b): 
         pass
+    @abstractmethod
+    def cmpBool(self,a,b): 
+        pass
 
     @abstractmethod
     def cmpPeor(self,a,b): 
+        pass
+    @abstractmethod
+    def cmpPeorBool(self,a,b): 
         pass
 
 class Funcion1(Funcion):
@@ -37,19 +43,28 @@ class Funcion1(Funcion):
         if a>b: return a
         else: return b
 
+    def cmpBool(self, a, b): 
+        if a>b: return True
+        else: return False
+
     def cmpPeor(self, a, b): 
         if a<b: return a
         else: return b
 
+    def cmpPeorBool(self, a, b): 
+        if a<b: return True
+        else: return False
+
 class Funcion2(Funcion):
 
     def __init__(self):
-        self.opt=True
+        self.opt=False
         self.xMax=[0,0]
         self.xMin=[-10,-6.5]
     
     # TODO comprobar
-    def fitness(self, nums):        
+    def fitness(self, nums):    
+        #f(x,y)=sen(y)*exp()    
         return  math.sin(nums[1])*math.pow(math.exp(1-math.cos(nums[0])),2) + \
                 math.cos(nums[0])*math.pow(math.exp(1-math.sin(nums[1])),2) + \
                 ((nums[0]-nums[1])**2)
@@ -58,14 +73,22 @@ class Funcion2(Funcion):
         if a<b: return a
         else: return b
 
+    def cmpBool(self, a, b): 
+        if a<b: return True
+        else: return False
+
     def cmpPeor(self, a, b): 
         if a>b: return a
         else: return b
 
+    def cmpPeorBool(self, a, b): 
+        if a>b: return True
+        else: return False
+
 class Funcion3(Funcion):
 
     def __init__(self):
-        self.opt=True
+        self.opt=False
         self.xMax=[10,10]
         self.xMin=[-10,-10]
     
@@ -79,21 +102,29 @@ class Funcion3(Funcion):
         if a<b: return a
         else: return b
 
+    def cmpBool(self, a, b): 
+        if a<b: return True
+        else: return False
+
     def cmpPeor(self, a, b): 
         if a>b: return a
         else: return b
+
+    def cmpPeorBool(self, a, b): 
+        if a>b: return True
+        else: return False
 
 
 class Funcion4(Funcion):
 
     def __init__(self, num_genes):
-        self.opt=True
+        self.opt=False
         self.d=num_genes
         self.xMax=[]
         self.xMin=[]
         for i in range(num_genes):
             self.xMax.append(math.pi)
-            self.xMax.append(0)
+            self.xMin.append(0)
     
     # TODO comprobar
     def fitness(self, nums):        
@@ -108,11 +139,19 @@ class Funcion4(Funcion):
     
     def cmp(self, a, b): 
         if a<b: return a
-        else : return b
+        else: return b
+
+    def cmpBool(self, a, b): 
+        if a<b: return True
+        else: return False
 
     def cmpPeor(self, a, b): 
         if a>b: return a
-        else : return b
+        else: return b
+
+    def cmpPeorBool(self, a, b): 
+        if a>b: return True
+        else: return False
 
 
 class Funcion5(Funcion):
@@ -124,7 +163,7 @@ class Funcion5(Funcion):
         self.xMin=[]
         for i in range(num_genes):
             self.xMax.append(math.pi)
-            self.xMax.append(0)
+            self.xMin.append(0)
     
     # TODO comprobar
     def fitness(self, nums):        
@@ -139,8 +178,16 @@ class Funcion5(Funcion):
     
     def cmp(self, a, b): 
         if a<b: return a
-        else : return b
+        else: return b
+
+    def cmpBool(self, a, b): 
+        if a<b: return True
+        else: return False
 
     def cmpPeor(self, a, b): 
         if a>b: return a
-        else : return b
+        else: return b
+
+    def cmpPeorBool(self, a, b): 
+        if a>b: return True
+        else: return False

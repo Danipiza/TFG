@@ -2,17 +2,14 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 import os
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+# TODO DESCOMENTAR
+"""import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg"""
 
 sys.path.append(os.path.abspath("Logic"))
 
 from Logic import Cruce
 from Logic import AlgoritmoGenetico as AG
-""" pip install matplotlib
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg"""
 
 class MainWindow:
     def __init__(self) :
@@ -30,7 +27,6 @@ class MainWindow:
         
         self.AG=AG.AlgoritmoGenetico(self)
 
-        self.options_label=None
         self.result_label=None
         
         self.initGUI()
@@ -134,22 +130,19 @@ class MainWindow:
 
 
         # PRINT
-        self.result_label = tk.Label(root, text="")
+        self.result_label = tk.Label(root, text="Optimo:")
         self.result_label.grid(row=12, column=1, columnspan=2, padx=5, pady=5)
 
-        self.options_label = tk.Label(root, text="")
-        self.options_label.grid(row=13, column=1, columnspan=2, padx=5, pady=5)
-
-
+        """ TODO DESCOMENTAR
         # Add canvas for plot
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.fig, master=root)
         self.canvas_widget = self.canvas.get_tk_widget()
-        self.canvas_widget.grid(row=0, column=2, rowspan=11, padx=10, pady=10)
+        self.canvas_widget.grid(row=0, column=2, rowspan=11, padx=10, pady=10) # TODO CAMBIAR POSICION -> AQUI?
 
         # Bind close event
         root.protocol("WM_DELETE_WINDOW", self.cierra)
-
+        """
         # Start 
         root.mainloop()
 
@@ -175,7 +168,7 @@ class MainWindow:
             
         except ValueError:
             self.result_label.config(text="Datos inválidos")
-    
+    """ TODO DESCOMENTAR
     def Plot2D(self,vals):       
         self.ax.clear()
 
@@ -194,6 +187,7 @@ class MainWindow:
 
         # Draw plot
         self.canvas.draw()
+    """
 
     def cierra(self):
         plt.close()

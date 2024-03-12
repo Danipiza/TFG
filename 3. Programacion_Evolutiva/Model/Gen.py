@@ -6,8 +6,10 @@ class Gen:
         self.v = []
 
         if v is not None:
-            for a in v:
-                self.v.append(a)
+            self.v=[(v[i]) for i in range(len(v))]
+            #for a in v:
+            #   self.v.append(a)
         else:
-            for i in range(l):
-                self.v.append(random.randint(0, 1))
+            self.v=[(random.randint(0,1)) for i in range(l)]
+            #for i in range(l):
+            #    self.v.append(random.randint(0, 1))

@@ -11,7 +11,7 @@ class Individuo:
             self.xMax=ind.xMax
             self.xMin=ind.xMin
         else:
-            self.genes = [Gen.Gen(tam_genes[i],v=None) for i in range(num)]            
+            self.genes = [(Gen.Gen(tam_genes[i],v=None)) for i in range(num)]            
             self.xMax=xMax
             self.xMin=xMin
 
