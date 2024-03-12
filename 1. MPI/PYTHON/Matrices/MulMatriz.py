@@ -52,7 +52,7 @@ def leeArchivo():
     tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))    
     nombre_fichero=input("Introduce un nombre del fichero: ")    
     path=os.path.join(tfg_directorio, ".Otros","ficheros","Matrices", nombre_fichero+".txt")
-    
+    print(path)
        
     filas=0
     columnas=0 

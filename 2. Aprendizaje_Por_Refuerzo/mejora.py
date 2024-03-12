@@ -4,6 +4,21 @@ import os
 import signal
 import random
 
+"""
+MEJORAS:
+
+RECORRER QTABLE E INICIALIZAR A UN NUMERO NEGATIVO LAS ACCIONES QUE SE PEGAN CON UN MURO
+
+PONER VARIOS WORKERS EN SECCIONES DE LA MATRIZ Y HACER QUE SE MUEVAN
+
+DISTRIBUIR LOS EPISODIOS ENTRE WORKERS
+
+PONER DESDE VARIOS PUNTOS AL AGENTE
+
+"""
+
+
+
 def signal_handler(sig, frame):
     print("Ctrl+C\n")    
     sys.exit(0)
@@ -67,12 +82,24 @@ class Q_Learning():
         self.gamma = 0.9  # Factor de descuento
         self.epsilon = 0.1  # Factor de exploración
 
-        self.episodios=2500
+        self.episodios=500
 
         # Inicializar la Q table
         self.Q_table = [[[0 for _ in range(self.num_acciones)] for _ in range(self.cols)] for _ in range(self.fils)]
 
         self.estado_final=(self.fils-2, self.cols-2)
+
+    def recorreQTable(self):        
+        # Comprueba muros
+        for i in range(self.fils):
+            for j in range(self.cols):
+                if self.matriz[i][j]==1:    
+                    for k in range(self.num_acciones):
+                        self.Q_table[i][j][k]=-100000
+                    continue
+                for k in range(self.num_acciones):
+                    if self.matriz[i+self.acciones[k][0]][j+self.acciones[k][1]]==1:
+                        self.Q_table[i][j][k]=-1000
 
 
     # Seleciona una accion basada en epsilon-greedy
@@ -190,4 +217,7 @@ class Q_Learning():
 
 
 QL=Q_Learning()
-QL.ejecuta()
+timeStart=MPI.Wtime()
+QL.recorreQTable()
+timeEnd=MPI.Wtime()
+print("Tiempo de Ejecucion",(timeEnd-timeStart))
