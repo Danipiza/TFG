@@ -1,0 +1,101 @@
+Array desordenado con valores de 0-10000
+
+Array[0:100]
+Centroide. Tiempo de ejecucion: 0.010078299965243787
+Simple   . Tiempo de ejecucion: 0.03170089999912307
+Completa . Tiempo de ejecucion: 0.02838729997165501
+
+Array[0:200]
+Centroide. Tiempo de ejecucion: 0.060317100025713444
+Simple   . Tiempo de ejecucion: 0.1616533999913372
+Completa . Tiempo de ejecucion: 0.14812269998947158
+
+Array[0:300]
+Centroide. Tiempo de ejecucion: 0.18533860001480207
+Simple   . Tiempo de ejecucion: 0.4221506000030786
+Completa . Tiempo de ejecucion: 0.40091809997102246
+
+Array[0:400]
+Centroide. Tiempo de ejecucion: 0.44831669999985024
+Simple   . Tiempo de ejecucion: 0.8925449000089429
+Completa . Tiempo de ejecucion: 0.8481120999786071
+
+Array[0:500]
+Centroide. Tiempo de ejecucion: 0.8888506999937817
+Simple   . Tiempo de ejecucion: 1.6480470999958925
+Completa . Tiempo de ejecucion: 1.5515731999767013
+
+Array[0:600]
+Centroide. Tiempo de ejecucion: 1.5776852000271901
+Simple   . Tiempo de ejecucion: 2.7960255999932997
+Completa . Tiempo de ejecucion: 2.5398486999911256
+
+Array[0:700]
+Centroide. Tiempo de ejecucion: 2.572236400039401
+Simple   . Tiempo de ejecucion: 4.101700500003062
+Completa . Tiempo de ejecucion: 3.912157599988859
+
+Array[0:800]
+Centroide. Tiempo de ejecucion: 4.014793199952692
+Simple   . Tiempo de ejecucion: 6.20333180000307
+Completa . Tiempo de ejecucion: 5.8712609999929555
+
+Array[0:900]
+Centroide. Tiempo de ejecucion: 6.062546300003305
+Simple   . Tiempo de ejecucion: 8.8463946999982
+Completa . Tiempo de ejecucion: 8.191707600024529
+
+Array[0:1000]
+Centroide. Tiempo de ejecucion: 8.319740300008561
+Simple   . Tiempo de ejecucion: 12.00118039996596
+Completa . Tiempo de ejecucion: 11.303484600037336
+
+Array[0:1250]
+Centroide. Tiempo de ejecucion: 16.241769000014756
+Simple   . Tiempo de ejecucion: 22.401932800014038
+Completa . Tiempo de ejecucion: 21.392273199977353
+
+Array[0:1500]
+Centroide. Tiempo de ejecucion: 28.435400199959986
+Simple   . Tiempo de ejecucion: 37.133881099987775
+Completa . Tiempo de ejecucion: 36.62263789999997
+
+Array[0:1750]
+Centroide. Tiempo de ejecucion: 45.28064059995813
+Simple   . Tiempo de ejecucion: 57.16617219999898
+Completa . Tiempo de ejecucion: 55.29154900001595
+
+Array[0:2000]
+Centroide. Tiempo de ejecucion: 66.09080689999973
+Simple   . Tiempo de ejecucion: 81.26717870001448
+Completa . Tiempo de ejecucion: 80.52246750000631
+
+Array[0:2250]
+Centroide. Tiempo de ejecucion: 93.75305729999673
+Simple   . Tiempo de ejecucion: 115.05582519999007
+Completa . Tiempo de ejecucion: 113.72445690003224
+
+Array[0:2500]
+Centroide. Tiempo de ejecucion: 128.2621829000418
+Simple   . Tiempo de ejecucion: 157.49720849998994
+Completa . Tiempo de ejecucion: 154.46025080000982
+
+Array[0:3000]
+Centroide. Tiempo de ejecucion: 218.39627450000262
+Simple   . Tiempo de ejecucion: 258.2763370000175
+Completa . Tiempo de ejecucion: 256.4339474000153
+
+Array[0:3500]
+Centroide. Tiempo de ejecucion: 343.4541980000213
+Simple   . Tiempo de ejecucion: 403.08377570001176
+Completa . Tiempo de ejecucion: 400.1910447999835
+
+Array[0:4000]
+Centroide. Tiempo de ejecucion: 506.54929529997753
+Simple   . Tiempo de ejecucion: 592.2986277000164
+Completa . Tiempo de ejecucion: 586.9971056000213
+
+Array[0:4500]
+Centroide. Tiempo de ejecucion: 725.4010896999971
+Simple   . Tiempo de ejecucion: 825.2176199000096
+Completa . Tiempo de ejecucion: 830.1459542000084
