@@ -3,13 +3,20 @@ import random
 import os
 import math
 
+# EJECUTAR
+# mpiexec -np 5 python KMediasMPI_uno_M.py
 
-# COMPILAR
-# mpiexec -np 5 python MPI.py
+# TIEMPO: (datos=100000.txt, k=3)
+# Tiempo de ejecucion: 0.3559337999904528
+
+# PARALELIZAR
+    # 1. Dividir toda la poblacion y repartir entre los workers.
+    # 2. Repartir partes de la poblacion para que vayan procesando y enviando.      
 
 
-    
-    
+# Despues de implementar la 1ra idea, me he dado cuenta que es mas optimo
+    # dividir la poblacion entre los workers. Ya que esta poblacion no cambia,
+    # solo cambia la asignacion y los centros de los clustersm
 
 def main():      
     MASTER = 0              # int.  Valor del proceso master
@@ -33,20 +40,13 @@ def main():
     myrank=comm.Get_rank()
     numProc=comm.Get_size()
     numWorkers=numProc-1
-    #if myrank==0: print("Master: tiene {} workers".format(numWorkers))
-
-
-
-    # TODO PARALELIZAR
-    # 1. Dividir toda la poblacion y repartir entre los workers
-    # 2. Repartir partes de la poblacion para que vayan procesando y enviando
 
 
     # Inicializa centros
     if myrank==MASTER:                 
-        a,n=leeArchivo("10000")      
-        poblacion=[[x] for x in a]  
-        #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]
+        a,n=leeArchivo("100000")      
+        poblacion=[[x] for x in a]          
+        
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones
         k=3                     # Numero de cluster
@@ -59,8 +59,7 @@ def main():
                 if rand not in dic:
                     centroides.append(poblacion[rand])                
                     dic[rand] = 1
-                    break
-        #print("Centroides:", centroides)
+                    break        
     
     # Envia el numero de clusters a los workers
     k=comm.bcast(k, root=MASTER)
@@ -70,7 +69,8 @@ def main():
     centroides=comm.bcast(centroides, root=MASTER)
     
     timeStart = MPI.Wtime()
-
+    
+    
     if myrank==MASTER:       
         
         # ENVIA LA PARTE DE LA POBLACION QUE CADA worker ----------------------- 
@@ -136,7 +136,6 @@ def main():
             for i in range(k): 
                 for j in range(d):              
                     centroidesNuevos[i][j]/=indsCluster[i]
-            #print("\n\n, centroidesNuevos=",centroidesNuevos)
             
             # FINALIZA
             if(compara_centros(d, centroides,centroidesNuevos)): 
@@ -161,9 +160,7 @@ def main():
         #print(asignacion)
     
     else : # WORKER
-        #print("WORKER {}, ha recibido con BCast: k={}, d={}, centroides={}".format(myrank,k,d,centroides))
         poblacion=comm.recv(source=0)
-        #print("WORKER: {}, recibe {}".format(myrank,poblacion))
         if poblacion==-2: exit(0)
         n=len(poblacion)
         while True:
@@ -181,13 +178,11 @@ def main():
                     tmp=0.0      
                     for a in range(d):
                         tmp+=abs(poblacion[i][a]-centroides[j][a])     
-                    tmp=math.sqrt(tmp)
-                    
+                                        
                     if dist>tmp:
                         dist=tmp
                         cluster=j
                 asignacion.append(cluster)
-            #print("WORKER {}: asignacion={}".format(myrank, asignacion))
 
             # ACTUALIZAN CENTROS
             indsCluster=[0 for _ in range(k)]
@@ -196,25 +191,14 @@ def main():
                 for j in range(d):
                     centroidesNuevos[asignacion[i]][j]+=poblacion[i][j]
                 indsCluster[asignacion[i]]+=1
-            #print("WORKER {}: centroidesNuevos={}, indsCluster={}".format(myrank, centroidesNuevos,indsCluster))
             comm.send(centroidesNuevos, dest=0)
             comm.send(indsCluster, dest=0)
             
             # Reciben los nuevos centroides            
             centroides=comm.recv(source=0)
-            #print("WORKER {}: centroides={}".format(myrank, centroides))
             if centroides==END_OF_PROCESSING:
-                # TODO ENVIA
                 comm.send(asignacion, dest=0)
                 exit(0)
-
-                
-
-            
-            
-
-    
-    
 
     
 def compara_centros(d, a, b):
@@ -225,19 +209,7 @@ def compara_centros(d, a, b):
     
     return True
 
-# Manhattan
-def manhattan(self,a,b):
-    ret=0.0
-    for i in range(len(a)):
-        ret+=abs(a[i]-b[i])
-    return ret
 
-def euclidea(self, a,b):
-    ret=0.0
-    for i in range(len(a)):
-        ret+=(a[i]-b[i])**2        
-    
-    return math.sqrt(ret)
 
 
 def leeArchivo(archivo):
@@ -247,7 +219,7 @@ def leeArchivo(archivo):
     tam: int.       Tamaño del array leido
     """
     
-    tfg_directorio=os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd())))
+    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))
     
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
     path=os.path.join(tfg_directorio, ".Otros","ficheros","No_Ordenado", archivo+".txt")
@@ -269,27 +241,5 @@ def leeArchivo(archivo):
 
 
 
-#for i in range(10):
 main()
-
-"""for k in range(1,19):
-   
-    ret=0
-    timeStart=MPI.Wtime()
-    for i in range(100):
-        asignacion=kM.ejecuta()
-        maxC=[(-float('inf')) for _ in range(k)]
-        minC=[(float('inf')) for _ in range(k)]
-        for j in range(n):
-            if maxC[asignacion[j]]<poblacion[j]: maxC[asignacion[j]]=poblacion[j]
-            if minC[asignacion[j]]>poblacion[j]: minC[asignacion[j]]=poblacion[j]
-        tmp=0
-        for j in range(k):
-            tmp+=maxC[j]-minC[j]
-        if ret<tmp: ret=tmp
-
-    timeEnd=MPI.Wtime()
-        
-    print("Tiempo de ejecucion:",(timeEnd-timeStart))
-    print("Mejor Resultado:",ret)"""
 

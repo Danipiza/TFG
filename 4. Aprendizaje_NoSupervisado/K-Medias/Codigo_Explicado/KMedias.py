@@ -114,14 +114,15 @@ def leeArchivo(archivo):
     return array, tam
 
 
-a,n=leeArchivo("10000")
+a,n=leeArchivo("100000")
 poblacion=[[x] for x in a]
 #print(poblacion)
 #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]
 
-kM=KMeans(10, poblacion, False)
 timeStart=MPI.Wtime()
-asignacion=kM.ejecuta()
+for _ in range(5):
+    kM=KMeans(10, poblacion, False)
+    asignacion=kM.ejecuta()
 timeEnd=MPI.Wtime()
 print("Tiempo de ejecucion:",(timeEnd-timeStart))
 #print(asignacion)
