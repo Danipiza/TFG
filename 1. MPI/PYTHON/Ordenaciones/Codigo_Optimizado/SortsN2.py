@@ -44,6 +44,8 @@ def selection_sort(a):
         a[i] = a[pos]
         a[pos] = tmp
 
+# Recorre el array N veces (1 por cada elemento) recorriendo el array de izquierda a derecha, 
+#   comparando el valor actual con todo el array, para que cuando termine, colocarlo en que posición del array ordenado.
 def sequential_sort(a):
     INF=sys.maxsize   
     n=len(a)
@@ -51,8 +53,11 @@ def sequential_sort(a):
     for i in range(n):
         cont=0
         val=a[i]
+        # Compara el elemento actual con todos para saber en que posicion ponerlo
         for i in range(n):  
-            if a[i]<val: cont+=1        
+            if a[i]<val: cont+=1
+        # Termina una ejecucion y lo pone en su sitio. 
+        # Si esta ocupado es porque hay un valor duplicado, por lo que busca el siguiente
         while b[cont]!=INF: cont+=1
         b[cont]=val
     return b
@@ -60,16 +65,16 @@ def sequential_sort(a):
 
 
 
-def leeArchivo():
+def leeArchivo(archivo):
     """
     return:
     array: int[].   Array con los enteros leidos
     tam: int.       Tamaño del array leido
     """
     
-    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))    
-    nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(tfg_directorio, ".Otros","ficheros","Ordenados", nombre_fichero+"Desc.txt")
+    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd())))))
+    if archivo==None: archivo=input("Introduce un nombre del fichero: ")  
+    path=os.path.join(tfg_directorio, ".Otros","ficheros","Ordenado", archivo+"Desc.txt")
     
        
     tam=0    
@@ -83,7 +88,7 @@ def leeArchivo():
                     tam+=1
     
     except FileNotFoundError:
-        print("El archivo '{}' no existe.".format(nombre_fichero+".txt"))
+        print("El archivo '{}' no existe.".format(archivo+"Desc.txt"))
     
     return array, tam
 
@@ -101,13 +106,23 @@ def arrayOrdenado(a, n):
     return True
 
 def main():
-    a,n=leeArchivo()
+    #a,n=leeArchivo(archivo=None)
+    archivo="1000"
+
+    #for i in range
+    
+    a,n=leeArchivo(archivo)
     print("Array Generado.")
+    
     timeStart=MPI.Wtime()
-    bubble_sort(a,0,len(a)-1)
+    bubble_sort(a) # ,0,len(a)-1
     timeEnd=MPI.Wtime()
     print("Tiempo de ejecucion: {}".format(timeEnd-timeStart))
     if arrayOrdenado(a,n): print("Array Ordenado")
     else : print("Array NO ordenado")
+
+
+
+
 
 main()

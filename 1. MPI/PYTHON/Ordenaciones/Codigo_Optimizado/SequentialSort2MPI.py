@@ -155,7 +155,6 @@ def main():
 
 
 
-# TODO COMPROBAR SI FUNCIONA
 def leeArchivo():
     """
     return:
@@ -163,9 +162,9 @@ def leeArchivo():
     tam: int.       Tamaño del array leido
     """
     
-    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))    
+    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd())))))
     nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(tfg_directorio, ".Otros","ficheros","No_Ordenados", nombre_fichero+".txt")
+    path=os.path.join(tfg_directorio, ".Otros","ficheros","No_Ordenado", nombre_fichero+".txt")
     
        
     tam=0    
@@ -192,7 +191,7 @@ def arrayOrdenado(a, n):
     return.     True or False
     """
     for i in range(1,n):    
-        if (a[i]!=a[i-1]+1):return False
+        if (a[i]<a[i-1]):return False
     
     return True
 

@@ -122,7 +122,7 @@ def leeArchivo(archivo):
     
     tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))    
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(tfg_directorio, ".Otros","ficheros","Ordenados", archivo+"Desc.txt")
+    path=os.path.join(tfg_directorio, ".Otros","ficheros","Ordenado", archivo+".txt")#Desc
     
        
     tam=0    
@@ -160,7 +160,7 @@ datos=[]
 # Crear handler para SIGINT (Ctrl+C)
 signal.signal(signal.SIGINT, signal_handler)
 
-a,n=leeArchivo("100000")
+a,n=leeArchivo("1000")
 print("Array Generado.")
 
 #procesar=[1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000]

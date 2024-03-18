@@ -3,6 +3,89 @@ import random
 import os
 import math
 
+class KMeans:
+    def __init__(self, k, vals, print):
+        self.k = k
+        self.poblacion=vals
+        self.d=len(vals[0])
+        self.n=len(vals)
+        self.print=print
+        
+        
+
+    def ejecuta(self):
+        # Inicializa centros
+        dic={}
+        centroides=[]
+        for i in range(self.k):
+            while True:
+                rand = random.randint(0, self.n - 1)
+                if rand not in dic:
+                    centroides.append(self.poblacion[rand])                
+                    dic[rand] = 1
+                    break
+
+        
+        asignacion=[-1 for i in range(self.n)]
+        while True:
+            # Fase de asginacion
+            for i in range(self.n):
+                tmp=-1
+                cluster=-1
+                dist=float('inf')
+                for j in range(self.k):
+                    tmp=self.manhattan(self.poblacion[i], centroides[j])
+                    if dist>tmp:
+                        dist=tmp
+                        cluster=j
+                asignacion[i]=cluster
+
+            # Actualiza el los centros
+            indsCluster=[0 for _ in range(self.k)]
+            centroidesNuevos=[[0 for _ in range(self.d)] for _ in range(self.k)]
+            for i in range(self.n):
+                for j in range(self.d):
+                    centroidesNuevos[asignacion[i]][j]+=self.poblacion[i][j]
+                indsCluster[asignacion[i]]+=1
+
+            if self.print==True:
+                print("Poblacion:",self.poblacion)
+                print("Centroides:",centroides)
+                print("indsClusters:",indsCluster)
+            for i in range(self.k): 
+                for j in range(self.d):              
+                    centroidesNuevos[i][j]/=indsCluster[i]
+            
+            if self.print==True: print("Nuevos Centroides:",centroidesNuevos)
+            if(self.compara_centros(centroides,centroidesNuevos)): break
+            centroides=centroidesNuevos
+
+        return asignacion
+
+        
+    def compara_centros(self, a, b):
+        n=len(a)
+        for i in range(n):
+            for j in range(self.d):
+                if a[i][j]!=b[i][j]: return False
+        
+        return True
+
+    # Manhattan
+    def manhattan(self,a,b):
+        ret=0.0
+        for i in range(len(a)):
+            ret+=abs(a[i]-b[i])
+        return ret
+    
+    def euclidea(self, a,b):
+        ret=0.0
+        for i in range(len(a)):
+            ret+=(a[i]-b[i])**2        
+        
+        return math.sqrt(ret)
+
+
 def leeArchivo(archivo):
     """
     return:
@@ -30,85 +113,20 @@ def leeArchivo(archivo):
     
     return array, tam
 
-class KMeans:
-    def __init__(self, k, vals, print):
-        self.k = k
-        self.poblacion=vals
-        self.n=len(vals)
-        self.print=print
-        
 
-    def ejecuta(self):
-        # Inicializa centros
-        dic={}
-        centroides=[]
-        for i in range(self.k):
-            while True:
-                rand = random.randint(0, self.n - 1)
-                if rand not in dic:
-                    centroides.append(self.poblacion[rand])                
-                    dic[rand] = 1
-                    break
-
-        
-        asignacion=[-1 for i in range(self.n)]
-        while True:
-            # Fase de asginacion
-            for i in range(self.n):
-                tmp=-1
-                cluster=-1
-                dist=float('inf')
-                for j in range(self.k):
-                    #print(self.poblacion[i])
-                    #print(centroides[j])
-                    tmp=self.distancia(self.poblacion[i], centroides[j])
-                    if dist>tmp:
-                        dist=tmp
-                        cluster=j
-                asignacion[i]=cluster
-
-            # Actualiza el los centros
-            indsCluster=[0 for _ in range(self.k)]
-            centroidesNuevos=[0 for _ in range(self.k)]
-            for i in range(self.n):
-                centroidesNuevos[asignacion[i]]+=self.poblacion[i]
-                indsCluster[asignacion[i]]+=1
-
-            if self.print==True:
-                print("Poblacion:",self.poblacion)
-                print("Centroides:",centroides)
-                print("indsClusters:",indsCluster)
-            for i in range(self.k):               
-                centroidesNuevos[i]/=indsCluster[i]
-            
-            if self.print==True: print("Nuevos Centroides:",centroidesNuevos)
-            if(self.compara_centros(centroides,centroidesNuevos)): break
-            centroides=centroidesNuevos
-
-        return asignacion
-
-        
-    def compara_centros(self, a, b):
-        n=len(a)
-        for i in range(n):
-            if a[i]!=b[i]: return False
-        
-        return True
-
-    # Manhattan
-    def distancia(self,a,b):
-        return abs(a-b)# + abs(a[1]-b[1])
-    
-
-poblacion,n=leeArchivo("10000")
+a,n=leeArchivo("10000")
+poblacion=[[x] for x in a]
 #print(poblacion)
-#poblacion=[1, 2, 4, 5, 11, 12, 14, 15, 19, 20, 20.5, 21]
+#poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]
 
-
-
-
-for k in range(1,19):
-    kM=KMeans(k, poblacion, False)
+kM=KMeans(10, poblacion, False)
+timeStart=MPI.Wtime()
+asignacion=kM.ejecuta()
+timeEnd=MPI.Wtime()
+print("Tiempo de ejecucion:",(timeEnd-timeStart))
+#print(asignacion)
+"""for k in range(1,19):
+   
     ret=0
     timeStart=MPI.Wtime()
     for i in range(100):
@@ -126,5 +144,5 @@ for k in range(1,19):
     timeEnd=MPI.Wtime()
         
     print("Tiempo de ejecucion:",(timeEnd-timeStart))
-    print("Mejor Resultado:",ret)
+    print("Mejor Resultado:",ret)"""
 

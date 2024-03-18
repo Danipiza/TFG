@@ -72,9 +72,9 @@ def leeArchivo(archivo):
     tam: int.       Tamaño del array leido
     """
     
-    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))    
+    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd())))))
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")  
-    path=os.path.join(tfg_directorio, ".Otros","ficheros","Ordenados", archivo+"Desc.txt")
+    path=os.path.join(tfg_directorio, ".Otros","ficheros","Ordenado", archivo+"Desc.txt")
     
        
     tam=0    
@@ -88,7 +88,7 @@ def leeArchivo(archivo):
                     tam+=1
     
     except FileNotFoundError:
-        print("El archivo '{}' no existe.".format(archivo+".txt"))
+        print("El archivo '{}' no existe.".format(archivo+"Desc.txt"))
     
     return array, tam
 
@@ -107,7 +107,7 @@ def arrayOrdenado(a, n):
 
 def main():
     #a,n=leeArchivo(archivo=None)
-    archivo="100"
+    archivo="1000"
 
     #for i in range
     
@@ -115,7 +115,7 @@ def main():
     print("Array Generado.")
     
     timeStart=MPI.Wtime()
-    bubble_sort(a,0,len(a)-1)
+    bubble_sort(a) # ,0,len(a)-1
     timeEnd=MPI.Wtime()
     print("Tiempo de ejecucion: {}".format(timeEnd-timeStart))
     if arrayOrdenado(a,n): print("Array Ordenado")
