@@ -84,21 +84,23 @@ def lee(archivo, plot):
 
 
 if __name__ == "__main__":
-    num = 1000
+    num = 6000
     
-    p1 = genera_puntos(num, -1400, -400, -600, -100)
-    p2 = genera_puntos(num, -500, 500, -600, -100)
-    p3 = genera_puntos(num, 400, 1400, -600, -100)
-    p4 = genera_puntos(num, -1400, -400, 100, 600)
-    p5 = genera_puntos(num, -500, 500, 100, 600)
-    p6 = genera_puntos(num, 400, 1400, 100, 600)
-    puntos=[p1,p2,p3,p4,p5,p6]   
+    """p1 = genera_puntos(num, -1400, -400, -1100, -600)
+    p2 = genera_puntos(num, -500, 500, -1100, -600)
+    p3 = genera_puntos(num, 400, 1400, -1100, -600)
+    p4 = genera_puntos(num, -1400, -400, 600, 1100)
+    p5 = genera_puntos(num, -500, 500, 600, 1100)
+    p6 = genera_puntos(num, 400, 1400, 600, 1100)
+    puntos=[p1,p2,p3,p4,p5,p6]"""
+    p1=genera_puntos(num, -100000,100000,-100000,100000)
+    puntos=[p1]
     archivo = '6000_3.txt'
     
     escribe(puntos, archivo)
-    array=lee(archivo,True)
+    #array=lee(archivo,True)
 
-    array=lee(archivo,False)
+    #array=lee(archivo,False)
     plot2D_genereados(puntos)
 
 

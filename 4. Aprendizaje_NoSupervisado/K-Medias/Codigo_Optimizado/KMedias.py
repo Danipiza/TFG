@@ -70,7 +70,7 @@ class KMeans:
             if(self.compara_centros(centroides,centroidesNuevos)): break
             centroides=centroidesNuevos
 
-        return asignacion
+        return asignacion,centroides
     
 
     def ejecutaE(self):
@@ -120,7 +120,7 @@ class KMeans:
             if(self.compara_centros(centroides,centroidesNuevos)): break
             centroides=centroidesNuevos
 
-        return asignacion
+        return asignacion,centroides
 
         
     def compara_centros(self, a, b):
@@ -147,41 +147,23 @@ class KMeans:
 
 
 """Naranja esta implementado para varias dimensiones"""
-def plot2D(points,asignacion,k):
-    colors=["blue","red","green","black","pink","yellow"]
-    n=len(points)
-    d=len(points[0])
+def plot2D(poblacion,asignacion,k):
+    #['aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk', 'crimson', 'cyan', 'darkblue', 'darkcyan', 'darkgoldenrod', 'darkgray', 'darkgreen', 'darkgrey', 'darkkhaki', 'darkmagenta', 'darkolivegreen', 'darkorange', 'darkorchid', 'darkred', 'darksalmon', 'darkseagreen', 'darkslateblue', 'darkslategray', 'darkslategrey', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dimgrey', 'dodgerblue', 'firebrick', 'floralwhite', 'forestgreen', 'fuchsia', 'gainsboro', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'greenyellow', 'grey', 'honeydew', 'hotpink', 'indianred', 'indigo', 'ivory', 'khaki', 'lavender', 'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral', 'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen', 'lightgrey', 'lightpink', 'lightsalmon', 'lightseagreen', 'lightskyblue', 'lightslategray', 'lightslategrey', 'lightsteelblue', 'lightyellow', 'lime', 'limegreen', 'linen', 'magenta', 'maroon', 'mediumaquamarine', 'mediumblue', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue', 'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin', 'navajowhite', 'navy', 'oldlace', 'olive', 'olivedrab', 'orange', 'orangered', 'orchid', 'palegoldenrod', 'palegreen', 'paleturquoise', 'palevioletred', 'papayawhip', 'peachpuff', 'peru', 'pink', 'plum', 'powderblue', 'purple', 'rebeccapurple', 'red', 'rosybrown', 'royalblue', 'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue', 'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat', 'white', 'whitesmoke', 'yellow', 'yellowgreen']
+    colors=['blue','red','green','black','pink','yellow','magenta','brown','darkgreen','gray','fuchsia','violet','salmon','darkturquoise','forestgreen','firebrick', 'darkblue','lavender','palegoldenrod','navy']
+    n=len(poblacion)
+    d=len(poblacion[0])
+
 
     x=[[]for _ in range(k)]
     y=[[]for _ in range(k)]
     """coords=[[] for _ in range(k)]"""
     for i in range(n):
         """coords[asignacion[i]].append(points[i])"""
-        x[asignacion[i]].append(points[i][0])
-        y[asignacion[i]].append(points[i][1])
+        x[asignacion[i]].append(poblacion[i][0])
+        y[asignacion[i]].append(poblacion[i][1])
     #print(coords[0])
     
-    ret=0.0    
-    for i in range(k): # Recorre clusters
-        m=len(x[i])
-
-        tmp=[[float("inf"),-float("inf")] for _ in range(d)]
-        """tmpY=[[float("inf"),-float("inf")] for _ in range(k)]"""
-        
-        for j in range(m): # Recorre individuos del cluster
-            """for a in range(d): # Recorre sus dimensiones                
-                if coords[i][j][a]<tmp[a][0]: tmp[a][0]=coords[i][j][a]     # min
-                elif coords[i][j][a]>tmp[a][1]: tmp[a][1]=coords[i][j][a]   # max"""
-            if x[i][j]<tmp[0][0]: tmp[0][0]=x[i][j]     # min
-            elif x[i][j]>tmp[0][1]: tmp[0][1]=x[i][j]   # max
-            
-            if y[i][j]<tmp[1][0]: tmp[1][0]=y[i][j]     # min
-            elif y[i][j]>tmp[1][1]: tmp[1][1]=y[i][j]   # max
-        
-        for a in range(d):            
-            ret+=abs(tmp[a][0]-tmp[a][1])
-            
-    print("Valor:",ret)
+    
 
     for i in range(k):
         plt.scatter(x[i], y[i], color=colors[i])
@@ -190,11 +172,9 @@ def plot2D(points,asignacion,k):
     
     plt.xlabel('X')
     plt.ylabel('Y')
-    plt.title('2D-Plot Leida')
+    plt.title('2D-Plot')
     
     plt.show()
-
-
 
 def lee(archivo):
     with open(archivo, 'r') as file:
@@ -241,37 +221,78 @@ def leeArchivo(archivo):
     
     return array, tam
 
+"""In KMeans clustering, the goal is to partition the input data into a 
+predetermined number of clusters, with each cluster represented by its 
+centroid (the center point of the cluster). The algorithm aims to minimize 
+the sum of squared distances between data points and their respective cluster centroids."""
+def evaluacion(poblacion, asignacion,centroides):
+    n=len(poblacion)
+    d=len(poblacion[0])
+    k=len(centroides)
+    
 
+    """for i in range(len(a)):
+            ret+=(a[i]-b[i])**2 """
+    tmp=0.0
+    ret=0.0 # distancia Euclidea    
+    for i in range(n):
+        tmp=0.0
+        for a in range(d): # Recorre sus dimensiones                
+            tmp+=(poblacion[i][a]-centroides[asignacion[i]][a])**2            
+        ret+=(tmp**2)
+
+            
+    print("Valor calculado:",ret)
+    return ret
 
 
 def ejecuta_uno(poblacion, k, tipo):
     timeStart=MPI.Wtime()   
     
     kM=KMeans(k, poblacion, False)
-    if tipo==0: asignacion=kM.ejecutaM()
-    else: asignacion=kM.ejecutaE()    
+    if tipo==0: 
+        asignacion,centroides=kM.ejecutaM()
+    else: 
+        asignacion,centroides=kM.ejecutaE()    
     timeEnd=MPI.Wtime()
-    
+    eval=evaluacion(poblacion, asignacion,centroides)
     #print(asignacion)
+    print("Mejor Valor:",eval)
     print("Tiempo de ejecucion:",(timeEnd-timeStart))
+
+    plot2D(poblacion,asignacion,k)
     return asignacion
 
 def ejecuta_varios(poblacion, k, times,tipo):
     timeStart=MPI.Wtime()
+    ret=float("inf")
+    mejor=None
     if tipo==0: 
         for _ in range(times):
             kM=KMeans(k, poblacion, False)
-            asignacion=kM.ejecutaM()
+            asignacion,centroides=kM.ejecutaM()
+            tmp=evaluacion(poblacion, asignacion,centroides)
+            if tmp<ret:
+                ret=tmp
+                mejor=asignacion
     else: 
         for _ in range(times):
             kM=KMeans(k, poblacion, False)
-            asignacion=kM.ejecutaE()
+            asignacion,centroides=kM.ejecutaE()
+            tmp=evaluacion(poblacion, asignacion,centroides)
+            if tmp<ret:
+                ret=tmp
+                mejor=asignacion
     
     
     timeEnd=MPI.Wtime()
     
     #print(asignacion)
+    print("Mejor Valor:",ret)
     print("Tiempo de ejecucion:",(timeEnd-timeStart))
+
+    plot2D(poblacion,mejor,k)
+    return(mejor)
     
 def ejecuta_busquedaM(poblacion, maxCluster, n):
     d=len(poblacion[0])
@@ -327,20 +348,44 @@ def ejecuta_busquedaE(poblacion, maxCluster, n):
 
 def main():
     poblacion=lee("6000.txt")
-    k=4
+    k=20
+    
     #print(poblacion)
     #a,n=leeArchivo("100000")
     #poblacion=[[x] for x in a]
     #print(poblacion)
     #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]
 
-    asignacion=ejecuta_uno(poblacion, k, 0)
-    #ejecuta_varios(poblacion, 3, 5, 1)
+    #asignacion=ejecuta_uno(poblacion, k, 0)
+    asignacion=ejecuta_varios(poblacion, k, 20, 0)
     #ejecuta_busquedaM(poblacion, 2, n)
     #ejecuta_busquedaE(poblacion, 2, n)
 
-    plot2D(poblacion,asignacion,k)
+    
 
 
 
 main()
+
+
+
+""" FUNCION DE EVALUACION CON LAS DISTANCIAS MINIMAS Y MAXIMAS DE CADA CLUSTER
+def evaluacion(poblacion, asignacion,k):
+    n=len(poblacion)
+    d=len(poblacion[0])
+    
+    ret=0.0    
+    tmp=[[[float("inf"),-float("inf")] for _ in range(d)] for _ in range(k)]
+    for i in range(n):
+        for a in range(d): # Recorre sus dimensiones                
+            if poblacion[i][a]<tmp[asignacion[i]][a][0]: tmp[asignacion[i]][a][0]=poblacion[i][a]     # min
+            elif poblacion[i][a]>tmp[asignacion[i]][a][1]: tmp[asignacion[i]][a][1]=poblacion[i][a] # max
+
+    
+    for i in range(k):    
+        for a in range(d):            
+            ret+=abs(tmp[i][a][0]-tmp[i][a][1])**2
+            
+    print("Valor calculado:",ret)
+    return ret
+"""
