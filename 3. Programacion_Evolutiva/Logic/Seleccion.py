@@ -110,7 +110,7 @@ class Seleccion:
         return seleccionados
     
 
-    def estocasticoUniversal1(self, poblacion, prob_acumulada, tam_seleccionados):
+    def estocasticoUniversal(self, poblacion, prob_acumulada, tam_seleccionados):
         seleccionados=[]
 		
         incr=1.0/tam_seleccionados
@@ -119,18 +119,6 @@ class Seleccion:
             seleccionados.append(Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
 			
             rand += incr		
-
-        return seleccionados
-
-    def estocasticoUniversal2(self, poblacion, prob_acumulada, tam_seleccionados):
-        seleccionados=[]
-		
-        distMarca = 1.0/tam_seleccionados
-        rand = random.random()*distMarca
-        for i in range(tam_seleccionados):       			
-            x=(rand+i)/tam_seleccionados
-            seleccionados.append(Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=poblacion[self.busquedaBinaria(x, prob_acumulada)]))
-				
 
         return seleccionados
 

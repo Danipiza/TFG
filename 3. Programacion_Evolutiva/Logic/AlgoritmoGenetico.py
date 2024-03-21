@@ -3,6 +3,7 @@ import os
 import random
 import math
 
+# internet de las cosas
 
 sys.path.append(os.path.abspath("View"))
 sys.path.append(os.path.abspath("Model"))
@@ -12,11 +13,13 @@ import Mutacion
 import Funcion
 import Seleccion
 from Model import Individuo
-from View import MainWindow
+# TODO QUITAR
+# from View import MainWindow
 
 class AlgoritmoGenetico():
     def __init__(self,MW):
-        self.MW=MW                  # Class: MainWindow
+        # TODO QUITAR
+        # self.MW=MW                  # Class: MainWindow
         
         self.funcion=None           # Funcion
         self.seleccion=None         # Seleccion
@@ -63,7 +66,6 @@ class AlgoritmoGenetico():
         elif funcion_idx==1: self.funcion=Funcion.Funcion2()
         elif funcion_idx==2: self.funcion=Funcion.Funcion3()
         elif funcion_idx==3: self.funcion=Funcion.Funcion4(self.num_genes)
-        else: self.funcion=Funcion.Funcion5(self.num_genes)
         
         self.seleccion_idx=seleccion_idx
         self.seleccion=Seleccion.Seleccion(tam_poblacion, self.funcion.opt)
@@ -108,11 +110,12 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
         
-            
-        self.MW.Plot2D(self.progreso_generaciones, self.mejor_ind)
+        # TODO QUITAR (UCM NO FUNCIONA)     
+        #self.MW.Plot2D(self.progreso_generaciones, self.mejor_ind)
 
-        # TODO UCM ORDENA
+        
         #print(self.mejor_total)
+        return self.mejor_total
 
 
     def init_poblacion(self):
@@ -194,25 +197,15 @@ class AlgoritmoGenetico():
             self.prob_seleccionAcum[i]=acum
         """
 
-    """ret = seleccion.estocasticoUniversal1(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite);
-				break;
-			case 4:
-				ret = seleccion.estocasticoUniversal2(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite);
-				break;
-			case 5:
-				ret = seleccion.truncamiento(poblacion, prob_seleccion, 0.5, tam_poblacion-tam_elite);
-				break;
-			case 6:
-				ret = seleccion.restos(poblacion, prob_seleccion, prob_seleccionAcum, tam_poblacion-tam_elite);"""
+    
     def seleccion_poblacion(self, tam_seleccionados, k):         
         ret=[]
         if self.seleccion_idx==0: ret=self.seleccion.ruleta(self.poblacion, self.prob_seleccionAcum, tam_seleccionados)
         elif self.seleccion_idx==1: ret= self.seleccion.tornedoDeterministico(self.poblacion, tam_seleccionados, k)
         elif self.seleccion_idx==2: ret= self.seleccion.torneoProbabilistico(self.poblacion, k, 0.9, tam_seleccionados)
-        elif self.seleccion_idx==3: ret= self.seleccion.estocasticoUniversal1(self.poblacion,self.prob_seleccionAcum,tam_seleccionados)
-        elif self.seleccion_idx==4: ret= self.seleccion.estocasticoUniversal2(self.poblacion,self.prob_seleccionAcum,tam_seleccionados)
-        elif self.seleccion_idx==5: ret= self.seleccion.truncamiento(self.poblacion,self.prob_seleccion, 0.5, tam_seleccionados)
-        elif self.seleccion_idx==6: ret= self.seleccion.restos(self.poblacion,self.prob_seleccion, self.prob_seleccionAcum, tam_seleccionados)
+        elif self.seleccion_idx==3: ret= self.seleccion.estocasticoUniversal(self.poblacion,self.prob_seleccionAcum,tam_seleccionados)
+        elif self.seleccion_idx==4: ret= self.seleccion.truncamiento(self.poblacion,self.prob_seleccion, 0.5, tam_seleccionados)
+        elif self.seleccion_idx==5: ret= self.seleccion.restos(self.poblacion,self.prob_seleccion, self.prob_seleccionAcum, tam_seleccionados)
         else: ret=[] # TODO RANKING
         return ret
 
@@ -220,50 +213,11 @@ class AlgoritmoGenetico():
         ret=[]
         if self.cruce_idx==0: ret=self.cruce.cruce_monopuntoBin(selec)
         return ret
-        """n=len(selec)
-        ret=[(None) for _ in range(n)]
-        if n%2==1:
-            ret[n-1] = Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[n-1])
-            n-=1
         
-        long_genes=[len(selec[0].genes[i].v) for i in range(len(selec[0].genes))]
-        corte_maximo=-1
-        for l in long_genes:
-            corte_maximo+=l
-        i=0
-
-        ind1=[]
-        ind2=[]
-        while i<n:
-            ind1=Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[i])
-            ind2=Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[i + 1])
-            
-            rand=random.random()
-            if rand<self.prob_cruce:                                               
-                corte=random.randint(1,corte_maximo)
-                cont=0
-                j=0
-                for k in range(corte):
-                    tmp=ind1.genes[cont].v[j]
-                    ind1.genes[cont].v[j]=ind2.genes[cont].v[j]
-                    ind2.genes[cont].v[j]=tmp
-                    j+=1
-                    if j==long_genes[cont]:
-                        cont+=1
-                        j=0
-            
-            
-            ret[i] = Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind1)
-            ret[i+1] = Individuo.Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind2)
-            i += 2     
-        
-        return ret"""
 
     def mutacion_poblacion(self, selec):
-        ret=[]
-        #if self.mutacion_idx == 0: ret = self.mutacion.mut_basicaBin(selec)
+        ret=[]    
         ret = self.mutacion.mut_basicaBin(selec)
-
         return ret
 
 

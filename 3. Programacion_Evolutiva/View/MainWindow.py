@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import sys
 import os
+
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -42,23 +43,20 @@ class MainWindow:
         seleccion_opt = ["Ruleta", 
                          "Torneo Determinista", 
                          "Torneo Probabilístico", 
-                         "Estocástico Universal1",
-                         "Estocástico Universal2",
+                         "Estocástico Universal",
                          "Truncamiento",
-                         "Restos"]
+                         "Restos",
+                         "Ranking"]
         
         cruce_opt = ["Básica", 
-                     "Uniforme",
-                     "Aritmetica",
-                     "BLX"]
+                     "Uniforme"]
         
         mutacion_opt = ["Básica"]
 
         funcion_opt = ["F1: Calibracion y Prueba",
                        "F2: Mishra Bird",
                        "F3: Holder table",
-                       "F4: Michalewicz (Binaria)",
-                       "F5: Michalewicz (Real)"]
+                       "F4: Michalewicz (Binaria)"]
         
 
 
