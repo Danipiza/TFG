@@ -83,18 +83,27 @@ def lee(archivo, plot):
     return array
 
 
+""" 6000_2.txt
+p1 = genera_puntos(num, -10, -3, -10, -2)
+    p2 = genera_puntos(num, -3.5, 3.5, -10, -2)
+    p3 = genera_puntos(num, 3, 10, -10, -2)
+    p4 = genera_puntos(num, -10, -3, 2, 10)
+    p5 = genera_puntos(num, -3.5, 3.5, 2, 10)
+    p6 = genera_puntos(num, 3, 10, 2, 10)
+"""
+
 if __name__ == "__main__":
-    num = 6000
+    num = 1000
     
-    """p1 = genera_puntos(num, -1400, -400, -1100, -600)
-    p2 = genera_puntos(num, -500, 500, -1100, -600)
-    p3 = genera_puntos(num, 400, 1400, -1100, -600)
-    p4 = genera_puntos(num, -1400, -400, 600, 1100)
-    p5 = genera_puntos(num, -500, 500, 600, 1100)
-    p6 = genera_puntos(num, 400, 1400, 600, 1100)
-    puntos=[p1,p2,p3,p4,p5,p6]"""
-    p1=genera_puntos(num, -100000,100000,-100000,100000)
-    puntos=[p1]
+    p1 = genera_puntos(num, -12.5, -7.5, -10, -2.5)
+    p2 = genera_puntos(num, -2.5, 2.5, -10, -2.5)
+    p3 = genera_puntos(num, 7.5, 12.5, -10, -2.5)
+    p4 = genera_puntos(num, -12.5, -7.5, 2.5, 10)
+    p5 = genera_puntos(num, -2.5, 2.5, 2.5, 10)
+    p6 = genera_puntos(num, 7.5, 12.5, 2.5, 10)
+    puntos=[p1,p2,p3,p4,p5,p6]
+    #p1=genera_puntos(num, -10,10,-10,10)
+    #puntos=[p1]
     archivo = '6000_3.txt'
     
     escribe(puntos, archivo)
