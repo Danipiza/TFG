@@ -90,11 +90,17 @@ def leeArchivo():
     array: int[].   Array con los enteros leidos
     tam: int.       Tamaño del array leido
     """
-    
-    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))    
+    dir=os.getcwd()
+    n=len(dir)
+
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
+            
     nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(tfg_directorio, ".Otros","ficheros","Ordenados", nombre_fichero+"Desc.txt")
+    path=os.path.join(dir   , ".Otros","ficheros","Ordenado", nombre_fichero+".txt")
     
+    print(path)
        
     tam=0    
     array = [] 
@@ -128,7 +134,8 @@ def main():
     a,n=leeArchivo()
     print("Array Generado.")
     timeStart=MPI.Wtime()
-    quick_sort(a,0,len(a)-1)
+    #quick_sort(a,0,len(a)-1)
+    merge_sort(a,0,len(a)-1)
     timeEnd=MPI.Wtime()
     print("Tiempo de ejecucion: {}".format(timeEnd-timeStart))
     if arrayOrdenado(a,n): print("Array Ordenado")

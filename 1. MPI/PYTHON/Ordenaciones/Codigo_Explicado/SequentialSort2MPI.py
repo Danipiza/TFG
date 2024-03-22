@@ -162,9 +162,15 @@ def leeArchivo():
     tam: int.       Tamaño del array leido
     """
     
-    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd())))))
+    dir=os.getcwd()
+    n=len(dir)
+
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
+
     nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(tfg_directorio, ".Otros","ficheros","No_Ordenado", nombre_fichero+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","No_Ordenado", nombre_fichero+".txt")
     
        
     tam=0    

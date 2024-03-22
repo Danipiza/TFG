@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 from mpi4py import MPI
 import random
 import os
@@ -8,6 +9,8 @@ import math
 El algoritmo de clustering, KMeans, tiene como objetivo dividir unos datos 
 en un numero determindo de clusters (con su respectivo centroide).
 """
+
+# TODO SILHOUETTE (Tarda mucho)
 
 # TIEMPO: (datos=100000.txt, k=3)
 # Manhattan:
@@ -83,8 +86,8 @@ class KMeans:
 
             # Para cada cluster divide entre su numero de individuos (en cada dimension)
             for i in range(self.k): 
-                for j in range(self.d):              
-                    centroidesNuevos[i][j]/=indsCluster[i]                       
+                for j in range(self.d):  
+                    if indsCluster[i]!=0: centroidesNuevos[i][j]/=indsCluster[i]                       
             if self.print==True: print("Nuevos Centroides:",centroidesNuevos)
 
             # 3. Compara los centroides para ver si finaliza la ejecucion
@@ -157,123 +160,109 @@ class KMeans:
             return math.sqrt(ret)
 
 
-def davies_bouldin_y_mejor(k, mejores, poblacion, asignacion):
-    import matplotlib.pyplot as plt
-    # Crear figura y ejes
-    fig, axs = plt.subplots(1,2, figsize=(12, 6))
+def GUI(k, mejor, fits, coefs, poblacion,asignacion):    
+    # Create figure and axes
+    #fig, axs = plt.subplots(2, 2, figsize=(18, 12), gridspec_kw={'width_ratios': [1, 2]})
     
-    # Definir los datos grafico 1
-    x1 = [i for i in range(1, k + 1)]    
-    #y2=mejores    
-
-    # Graficar primer diagrama
-    axs[0].plot(x1, mejores, 'ro', linestyle='-')
-    axs[0].set_xlabel('Clusters')
-    axs[0].set_ylabel('Fitness')
-    axs[0].set_title('Diagrama de codo')
-    axs[0].grid(True)
-
-
-     # Definir los datos grafico 2
+    # Define data for the first plot
+    x1 = [i for i in range(1, k + 1)]  
+    # Define data for the second plot
+    x2 = [i for i in range(2, k + 1)] 
+    # Define data for the third plot
     colors = ['blue', 'red', 'green', 'black', 'pink', 'yellow', 'magenta', 'brown', 'darkgreen', 'gray', 'fuchsia',
             'violet', 'salmon', 'darkturquoise', 'forestgreen', 'firebrick', 'darkblue', 'lavender', 'palegoldenrod',
             'navy']
-    n=len(poblacion)
-
-    x2=[[]for _ in range(k)]
-    y2=[[]for _ in range(k)]
+    n = len(poblacion)
+    x3 = [[] for _ in range(k)]
+    y3 = [[] for _ in range(k)]
     for i in range(n):
-        x2[asignacion[i]].append(poblacion[i][0])
-        y2[asignacion[i]].append(poblacion[i][1])
-           
+        x3[asignacion[i]].append(poblacion[i][0])
+        y3[asignacion[i]].append(poblacion[i][1])
 
 
-    # Graficar segundo diagrama
+    # Crear la figura y GridSpec
+    fig = plt.figure(figsize=(10, 6))
+    gs = GridSpec(2, 2, figure=fig)
+
+    # Grafico 1 (arriba a la izquierda)
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax1.plot(x1, fits, color='b', linestyle='-')
+    ax1.scatter(mejor+1, fits[mejor], color='red')  # Punto rojo 
+    ax1.set_xlabel('Clusters')
+    ax1.set_ylabel('Fitness')
+    ax1.set_title('Diagrama de codo')
+    ax1.grid(True)
+
+    # Grafico 2 (abajo a la izquierda)
+    ax2 = fig.add_subplot(gs[1, 0])
+    ax2.plot(x2, coefs, color='b', linestyle='-') 
+    ax2.scatter(mejor+1, coefs[mejor-1], color='red')  # Punto rojo 
+    ax2.set_xlabel('Clusters')
+    ax2.set_ylabel('Coficiente')
+    ax2.set_title('Davies Bouldin')
+    ax2.grid(True)
+    ax2.set_xlim(1, k)  # Expandir el eje x
+
+    # Grafico 3 (a la derecha, ocupando las 2 filas)
+    ax3 = fig.add_subplot(gs[:, 1])
+    # Plot the third diagram in the first row, second column
     for i in range(k):
-        axs[1].scatter(x2[i], y2[i], color=colors[i])
+        ax3.scatter(x3[i], y3[i], color=colors[i])
+    ax3.set_xlabel('X')
+    ax3.set_ylabel('Y')
+    ax3.set_title('Poblacion')
     
     
-    axs[1].set_xlabel('X')
-    axs[1].set_ylabel('Y')
-    axs[1].set_title('2D-Plot')
+    plt.tight_layout() # Ajustar la disposición de los subplots    
+    plt.show() # Mostrar los gráficos
 
+def calcula_DB_mejor(DBs):
+    n=len(DBs)
+    val=DBs[0]
+    ret=0
 
+    for i in range(1,n):
+        if val>DBs[i]: 
+            val=DBs[i]
+            ret=i
 
-    # Mostrar la figura con ambos gráficos
-    plt.tight_layout()
-    plt.show()
+    return ret          
 
-# Funcion que encuentra el codo
-def encontrar_codo(x, y):
-    n = len(x)     
-    # Diferencias de las pendientes
-    pendientes = [(y[i]-y[i-1])/(x[i]-x[i-1]) for i in range(1,n)]
-    
-    diferencias = [pendientes[i]-pendientes[i-1] for i in range(1,n-1)]    
-    
-    #indice = diferencias.index(max(diferencias))+1
-    #return [x[indice],y[indice]]
-    return diferencias.index(max(diferencias))+1 # Indice con mayor diferencia de pendientes               
-
-def diagrama_codo_y_mejor(k, mejores, poblacion,asignacion):
-    import matplotlib.pyplot as plt
-    # Crear figura y ejes
-    fig, axs = plt.subplots(1,2, figsize=(12, 6))
-    
-    # Definir los datos grafico 1
-    x1 = [i for i in range(1, k + 1)]    
-    #y2=mejores    
-
-    # Graficar primer diagrama
-    axs[0].plot(x1, mejores, 'ro', linestyle='-')
-    axs[0].set_xlabel('Clusters')
-    axs[0].set_ylabel('Fitness')
-    axs[0].set_title('Diagrama de codo')
-    axs[0].grid(True)
-
-
-     # Definir los datos grafico 2
-    colors = ['blue', 'red', 'green', 'black', 'pink', 'yellow', 'magenta', 'brown', 'darkgreen', 'gray', 'fuchsia',
-            'violet', 'salmon', 'darkturquoise', 'forestgreen', 'firebrick', 'darkblue', 'lavender', 'palegoldenrod',
-            'navy']
+def davies_bouldin(poblacion, k, asignacion, centroides):
+    ret=0.0
     n=len(poblacion)
-
-    x2=[[]for _ in range(k)]
-    y2=[[]for _ in range(k)]
+    
+    tmp=0.0
+    distanciaProm=[0.0 for _ in range(k)]    
+    indsCluster=[0 for _ in range(k)] # Numero de inviduos en cada cluster    
     for i in range(n):
-        x2[asignacion[i]].append(poblacion[i][0])
-        y2[asignacion[i]].append(poblacion[i][1])
-           
-
-
-    # Graficar segundo diagrama
+        distanciaProm[asignacion[i]]+=distancia(centroides[asignacion[i]],poblacion[i])        
+        indsCluster[asignacion[i]]+=1
+    
     for i in range(k):
-        axs[1].scatter(x2[i], y2[i], color=colors[i])
+        distanciaProm[i]/=indsCluster[i]
     
+    distanciaClust=[[0 for _ in range(k)] for _ in range(k)]
+    for i in range(k-1):
+        for j in range(i+1,k):
+            tmp=distancia(centroides[i],centroides[j])
+            distanciaClust[i][j]=tmp
+            distanciaClust[j][i]=tmp
     
-    axs[1].set_xlabel('X')
-    axs[1].set_ylabel('Y')
-    axs[1].set_title('2D-Plot')
-
-
-
-    # Mostrar la figura con ambos gráficos
-    plt.tight_layout()
-    plt.show()
-
-def diagrama_codo(k, mejores):
-    x = [i for i in range(1,k+1)]
-   
-    plt.figure(figsize=(8, 6))  # Definir el tamaño del gráfico 
-    plt.plot(x, mejores, 'ro')  # 'ro' indica que los puntos se representarán como círculos rojos
-    plt.xlabel('Clusters')  
-    plt.ylabel('Fitness')  
-    plt.title('Diagrama de codo') 
+    tmp=0.0
+    for i in range(k):
+        maxVal=0.0
+        for j in range(k):
+            if i==j: continue
+            tmp=(distanciaProm[i]+distanciaProm[j])/(distanciaClust[i][j])
+            if tmp>maxVal: maxVal=tmp
+        
+        ret+=maxVal
     
-    plt.plot(x, mejores, linestyle='-', color='blue')  # '-' indica una línea sólida, color='blue' para azul
+    ret/=k
+    return ret
+       
 
-    plt.grid(True)  # Mostrar cuadrícula 
-    plt.show()  
 
 """Naranja esta implementado para varias dimensiones"""
 def plot2D(poblacion,asignacion,k):
@@ -320,47 +309,7 @@ def distancia(a,b):
     
     return math.sqrt(ret)
 
-def calcula_DB_mejor(DBs):
-    n=len(DBs)
-    ret=DBs[0]
-    for i in range(1,n):
-        if ret>DBs[i]: ret=DBs[i]
 
-    return ret
-
-def davies_bouldin(poblacion, k, asignacion, centroides):
-    ret=0.0
-    n=len(poblacion)
-
-    tmp=0.0
-    distanciaProm=[0.0 for _ in range(k)]    
-    indsCluster=[0 for _ in range(k)] # Numero de inviduos en cada cluster    
-    for i in range(n):
-        distanciaProm[asignacion[i]]+=distancia(centroides[asignacion[i]],poblacion[i])        
-        indsCluster[asignacion[i]]+=1
-    
-    for i in range(k):
-        distanciaProm[i]/=indsCluster[i]
-    
-    distanciaClust=[[0 for _ in range(k)] for _ in range(k)]
-    for i in range(k-1):
-        for j in range(i+1,k):
-            tmp=distancia(centroides[i],centroides[j])
-            distanciaClust[i][j]=tmp
-            distanciaClust[j][i]=tmp
-    
-    tmp=0.0
-    for i in range(k):
-        maxVal=0.0
-        for j in range(k):
-            if i==j: continue
-            tmp=(distanciaProm[i]+distanciaProm[j])/(distanciaClust[i][j])
-            if tmp>maxVal: maxVal=tmp
-        
-        ret+=maxVal
-    
-    ret/=k
-    return ret
 
 def ejecuta_uno(poblacion, k, tipo):
     timeStart=MPI.Wtime()   
@@ -371,14 +320,13 @@ def ejecuta_uno(poblacion, k, tipo):
     else: 
         asignacion,centroides=kM.ejecutaE()    
     timeEnd=MPI.Wtime()
-    eval=evaluacion(poblacion, asignacion,centroides,False)
-    
-    #davies_bouldin(poblacion, k, asignacion, centroides)
+    eval=evaluacion(poblacion, asignacion,centroides,False)    
 
     print("Mejor Valor:",eval)
     print("Tiempo de ejecucion:",(timeEnd-timeStart))
 
-    #plot2D(poblacion,asignacion,k)
+    plot2D(poblacion,asignacion,k)
+
     return asignacion
 
 def ejecuta_varios(poblacion, k, tipo, times):
@@ -408,8 +356,7 @@ def ejecuta_varios(poblacion, k, tipo, times):
     
     timeEnd=MPI.Wtime()
     
-    DB=davies_bouldin(poblacion, k, mejor, centroidesMejor)
-    print("Davies Bouldin=",DB)
+    
     #print(asignacion)
     print("Mejor Valor:",ret)
     print("Tiempo de ejecucion:",(timeEnd-timeStart))
@@ -417,8 +364,10 @@ def ejecuta_varios(poblacion, k, tipo, times):
     plot2D(poblacion,mejor,k)
     return(mejor)
     
-def ejecuta_busquedaM(poblacion, maxCluster, times):
-    d=len(poblacion[0])
+
+
+def ejecuta_busquedaM(poblacion, maxCluster, times):    
+    print("Distancia Manhattan\n")
     fits=[]
     mejores=[]
     centroidesMejores=[]
@@ -440,50 +389,57 @@ def ejecuta_busquedaM(poblacion, maxCluster, times):
         mejores.append(mejor)
         centroidesMejores.append(centroidesMejor)
 
-    DBs=[davies_bouldin(poblacion, i, mejores[i], centroidesMejores[i]) for i in range(k)]
-    
+    DBs=[davies_bouldin(poblacion, i, mejores[i-1], centroidesMejores[i-1]) for i in range(2,k+1)]    
     dbMejor=calcula_DB_mejor(DBs)
-
-    davies_bouldin_y_mejor(maxCluster, DBs, poblacion, mejores[dbMejor])
-    #codo=encontrar_codo([i for i in range(1, maxCluster+1)],fits)
-    #print(codo)
-    #diagrama_codo_y_mejor(maxCluster, fits, poblacion, mejores[3])
-    #silhouette_y_mejor(maxCluster, mejores, poblacion, mejores[3])   
     
-
-
-def ejecuta_busquedaE(poblacion, maxCluster, n):
-    d=len(poblacion[0])
+    GUI(maxCluster, dbMejor+1, fits,DBs,poblacion,mejores[dbMejor+1])
+      
+    
+def ejecuta_busquedaE(poblacion, maxCluster, times):
+    print("Distancia Euclidea\n")
+    fits=[]
+    mejores=[]
+    centroidesMejores=[]
+    
     for k in range(1,maxCluster+1):
-        kM=KMeans(k, poblacion, False)
-
-        ret=0 #[0 for _ in range(d)]
         timeStart=MPI.Wtime()
-        for i in range(100):
-            asignacion=kM.ejecutaE()
-            maxC=[[(-float('inf')) for _ in range(d)] for _ in range(k)]
-            minC=[[(float('inf')) for _ in range(d)] for _ in range(k)]
-            for j in range(n):
-                for a in range(d):
-                    if maxC[asignacion[j]][a]<poblacion[j][a]: maxC[asignacion[j]][a]=poblacion[j][a]
-                    if minC[asignacion[j]][a]>poblacion[j][a]: minC[asignacion[j]][a]=poblacion[j][a]
-            tmp=0 #[0 for _ in range(d)]
-            for j in range(k):
-                for a in range(d):
-                    tmp+=maxC[j][a]-minC[j][a]
-            if ret<tmp: ret=tmp
-
+        ret=float("inf")
+        for _ in range(times):
+            kM=KMeans(k, poblacion, False)
+            asignacion,centroides=kM.ejecutaE()
+            tmp=evaluacion(poblacion, asignacion,centroides,False)
+            if tmp<ret:
+                ret=tmp
+                mejor=asignacion
+                centroidesMejor=centroides
         timeEnd=MPI.Wtime()
-            
-        print("Tiempo de ejecucion:",(timeEnd-timeStart))
-        print("Mejor Resultado:",ret)
+        print("Cluster (k)= {}, mejor valor= {}.\nTiempo de Ejecucion: {}".format(k,ret,(timeEnd-timeStart)))        
+        fits.append(ret)
+        mejores.append(mejor)
+        centroidesMejores.append(centroidesMejor)
+
+    DBs=[davies_bouldin(poblacion, i, mejores[i-1], centroidesMejores[i-1]) for i in range(2,k+1)]    
+    dbMejor=calcula_DB_mejor(DBs)
+    
+    GUI(maxCluster, dbMejor+1, fits,DBs,poblacion,mejores[dbMejor+1])
 
 
     
 
 
 def lee(archivo):
-    with open(archivo, 'r') as file:
+
+    dir=os.getcwd()
+    n=len(dir)
+
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
+
+    if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
+    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+
+    with open(path, 'r') as file:
         content = file.read()
 
     array = []
@@ -507,10 +463,15 @@ def leeArchivo(archivo):
     tam: int.       Tamaño del array leido
     """
     
-    tfg_directorio=os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(os.getcwd()))))
+    dir=os.getcwd()
+    n=len(dir)
+
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
     
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(tfg_directorio, ".Otros","ficheros","No_Ordenado", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","No_Ordenado", archivo+".txt")
        
     tam=0    
     array = [] 
@@ -529,9 +490,14 @@ def leeArchivo(archivo):
 
     
 def main():
-    #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]
-    poblacion=lee("6000.txt")
-    k=6
+    #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]    
+    # 6000      1 generacion de puntos aleatorios
+    # 6000_2    2 generaciones de puntos aleatorios
+    # 6000_3    6 generaciones de puntos aleatorios
+    poblacion=lee("6000_3")
+    
+    # Numero de clusters ejecutados [1-k]
+    k=12
     
     # Variables: poblacion, numero de clusters, manh o eucl
     #asignacion=ejecuta_uno(poblacion, k, 1)
@@ -540,18 +506,9 @@ def main():
     #asignacion=ejecuta_varios(poblacion, k, 0, 10)
 
 
-    ejecuta_busquedaM(poblacion, k, 6)
-    #ejecuta_busquedaE(poblacion, 2, n)
+    #ejecuta_busquedaM(poblacion, k, 5)
+    ejecuta_busquedaE(poblacion, k, 5)
 
-
-    # TODO SILHOUETTE
-    # https://www.youtube.com/watch?v=b920s9nXGao&ab_channel=CodigoMaquina
-    #timeStart=MPI.Wtime()  
-    #ret=coeficiente_silhouette(poblacion, asignacion)
-    #timeEnd=MPI.Wtime()      
-    #print(ret)
-    #print("Tiempo de ejecucion para calcular silhouette:",(timeEnd-timeStart))
 
 
 main()
-
