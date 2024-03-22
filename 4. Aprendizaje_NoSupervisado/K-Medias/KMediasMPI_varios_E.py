@@ -42,8 +42,9 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:                 
-        a,n=leeArchivo("100000")      
-        poblacion=[[x] for x in a] 
+        #a,n=leeArchivo("6000")      
+        #poblacion=[[x] for x in a] 
+        poblacion=lee("6000")
         #n=12
         #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]         
         
@@ -219,6 +220,35 @@ def compara_centros(d, a, b):
     return True
 
 
+def lee(archivo):
+
+    dir=os.getcwd()
+    n=len(dir)
+
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
+
+    if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
+    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+
+    with open(path, 'r') as file:
+        content = file.read()
+
+    array = []
+
+    # Quita " " "," "[" y "]. Y divide el archivo     
+    datos = content.replace('[', '').replace(']', '').split(', ')      
+    for i in range(0, len(datos), 2):
+        x = float(datos[i])
+        y = float(datos[i + 1])
+
+        array.append([x, y])
+
+    #print("\n",array)        
+    
+    return array
+ 
 
 def leeArchivo(archivo):
     """

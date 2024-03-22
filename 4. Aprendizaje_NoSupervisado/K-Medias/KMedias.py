@@ -263,8 +263,6 @@ def davies_bouldin(poblacion, k, asignacion, centroides):
     return ret
        
 
-
-"""Naranja esta implementado para varias dimensiones"""
 def plot2D(poblacion,asignacion,k):
     #['aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk', 'crimson', 'cyan', 'darkblue', 'darkcyan', 'darkgoldenrod', 'darkgray', 'darkgreen', 'darkgrey', 'darkkhaki', 'darkmagenta', 'darkolivegreen', 'darkorange', 'darkorchid', 'darkred', 'darksalmon', 'darkseagreen', 'darkslateblue', 'darkslategray', 'darkslategrey', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dimgrey', 'dodgerblue', 'firebrick', 'floralwhite', 'forestgreen', 'fuchsia', 'gainsboro', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'greenyellow', 'grey', 'honeydew', 'hotpink', 'indianred', 'indigo', 'ivory', 'khaki', 'lavender', 'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral', 'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen', 'lightgrey', 'lightpink', 'lightsalmon', 'lightseagreen', 'lightskyblue', 'lightslategray', 'lightslategrey', 'lightsteelblue', 'lightyellow', 'lime', 'limegreen', 'linen', 'magenta', 'maroon', 'mediumaquamarine', 'mediumblue', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue', 'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin', 'navajowhite', 'navy', 'oldlace', 'olive', 'olivedrab', 'orange', 'orangered', 'orchid', 'palegoldenrod', 'palegreen', 'paleturquoise', 'palevioletred', 'papayawhip', 'peachpuff', 'peru', 'pink', 'plum', 'powderblue', 'purple', 'rebeccapurple', 'red', 'rosybrown', 'royalblue', 'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue', 'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat', 'white', 'whitesmoke', 'yellow', 'yellowgreen']
     colors=['blue','red','green','black','pink','yellow','magenta','brown','darkgreen','gray','fuchsia','violet','salmon','darkturquoise','forestgreen','firebrick', 'darkblue','lavender','palegoldenrod','navy']
@@ -363,14 +361,15 @@ def ejecuta_varios(poblacion, k, tipo, times):
 
     plot2D(poblacion,mejor,k)
     return(mejor)
-    
-
+   
 
 def ejecuta_busquedaM(poblacion, maxCluster, times):    
     print("Distancia Manhattan\n")
     fits=[]
     mejores=[]
     centroidesMejores=[]
+
+    totalTimeStart = MPI.Wtime()
     
     for k in range(1,maxCluster+1):
         timeStart=MPI.Wtime()
@@ -389,18 +388,21 @@ def ejecuta_busquedaM(poblacion, maxCluster, times):
         mejores.append(mejor)
         centroidesMejores.append(centroidesMejor)
 
+    totalTimeEnd = MPI.Wtime()
+    print("Tiempo de ejecucion total: {}".format(totalTimeEnd-totalTimeStart))
+
     DBs=[davies_bouldin(poblacion, i, mejores[i-1], centroidesMejores[i-1]) for i in range(2,k+1)]    
     dbMejor=calcula_DB_mejor(DBs)
     
-    GUI(maxCluster, dbMejor+1, fits,DBs,poblacion,mejores[dbMejor+1])
-      
-    
+    GUI(maxCluster, dbMejor+1, fits,DBs,poblacion,mejores[dbMejor+1]) 
+   
 def ejecuta_busquedaE(poblacion, maxCluster, times):
     print("Distancia Euclidea\n")
     fits=[]
     mejores=[]
     centroidesMejores=[]
-    
+    totalTimeStart = MPI.Wtime()
+        
     for k in range(1,maxCluster+1):
         timeStart=MPI.Wtime()
         ret=float("inf")
@@ -417,14 +419,14 @@ def ejecuta_busquedaE(poblacion, maxCluster, times):
         fits.append(ret)
         mejores.append(mejor)
         centroidesMejores.append(centroidesMejor)
+    
+    totalTimeEnd = MPI.Wtime()
+    print("Tiempo de ejecucion total: {}".format(totalTimeEnd-totalTimeStart))
 
     DBs=[davies_bouldin(poblacion, i, mejores[i-1], centroidesMejores[i-1]) for i in range(2,k+1)]    
     dbMejor=calcula_DB_mejor(DBs)
     
     GUI(maxCluster, dbMejor+1, fits,DBs,poblacion,mejores[dbMejor+1])
-
-
-    
 
 
 def lee(archivo):
@@ -455,49 +457,18 @@ def lee(archivo):
     #print("\n",array)        
     
     return array
-
-def leeArchivo(archivo):
-    """
-    return:
-    array: int[].   Array con los enteros leidos
-    tam: int.       Tamaño del array leido
-    """
-    
-    dir=os.getcwd()
-    n=len(dir)
-
-    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
-        dir=os.path.dirname(dir)
-        n=len(dir)
-    
-    if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","No_Ordenado", archivo+".txt")
-       
-    tam=0    
-    array = [] 
-    try:        
-        with open(path, 'r') as archivo: # modo lectura
-            for linea in archivo: # Solo hay una linea                
-                numeros_en_linea = linea.split() # Divide por espacios                               
-                for numero in numeros_en_linea:
-                    array.append(int(numero))
-                    tam+=1
-    
-    except FileNotFoundError:
-        print("El archivo '{}' no existe.".format(archivo+".txt"))
-    
-    return array, tam
-
+ 
     
 def main():
     #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]    
     # 6000      1 generacion de puntos aleatorios
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
-    poblacion=lee("6000_3")
+    # 100000_2D    6 generaciones de puntos aleatorios
+    poblacion=lee("100000_2D")
     
     # Numero de clusters ejecutados [1-k]
-    k=12
+    k=6
     
     # Variables: poblacion, numero de clusters, manh o eucl
     #asignacion=ejecuta_uno(poblacion, k, 1)
@@ -506,9 +477,7 @@ def main():
     #asignacion=ejecuta_varios(poblacion, k, 0, 10)
 
 
-    #ejecuta_busquedaM(poblacion, k, 5)
-    ejecuta_busquedaE(poblacion, k, 5)
-
-
+    ejecuta_busquedaM(poblacion, k, 8)
+    #ejecuta_busquedaE(poblacion, k, 8)
 
 main()

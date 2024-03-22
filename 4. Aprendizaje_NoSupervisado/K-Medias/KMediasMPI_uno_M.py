@@ -44,8 +44,9 @@ def main():
 
     # Inicializa centros
     if myrank==MASTER:                 
-        a,n=leeArchivo("100000")      
-        poblacion=[[x] for x in a]          
+        #a,n=leeArchivo("6000")      
+        #poblacion=[[x] for x in a] 
+        poblacion=lee("6000")          
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones
@@ -211,6 +212,35 @@ def compara_centros(d, a, b):
 
 
 
+def lee(archivo):
+
+    dir=os.getcwd()
+    n=len(dir)
+
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
+
+    if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
+    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+
+    with open(path, 'r') as file:
+        content = file.read()
+
+    array = []
+
+    # Quita " " "," "[" y "]. Y divide el archivo     
+    datos = content.replace('[', '').replace(']', '').split(', ')      
+    for i in range(0, len(datos), 2):
+        x = float(datos[i])
+        y = float(datos[i + 1])
+
+        array.append([x, y])
+
+    #print("\n",array)        
+    
+    return array
+ 
 
 def leeArchivo(archivo):
     """
