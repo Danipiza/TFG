@@ -465,10 +465,10 @@ def main():
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    poblacion=lee("100000_2D")
+    poblacion=lee("100_2_2D")
     
     # Numero de clusters ejecutados [1-k]
-    k=6
+    k=12
     
     # Variables: poblacion, numero de clusters, manh o eucl
     #asignacion=ejecuta_uno(poblacion, k, 1)
@@ -477,7 +477,7 @@ def main():
     #asignacion=ejecuta_varios(poblacion, k, 0, 10)
 
 
-    ejecuta_busquedaM(poblacion, k, 8)
+    ejecuta_busquedaM(poblacion, k, 20)
     #ejecuta_busquedaE(poblacion, k, 8)
 
 main()

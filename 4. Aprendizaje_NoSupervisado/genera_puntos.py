@@ -93,7 +93,7 @@ p1 = genera_puntos(num, -10, -3, -10, -2)
 """
 
 if __name__ == "__main__":
-    num = 100000
+    num = 1000
     
     """p1 = genera_puntos(num, -12.5, -7.5, -10, -2.5)
     p2 = genera_puntos(num, -2.5, 2.5, -10, -2.5)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
     puntos=[p1,p2,p3,p4,p5,p6]"""
     p1=genera_puntos(num, -10,10,-10,10)
     puntos=[p1]
-    archivo = '100000_2D.txt'
+    archivo = '1000_2D.txt'
     
     escribe(puntos, archivo)
     #array=lee(archivo,True)
