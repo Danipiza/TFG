@@ -107,7 +107,7 @@ class Jerarquico_Aglom:
             distMin=float("inf")            
             for i in range(len(M)):
                 for j in range(i+1,len(M[0])):
-                    if distMin>M[i][j]: 
+                    if distMin>=M[i][j]: 
                         distMin=M[i][j]
                         c1=i
                         c2=j            
@@ -481,7 +481,7 @@ def ejecuta_diferentes_poblaciones(poblacion,k):
         print("\nArray[0:{}]".format(cont))
         for i in range(3):
             timeStart=MPI.Wtime()
-            JA=Jerarquico_Aglom(poblacion[0:cont],k,i,0,False)
+            JA=Jerarquico_Aglom(poblacion[0:cont],k,i,0)
             prueba=JA.ejecuta()
             timeEnd=MPI.Wtime()
             print("{}. Tiempo de ejecucion: {}".format(dic[i],(timeEnd-timeStart)))
@@ -495,7 +495,7 @@ def ejecuta_centroide(poblacion, distancia, clusts):
     n=len(poblacion)
     k=1
     timeStart=MPI.Wtime()
-    JA=Jerarquico_Aglom(poblacion,k,0,distancia,False)
+    JA=Jerarquico_Aglom(poblacion,k,0,distancia)
     asignaciones, centroides=JA.ejecuta(clusts)    
     
     
@@ -510,8 +510,6 @@ def ejecuta_centroide(poblacion, distancia, clusts):
     timeEnd=MPI.Wtime()
     print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
     
-    
-
     fits=[evaluacion(poblacion, asignacionesFin[i],centroides[i]) for i in range(clusts)]
 
     DBs=[davies_bouldin(poblacion, i, asignacionesFin[i-1], centroides[i-1]) for i in range(2,clusts+1)] 
@@ -525,7 +523,7 @@ def ejecuta_simple(poblacion, distancia, clusts):
     d=len(poblacion[0])
     k=1
     timeStart=MPI.Wtime()
-    JA=Jerarquico_Aglom(poblacion,k,1,distancia,False)
+    JA=Jerarquico_Aglom(poblacion,k,1,distancia)
     asignaciones, centroides=JA.ejecuta(clusts) 
     
     asignacionesFin=[[-1 for _ in range(n)] for _ in range(clusts)]
@@ -567,7 +565,7 @@ def ejecuta_completa(poblacion, distancia, clusts):
     d=len(poblacion[0])
     k=1
     timeStart=MPI.Wtime()
-    JA=Jerarquico_Aglom(poblacion,k,2,distancia,False)
+    JA=Jerarquico_Aglom(poblacion,k,2,distancia)
     asignaciones, centroides=JA.ejecuta(clusts) 
     
     asignacionesFin=[[-1 for _ in range(n)] for _ in range(clusts)]
@@ -596,8 +594,6 @@ def ejecuta_completa(poblacion, distancia, clusts):
     timeEnd=MPI.Wtime()
     print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
     
-    
-
     fits=[evaluacion(poblacion, asignacionesFin[i],centroidesFin[i]) for i in range(clusts)]
 
     DBs=[davies_bouldin(poblacion, i, asignacionesFin[i-1], centroidesFin[i-1]) for i in range(2,clusts+1)]    
@@ -608,18 +604,18 @@ def ejecuta_completa(poblacion, distancia, clusts):
 
 
 def main():
-    #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]    
+    #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]
     # 6000      1 generacion de puntos aleatorios
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    poblacion=lee("100_2_2D")
-    
+    poblacion=lee("300_6_2D")
+        
     #ejecuta_diferentes_poblaciones(poblacion,1)
 
-    #ejecuta_centroide(poblacion, 0, 10)
-    #ejecuta_simple(poblacion, 0, 10)
-    ejecuta_completa(poblacion, 0, 10)
+    ejecuta_centroide(poblacion, 0, 7)
+    #ejecuta_simple(poblacion, 0, 7)
+    #ejecuta_completa(poblacion, 0, 7)
 
     
 

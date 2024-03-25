@@ -5,12 +5,10 @@ import random
 import os
 import math
 
+import copy
+
 # EJECUTAR
 # mpiexec -np 5 python aglomerativeMPI_E.py
-
-# TIEMPO: (datos=100000.txt, k=6, times=5)
-# Tiempo de ejecucion normal:               346.92305260000285s
-# Tiempo de ejecucion MPI (4 workers):      109.62681360007264s
 
 # PARALELIZAR
     # 1. Dividir toda la poblacion y repartir entre los workers.
@@ -20,6 +18,10 @@ import math
 # Despues de implementar la 1ra idea, me he dado cuenta que es mas optimo
     # dividir la poblacion entre los workers. Ya que esta poblacion no cambia,
     # solo cambia la asignacion y los centros de los clustersm
+
+# TODO 
+# DIVIDIR CALCULO DE DISTANCIA PARA LA FILA
+# Con 13 workers da otro resultado, 5 cluster optimo
 
 
 def main():      
@@ -52,18 +54,17 @@ def main():
 
     # Inicializa centros
     if myrank==MASTER:       
-        poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]              
-        #a,n=leeArchivo("6000")      
-        #poblacion=[[x] for x in a] 
+        #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]
+        
         # 6000      1 generacion de puntos aleatorios
         # 6000_2    2 generaciones de puntos aleatorios
         # 6000_3    6 generaciones de puntos aleatorios
         # 100000_2D     1 generacion de puntos aleatorios
-        #poblacion=lee("10_2D")            
+        poblacion=lee("300_6_2D")            
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones
-        C=1
+        C=7
         
         
     # Envia la poblacion entera a los workers
@@ -87,8 +88,9 @@ def main():
         # Array con los centros de cada cluster
         clustersCentros=[x for x in poblacion]  
 
-        print("\nINIT: \nClusters:{}\nCentroides:{}. LEN={}\n\n".format(clusters,clustersCentros,len(clustersCentros)))
-        
+        asignacion=[[] for _ in range(C)]
+        centroides=[[] for _ in range(C)]
+
         workers=[i for i in range(1,numWorkers+1)]
         # Diccionario con las asignaciones
         filasAsig={}
@@ -169,26 +171,7 @@ def main():
             # Se reduce el numero de workers
             numWorkers-=numWorkers-modulo
         
-        """print("MASTER: ------------------------------\n")               
-        for i in range(numWorkers):
-            print("Worker",i+1,end=",")
-            for x in workerFilas[i]:
-                print(x,end="")
-            print()
-        print("MASTER: ------------------------------\n")"""
-
-
-        M=[[] for _ in range(n)]
-        cont=n-1
-        for i in range(numWorkers, 0, -1):
-            data=comm.recv(source=i)
-            for j in range(len(data)):
-                M[workerFilas[i-1][j]]=data[j]
-
-        print("Matriz:")
-        for fila in M:
-            print(fila)
-
+        
         # ----------------------------------------------------------------------
         # ----------------------------------------------------------------------
 
@@ -198,44 +181,36 @@ def main():
 
         # FASE2:         
         # Repite hasta que solo haya "C" clusters
-        for numCluster in range(C,n): 
+        for numCluster in range(1,n): 
             min=float("inf")
             w=-1
-            print("\n1. ------------------- MINIMOS -------------------")
+            
+            aux=-1
+            
             for i in range(numWorkers, 0, -1):
                 data=comm.recv(source=workers[i-1])
                 if data==END_OF_PROCESSING:                    
-                    workers.pop(workers[i-1])
-                    numWorkers-=1
-                elif(data<=min): # TODO CAMBIAR
+                    aux=workers[i-1]
+                elif(data<min): # TODO CAMBIAR
                     min=data
                     w=i
-                print("Recibe de w={}, min={}".format(workers[i-1],data))
-            print("\nMenor es: {} de w={}\n".format(min,w))
-            print("1. ------------------- MINIMOS -------------------")
 
-            
+            if aux!=-1:
+                workers.pop(aux)
+                numWorkers-=1
+
             # Envia al worker con menor, para que le envie sus datos
             for i in workers:
                 comm.send(w,dest=i)
             
             # Recibe del worker los indices
             data=comm.recv(source=w)
-                    
-            
+                                
             # Envia a los otros workers el indice de la columna que tienen que eliminar
             for i in workers:            
                 comm.send(data[0],dest=i)
                 comm.send(data[1],dest=i)
-                #comm.send(filasAsig[data[1]],dest=i) # envia el id del worker 
-                #comm.send(data[1],dest=i) # envia la columna
 
-            print("\n2. ------------------------- DATOS -------------------------")
-            print("Master recibe: [c1:{}, c2:{}] de {}, el worker {} elimina fila".format(data[0],data[1],w,filasAsig[data[1]]))
-
-            print("\n2. ------------------------- DATOS -------------------------\n")
-
-            
 
             c1=data[0]
             c2=data[1]
@@ -254,38 +229,45 @@ def main():
             clustersCentros[c1]=tmp
             clustersCentros.pop(c2)
 
-            """a=comm.recv(source=filasAsig[data[1]])
+            a = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                        
+            source_rank=status.Get_source() 
             if a==END_OF_PROCESSING:
-                workers.remove(filasAsig[data[1]])
-                numWorkers-=1"""
+                workers.remove(source_rank)
+                numWorkers-=1
 
 
             
 
-            #print("\n\nMASTER ENVIAR ----------------> ------>",clustersCentros[c1])
             for i in workers:
                 comm.send(clustersCentros[c1],dest=i)
 
-            print("3. ---------------------- NUEVOS CENTROS ----------------------")
-            print("Clusters:{}\nCentroides:{}. LEN={}".format(clusters,clustersCentros,len(clustersCentros)))
-            print("\n3. ---------------------- NUEVOS CENTROS ----------------------\n")
             
-
+            if n-numCluster-1<C:                
+                asignacion[n-numCluster-1]=copy.deepcopy(clusters)
+                centroides[n-numCluster-1]=copy.deepcopy(clustersCentros)
+            
 
 
         totalTimeEnd = MPI.Wtime()
         print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
 
+        asignacionesFin=[[-1 for _ in range(n)] for _ in range(C)]
+        for numClust in range(C):
+            for i in range(numClust+1):
+                for j in asignacion[numClust][i]:
+                    asignacionesFin[numClust][j]=i
 
-        """DBs=[davies_bouldin(poblacion, i, mejores[i-1], centroidesMejores[i-1]) for i in range(2,maxClusters+1)]    
+        fits=[evaluacion(poblacion, asignacionesFin[i],centroides[i]) for i in range(C)]
+
+        DBs=[davies_bouldin(poblacion, i, asignacionesFin[i-1], centroides[i-1]) for i in range(2,C+1)]    
         dbMejor=calcula_DB_mejor(DBs)
         
-        GUI(maxClusters, dbMejor+1, fits,DBs,poblacion,mejores[dbMejor+1])"""
+        GUI(C, dbMejor+1, fits,DBs,poblacion,asignacionesFin[dbMejor+1])
     
     else : # WORKER
         izq=comm.recv(source=MASTER)
         der=comm.recv(source=MASTER)
-        #print("(WORKER {}), izq= {}, der= {}".format(myrank, izq,der))
+        
         tamIzq=len(izq)
         tamDer=len(der)
         
@@ -312,7 +294,7 @@ def main():
                 tmp.append(math.sqrt(aux))
             M.append(tmp)
 
-        comm.send(M, dest=MASTER)
+        #comm.send(M, dest=MASTER)
 
         # PADRE PROCESA
         filas=[]
@@ -330,26 +312,26 @@ def main():
         # ----------------------------------------------------------------------
 
         # FASE 2
-        for numCluster in range(C,n): 
-            if myrank==2: print("(WORKER {}) iteracion={}, i={}, j={},{}".format(myrank, numCluster,tam,filas[0]+1,n))       
+        for numCluster in range(1,n): 
             c1,c2=None,None
             distMin=float("inf")            
             for i in range(tam):
-                """print("WORKER({}): fila[{}]={}".format(myrank,i,M[i]))"""
                 for j in range(filas[i]+1,n):
                     if distMin>M[i][j]: 
                         distMin=M[i][j]
                         c1=i
                         c2=j 
-            """print("W{}. FILAS: {}, c1:{}".format(myrank,filas,c1))"""
             if c1==None: 
-                print("W2 eliminado")
+                distMin=float("inf")
+                # TODO
+                """print("W2 eliminado")
                 comm.send(END_OF_PROCESSING,dest=MASTER)
-                exit(0)
+                exit(0)"""                
             else:
                 c1=filas[c1] #Cambia porque las filas estan divididas
-                # Envia su minimo
-                comm.send(distMin, dest=MASTER)
+            
+            # Envia su minimo            
+            comm.send(distMin, dest=MASTER)
             # Recibe confirmacion si tiene que enviar los indices
             w=comm.recv(source=MASTER)
             if w==myrank: 
@@ -359,26 +341,14 @@ def main():
             c2=comm.recv(source=MASTER)
             #data=comm.recv(source=MASTER)
 
-            """if myrank==1:
-                print("\nW1. ------------------------- DATOS -------------------------")
-                print("[c1={}, c2={}], worker {} elimina fila\n".format(c1,c2,data))
-                print("\nW1. ------------------------- DATOS -------------------------")"""
+            
             
             #if data==myrank:
-            if c2 in filasDic:
-                """print("W{}. ------------------------- ELIMINA FILA {} -------------------------".format(myrank, c2))
-                
-                print("Filas: {}. ANTES:".format(filas))            
-                for fila in M:
-                    print(fila)"""
-                    
+            if c2 in filasDic:                    
                 # Elimina columna c2 de M            
                 for row in M:                
                     del row[c2]
 
-                print("W{}. ANTES filas={}, c1={}, c2={}".format(myrank, filas, c1,c2))
-
-                print("Dic:",filasDic)
                 tmp=filasDic[c2]
                 # Elimina fila c2 de M
                 if filasDic[c2]!=len(M): 
@@ -388,8 +358,7 @@ def main():
                 
                 # Actualiza indices
                 
-                print(tmp)
-                """print("Actualiza indices, reduce tam y elimina de filas[{}]={}".format(filas[i],tmp))"""
+               
                 filas.pop(tmp)
                 tam-=1
                 for i in range(tmp,tam): 
@@ -397,37 +366,18 @@ def main():
                     filas[i]-=1
                     filasDic[filas[i]]=i
                     
-                print("W{}. DESPUES filas={}, c1={}, c2={}".format(myrank, filas, c1,c2))    
-                    
-                
-                """print("W{}. DESPUES filas={}, c1={}, c2={}".format(myrank, filas, c1,c2))"""
+              
 
-                """if tam==0:
-                    print("W{} envia END\n\n\n".format(myrank))
+                if tam==0:
                     comm.send(END_OF_PROCESSING, dest=MASTER)
                     exit(0)
                 else:
-                    comm.send(1,dest=MASTER)"""
-                
-                
-                """ print("\n\nFilas: {}, tam={}. DESPUES:".format(filas,tam))
-                for fila in M:
-                    print(fila)
-
-                print("W{}. ------------------------- ELIMINA FILA {} -------------------------".format(myrank, c2))"""
-                        
+                    comm.send(1,dest=MASTER)
             else:
-                """print("\n(WORKER {}) ANTES: filas={}. ".format(myrank,filas))"""
-                """for fila in M:
-                    print(fila)"""
                 # Elimina columna c2 de M
                 for row in M:
                     del row[c2]
-                """print("Nuevas filas:")
-                for fila in M:
-                    print(fila)"""
 
-                """print("W{}. ANTES filas={}, c1={}, c2={}".format(myrank, filas, c1,c2))"""
                 # Actualiza indices                      
                 i=0
                 while i<tam:
@@ -438,18 +388,9 @@ def main():
                     filas[i]-=1
                     filasDic[filas[i]]=i 
                 
-                """print("W{}. DESPUES filas={}, c1={}, c2={}".format(myrank, filas, c1,c2))"""
-
-
-                
-                """print("(WORKER {}) Columnas eliminadas: {}, nuevas filas={}".format(myrank, c2,filas))"""
+              
             
-            """if w==myrank:
-                print("(WORKER {}) COMPROBANDO M, FILAS={}".format(myrank, filas))
-                for fila in M:
-                    print(fila)
-                print("\n")"""
-
+            
             # Elimina cluster c2
             del poblacion[c2]
             # Cambia cluster c1
@@ -457,71 +398,28 @@ def main():
             poblacion[c1]=clustNew
             
             # ACTUALIZA COLUMNAS (1 SOLO)  
-            # SE TIENE QUE HACER EN TODAS LAS FILAS 
-            """if myrank==1:
-                print("(WORKER 1) POBLACION=",poblacion)
-                print("(WORKER 1) ANTES M[0]=",M[0])"""              
+            # SE TIENE QUE HACER EN TODAS LAS FILAS             
             for i in range(tam):
                 if M[i][c1]==-1: break # TODO Se puede mejorar?
                 aux=0.0
                 for a in range(d):
                     aux+=(poblacion[filas[i]][a]-poblacion[c1][a])**2             
                 M[i][c1]=math.sqrt(aux)         
-            """if myrank==1:
-                print("(WORKER 1) DESPUES M[0]=",M[0])"""
             
             n-=1
             # ACTUALIZA FILA
-            if w==myrank:
-                """print("\n\n\n\n(WORKER {}) ACTUALIZA FILA:{}".format(myrank, c1))
-                print("(WORKER {}) FILAS={}".format(myrank, filas))
-                for fila in M:
-                    print(fila)
-                print("\n") """
+            if w==myrank:                
                 # for i in range(c1+1,len(M[filasDic[c1]])):
-                for i in range(c1+1,n):
-                    """print("i={} x c1={}".format(poblacion[i],poblacion[c1]))"""
+                for i in range(c1+1,n):                    
                     aux=0.0
                     for a in range(d):
                         aux+=(poblacion[i][a]-poblacion[c1][a])**2             
                     M[filasDic[c1]][i]=math.sqrt(aux)
                 
-                """for fila in M:
-                    print(fila)
-                print("\n") """
-
-            print("WORKER {}. tam={}".format(myrank, tam))
-            print("WORKER {}. Filas:{}".format(myrank,filas))   
-            print("WORKER {}. M:".format(myrank))        
-            for f in M:
-                print(f)
-            print("\n")
-
-            # ACTUALIZA FILA (DIVIDIR TRABAJO) TODO?
-            """if data==myrank:
-                # Divide
-                filaTam=len(M[c1])
-                filaTam/=numWorkers
-                izq=0
-                der=filaTam            
                 
-                for i in range(1,numWorkers):
-                    if i==myrank: continue
-                    comm.send([izq,der],dest=i)
-                    izq+=filaTam
-                    der+=filaTam
-                
-            else:
-                inter=comm.recv(source=data)
-                izq=inter[0]
-                der=inter[1]
-                filaRet=[]
-                for j in range(izq,der):
-                    aux=0.0
-                    for a in range(d):
-                        aux+=(poblacion[j][a]-poblacion[c1][a])**2 # c1?
-                    filaRet.append(aux)
-                comm.send(filaRet,dest=data)"""
+            
+
+            
             
             
 

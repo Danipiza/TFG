@@ -93,18 +93,18 @@ p1 = genera_puntos(num, -10, -3, -10, -2)
 """
 
 if __name__ == "__main__":
-    num = 1000
+    num = 300//6
     
-    """p1 = genera_puntos(num, -12.5, -7.5, -10, -2.5)
+    p1 = genera_puntos(num, -12.5, -7.5, -10, -2.5)
     p2 = genera_puntos(num, -2.5, 2.5, -10, -2.5)
     p3 = genera_puntos(num, 7.5, 12.5, -10, -2.5)
     p4 = genera_puntos(num, -12.5, -7.5, 2.5, 10)
     p5 = genera_puntos(num, -2.5, 2.5, 2.5, 10)
     p6 = genera_puntos(num, 7.5, 12.5, 2.5, 10)
-    puntos=[p1,p2,p3,p4,p5,p6]"""
-    p1=genera_puntos(num, -10,10,-10,10)
-    puntos=[p1]
-    archivo = '1000_2D.txt'
+    puntos=[p1,p2,p3,p4,p5,p6]
+    """p1=genera_puntos(num, -10,10,-10,10)
+    puntos=[p1]"""
+    archivo = '300_6_2D.txt'
     
     escribe(puntos, archivo)
     #array=lee(archivo,True)
