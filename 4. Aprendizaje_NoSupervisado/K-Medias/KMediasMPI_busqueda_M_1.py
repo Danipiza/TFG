@@ -6,7 +6,7 @@ import os
 import math
 
 # EJECUTAR
-# mpiexec -np 5 python KMediasMPI_busqueda_M.py
+# mpiexec -np 5 python KMediasMPI_busqueda_M_1.py
 
 # TIEMPO: (datos=100000.txt, k=6, times=5)
 # Tiempo de ejecucion normal:           251.5163483999204s    
@@ -50,18 +50,18 @@ def main():
     if myrank==MASTER:                 
         #a,n=leeArchivo("6000")      
         #poblacion=[[x] for x in a] 
-        # 6000      1 generacion de puntos aleatorios
-        # 6000_2    2 generaciones de puntos aleatorios
-        # 6000_3    6 generaciones de puntos aleatorios
+        # 6000_1_2D     1 generacion de puntos aleatorios
+        # 6000_2_2D     2 generaciones de puntos aleatorios
+        # 6000_3_2D     6 generaciones de puntos aleatorios
         # 100000_2D     1 generacion de puntos aleatorios
-        poblacion=lee("100000_2D")            
+        poblacion=lee("100_1_2D")            
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones
         
         
-        maxClusters=6
-        times=5
+        maxClusters=8
+        times=20
 
         """dic={}
         centroides=[]
@@ -158,7 +158,7 @@ def main():
                     for _ in range(numWorkers):
                         datos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                        
                         source_rank=status.Get_source() 
-                        print("Recibe de ", source_rank)
+                        """print("Recibe de ", source_rank)"""
                         # Suma los centroides
                         for i in range(numCluster):
                             for j in range(d):
@@ -173,7 +173,7 @@ def main():
                         for j in range(d):              
                             centroidesNuevos[i][j]/=indsCluster[i]
                     
-                    print("Cluster", len(centroidesNuevos))
+                    """print("Cluster", len(centroidesNuevos))"""
                     # FINALIZA
                     if(compara_centros(d, centroides,centroidesNuevos)): 
                         for i in range(1,numWorkers+1):
@@ -213,6 +213,7 @@ def main():
         dbMejor=calcula_DB_mejor(DBs)
         
         GUI(maxClusters, dbMejor+1, fits,DBs,poblacion,mejores[dbMejor+1])
+        guardar_en_txt(mejores[dbMejor+1],"100_1_2D.txt")
     
     else : # WORKER
         poblacion=comm.recv(source=0)
@@ -434,6 +435,12 @@ def lee(archivo):
     return array
  
 
+def guardar_en_txt(a, archivo):
+    with open(archivo, 'w') as txt:
+        # Convierte cada elemento en el array a cadena y luego únelos con espacios
+        linea = ' '.join(map(str, a))
+        # Escribe la línea en el archivo
+        txt.write(linea)
 
 main()
 

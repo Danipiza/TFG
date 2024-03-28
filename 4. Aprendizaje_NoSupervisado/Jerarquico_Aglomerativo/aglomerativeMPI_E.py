@@ -60,7 +60,7 @@ def main():
         # 6000_2    2 generaciones de puntos aleatorios
         # 6000_3    6 generaciones de puntos aleatorios
         # 100000_2D     1 generacion de puntos aleatorios
-        poblacion=lee("300_6_2D")            
+        poblacion=lee("10000_2D")            
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones

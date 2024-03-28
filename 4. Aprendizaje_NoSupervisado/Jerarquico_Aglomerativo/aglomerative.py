@@ -609,7 +609,7 @@ def main():
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    poblacion=lee("300_6_2D")
+    poblacion=lee("1000_2D")
         
     #ejecuta_diferentes_poblaciones(poblacion,1)
 
