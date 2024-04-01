@@ -1,16 +1,14 @@
 from mpi4py import MPI
 import random
-import sys
 import os
 import math
 
 # EJECUTAR
-# py RedesNeuronales2.py
+# mpiexec -np 5 python RedesNeuronalesMPI0.py
 
 # MEJORAR CADA WORKER SE ENCARGA DE VARIAS CAPAS DE LA CAPA OCULTA
 # SE VAN ENVIANDO DATOS COMO EN UN PROCESADOR DIVIDIDO EN VARIAS ETAPAS
 
-# TODO Estan puestos pesos fijados
 
 def lee(archivo):
     dir=os.getcwd()
@@ -73,15 +71,13 @@ class RedNeuronal:
         self.tam_capas_ocultas=tam_capas_ocultas
         self.tam_salida=tam_salida
         
-        self.capas=[tam_entrada]+tam_capas_ocultas+[tam_salida]
+        self.capas=[tam_entrada] + tam_capas_ocultas + [tam_salida]
         
         # Inicializar los pesos de manera aleatoria
         self.pesos=[]
-        """for i in range(len(self.capas)-1):
+        for i in range(len(self.capas) - 1):
             pesos_capa = [[random.uniform(-1, 1) for _ in range(self.capas[i + 1])] for _ in range(self.capas[i])]
-            self.pesos.append(pesos_capa)"""
-        self.pesos=[[[0.009291877242879387, -0.9951147922523249, 0.08905839012024352, -0.15405719243715832, 0.9174549957969651], [-0.8001749047430002, 0.6196351179863628, 0.4978160737825592, -0.6339024012446859, 0.6613399652927408]], [[0.6036843685017934], [-0.4981216808767255], [0.9150399216812313], [0.10772396548746266], [0.8819651957740591]]]
-        
+            self.pesos.append(pesos_capa)
 
     # Propagación hacia adelante (forward propagation)
     def forward(self,entrada):
@@ -90,17 +86,17 @@ class RedNeuronal:
         for i in range(len(self.capas)-1):
             entradas_capa=self.salidas[-1]
             salidas_capa=[0 for _ in range(self.capas[i+1])]
-            # Recorre todos los nodos de la capa siguiente
+            # Recorre todos los nodos de la capa actual
             for j in range(self.capas[i+1]):    
                 suma=0
-                # Suma todos los nodos de la capa actual con los pesos
+                # Suma todos los nodos de la capa anterior
                 for k in range(self.capas[i]):            
                     suma+=entradas_capa[k]*self.pesos[i][k][j]
                 salidas_capa[j]=sigmoide(suma) # Aplica funcion de activacion
             
             self.salidas.append(salidas_capa)
         
-        # Devuelve el ultimo elemento        
+        # Devuelve el ultimo elemento
         return self.salidas[-1] 
 
     # Retropropagación (backpropagation)
@@ -109,14 +105,14 @@ class RedNeuronal:
         errores=[]
         for i in range(self.tam_salida):
             errores.append((etiqueta[i]-self.salidas[-1][i])*sigmoide_derivado(self.salidas[-1][i]))
-                        
+                
         # Recorre todas las capas (menos la de entrada) en orden inverso
         for i in range(len(self.capas) - 2, -1, -1):
             nuevos_errores=[0 for _ in range(self.capas[i])]
             # Recorre todos los nodos de la capa actual
             for j in range(self.capas[i]):
                 suma=0
-                # Suma todos los nodos de la capa siguiente (sin orden inverso, es decir, la derecha)
+                # Suma todos los nodos de la capa anterior
                 for k in range(self.capas[i+1]):            
                     suma+=errores[k]*self.pesos[i][j][k]
                 nuevos_errores[j]=suma*sigmoide_derivado(self.salidas[i][j])
@@ -127,108 +123,123 @@ class RedNeuronal:
 
             errores = nuevos_errores
 
+
 def main():
+    comm=MPI.COMM_WORLD
+    myrank=comm.Get_rank()
+    numProc=comm.Get_size()
+    numWorkers=numProc-1 
+
     # (altura, peso, IMC)
-    """datos_entrenamiento = [ [1.70, 60, 20.8],
-                            [1.80, 90, 27.8],
-                            [1.65, 55, 20.2],
-                            [1.55, 70, 29.1],
-                            [1.90, 100, 27.6],
-                            [1.75, 65, 21.2],
-                            [1.60, 50, 19.5],
-                            [1.85, 80, 23.4],]"""
-    datos_entrenamiento=lee("datos80")    
-    
-    
+    #datos_entrenamiento = lee("datos80")
+    datos_entrenamiento = lee("datos2042")
+
     # (altura, peso)
-    datos_prueba=[[1.72, 68],
-                  [1.90, 85],
-                  [1.60, 50]]    
-    datos_prueba_tam=len(datos_prueba)
+    datos_prueba = [[1.72, 68],
+                    [1.90, 85],
+                    [1.60, 50]]
+    datos_prueba_tam = len(datos_prueba)
     # peso[Kg]/altura^2[m]
-    datos_prueba_IMC=[(datos_prueba[i][1]/datos_prueba[i][0]**2) for i in range(datos_prueba_tam)]
+    datos_prueba_IMC = [(datos_prueba[i][1] / datos_prueba[i][0] ** 2) for i in range(datos_prueba_tam)]
 
     # ----------------------------------------------------------------------------------------
     # --- Normalizar los datos ---------------------------------------------------------------
     # ----------------------------------------------------------------------------------------
 
-    alturasD=[data[0] for data in datos_entrenamiento]
-    pesosD=[data[1] for data in datos_entrenamiento]
-    imcsD=[data[2] for data in datos_entrenamiento]
+    alturasD = [data[0] for data in datos_entrenamiento]
+    pesosD = [data[1] for data in datos_entrenamiento]
+    imcsD = [data[2] for data in datos_entrenamiento]
 
-    alturaD_min=min(alturasD)
-    alturaD_max=max(alturasD)
-    pesoD_min=min(pesosD)
-    pesoD_max=max(pesosD)
-    imcD_min=min(imcsD)
-    imcD_max=max(imcsD)
+    alturaD_min = min(alturasD)
+    alturaD_max = max(alturasD)
+    pesoD_min = min(pesosD)
+    pesoD_max = max(pesosD)
+    imcD_min = min(imcsD)
+    imcD_max = max(imcsD)
 
     datos_entrenamiento_normalizados = [
-        [normalizar_dato(data[0], alturaD_min, alturaD_max), 
-         normalizar_dato(data[1], pesoD_min, pesoD_max), 
+        [normalizar_dato(data[0], alturaD_min, alturaD_max),
+         normalizar_dato(data[1], pesoD_min, pesoD_max),
          normalizar_dato(data[2], imcD_min, imcD_max)]
         for data in datos_entrenamiento]
-    
 
     datos_prueba_normalizados = [
-        [normalizar_dato(data[0], alturaD_min, alturaD_max), 
+        [normalizar_dato(data[0], alturaD_min, alturaD_max),
          normalizar_dato(data[1], pesoD_min, pesoD_max)]
         for data in datos_prueba]
-    
+
     # ----------------------------------------------------------------------------------------
     # --- Definir la red neuronal ------------------------------------------------------------
     # ----------------------------------------------------------------------------------------
 
-    tam_entrada=2               # Entrada: Altura y peso
-    tam_capas_ocultas=[5 for _ in range(1)]   # Tamaño de las capas ocultas (ejemplo)
-    tam_salida=1                # Salida: IMC
+    tam_entrada = 2  # Entrada: Altura y peso
+    tam_capas_ocultas = [10 for _ in range(2)]  # Tamaño de las capas ocultas (ejemplo)
+    tam_salida = 1  # Salida: IMC
 
     # Mejor => lr=0.05 rep=1000
-    learning_rate=0.1           # Aprendizaje
-    repeticiones=1              # Numero de repeticiones en el entrenamiento
+    learning_rate = 0.1  # Aprendizaje
+    repeticiones = 100  # Numero de repeticiones en el entrenamiento
 
-    RedN=RedNeuronal(tam_entrada,tam_capas_ocultas,tam_salida)
-    print("Tamaños de las capas ocultas: {}, numero de repeticiones: {}".format(tam_capas_ocultas, repeticiones))
+    RedN = RedNeuronal(tam_entrada, tam_capas_ocultas, tam_salida)
+    if myrank == 0:
+        print("Tamaños de las capas ocultas: {}, numero de repeticiones: {}".format(tam_capas_ocultas, repeticiones))
 
     # ----------------------------------------------------------------------------------------
-    # --- Entrenamiento ----------------------------------------------------------------------
+    # --- Entrenamiento MPI ------------------------------------------------------------------
     # ----------------------------------------------------------------------------------------
-    
-    print("Pesos antes")
-    print(RedN.pesos)
+	# Se dividen entre los proceso los datos de entrenamiento
+    timeStart=MPI.Wtime()
+    if myrank==0:
+        print("\nEntrenamiento:")
 
-    timeStart = MPI.Wtime()
-    print("\nEntrenamiento:")
+    tamProc=len(datos_entrenamiento_normalizados)//numProc
+    izq=myrank*tamProc
+    der=izq+tamProc
 
     for _ in range(repeticiones):
-        for data in datos_entrenamiento_normalizados:
+        for data in datos_entrenamiento_normalizados[izq:der]:
             entrada=data[:2]
             etiqueta=[data[2]]
             RedN.entrenar(entrada,etiqueta,learning_rate)
-    timeEntrEnd = MPI.Wtime()
-    print("Tiempo de ejecución del entrenamiento: {}s\n".format(timeEntrEnd-timeStart))
 
+    # Sincronizar los pesos actualizados y sumarlos
+    updated_weights=comm.gather(RedN.pesos, root=0)    
+    if myrank == 0:
+        for i in range(1, numProc):
+            for j in range(len(updated_weights[i])):
+                for k in range(len(updated_weights[i][j])):
+                    for l in range(len(updated_weights[i][j][k])):
+                        RedN.pesos[j][k][l]+=updated_weights[i][j][k][l]
+
+    timeEntrEnd=MPI.Wtime()
+    if myrank==0:
+        print("Tiempo de ejecucion del entrenamiento: {}s\n".format(timeEntrEnd-timeStart))
 
     # ----------------------------------------------------------------------------------------
-    # --- Entrenamiento ----------------------------------------------------------------------
+    # --- Predicciones ----------------------------------------------------------------------
     # ----------------------------------------------------------------------------------------
 
     timePredStart=MPI.Wtime()
-    print("Predicciones:")
-    
+    #if myrank == 0:
+    print("Predicciones Proceso {}:".format(myrank))
+
+    local_predictions = []
+
     for i in range(datos_prueba_tam):
-        prediccion_normalizada=RedN.forward(datos_prueba_normalizados[i])        
-        prediccion=desnormalizar_dato(prediccion_normalizada[0],imcD_min,imcD_max)
-       
-        print(  f"Altura: {datos_prueba[i][0]:.2f}m. Peso: {datos_prueba[i][1]:.2f}kg. "
-                f"IMC Predicho: {prediccion:.3f}. IMC Real: {datos_prueba_IMC[i]:.3f}. Fallo: {abs(prediccion-datos_prueba_IMC[i]):.3f}")
+        local_prediccion_normalizada = RedN.forward(datos_prueba_normalizados[i])
+        local_predictions.append(desnormalizar_dato(local_prediccion_normalizada[0], imcD_min, imcD_max))
 
-    timeEnd=MPI.Wtime()
-    print("Tiempo de ejecucion Predicciones: {}s".format(timeEnd-timePredStart))
-    print("\nTiempo de ejecucion Total: {}s".format(timeEnd-timeStart))
-    
-    print("Pesos despues")
-    print(RedN.pesos)
+    # Recolectar todas las predicciones
+    for pred in local_predictions:            
+        print(
+            f"Altura: {datos_prueba[i][0]:.2f}m. Peso: {datos_prueba[i][1]:.2f}kg. "
+            f"IMC Predicho: {pred:.3f}. IMC Real: {datos_prueba_IMC[i]:.3f}. Fallo: {abs(pred - datos_prueba_IMC[i]):.3f}"
+        )
+
+    timeEnd = MPI.Wtime()
+    print("Tiempo de ejecucion Predicciones: {}s".format(timeEnd - timePredStart))
+    print("\nTiempo de ejecucion Total: {}s".format(timeEnd - timeStart))
 
 
-main()
+if __name__ == "__main__":
+    main()

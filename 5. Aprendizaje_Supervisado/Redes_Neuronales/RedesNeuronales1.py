@@ -7,6 +7,36 @@ import math
 # EJECUTAR
 # py RedesNeuronales1.py
 
+
+def lee(archivo):
+    dir=os.getcwd()
+    n=len(dir)
+
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
+
+    if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
+    path=os.path.join(dir,".Otros","ficheros","RedNeu", archivo+".txt")
+
+    with open(path, 'r') as file:
+        content = file.read()
+
+    array = []
+
+    # Quita " " "," "[" y "]. Y divide el archivo     
+    datos = content.replace('[', '').replace(']', '').split(', ')      
+    for i in range(0, len(datos), 3):
+        altura=float(datos[i])
+        peso=float(datos[i+1])
+        IMC=float(datos[i+2])
+
+        array.append([altura,peso,IMC])
+
+    #print("\n",array)        
+    
+    return array
+
 # Normalizar los datos de altura y peso
 def normalizar_dato(val,m,M):
     return (val-m)/(M-m)
@@ -61,7 +91,7 @@ class RedNeuronal:
         
         suma = 0.0
         for j in range(self.tam_oculta):
-            suma += self.salidas_oculta[j]*self.pesos_salida_oculta[j]
+            suma+=self.salidas_oculta[j]*self.pesos_salida_oculta[j]
         self.entradas_salida=[suma]
         
         self.salida=sigmoide(self.entradas_salida[0])
@@ -74,14 +104,14 @@ class RedNeuronal:
         self.forward(entrada) # Propagacion hacia adelante
         
         # Calcular el error de la capa de salida
-        errores_salida = etiqueta[0]-self.salida
-        deltas_salida = errores_salida*sigmoide_derivado(self.salida)
+        errores_salida=etiqueta[0]-self.salida
+        deltas_salida=errores_salida*sigmoide_derivado(self.salida)
         # Actualizar los pesos de la capa de salida
         for i in range(self.tam_oculta):
             self.pesos_salida_oculta[i]+=learning_rate*deltas_salida*self.salidas_oculta[i]
 
         # Calcular los errores de la capa oculta (TODO SE PUEDEN JUNTAR)
-        errores_oculta = [self.pesos_salida_oculta[i]*deltas_salida for i in range(self.tam_oculta)]
+        errores_oculta=[self.pesos_salida_oculta[i]*deltas_salida for i in range(self.tam_oculta)]
         deltas_oculta=[]
         for i in range(self.tam_oculta):
             deltas_oculta.append(errores_oculta[i]*sigmoide_derivado(self.salidas_oculta[i]))
@@ -97,21 +127,25 @@ class RedNeuronal:
 
 
 def main():
+    
+    
 
     # (altura, peso, IMC)
-    datos_entrenamiento = [ [1.70, 60, 20.8],
+    """datos_entrenamiento = [ [1.70, 60, 20.8],
                             [1.80, 90, 27.8],
                             [1.65, 55, 20.2],
                             [1.55, 70, 29.1],
                             [1.90, 100, 27.6],
                             [1.75, 65, 21.2],
                             [1.60, 50, 19.5],
-                            [1.85, 80, 23.4],]
+                            [1.85, 80, 23.4],]"""
+    #datos_entrenamiento=lee("datos80")
+    datos_entrenamiento=lee("datos2042")
     
     # (altura, peso)
-    datos_prueba = [[1.72, 68],
-                    [1.90, 85],
-                    [1.60, 50],]    
+    datos_prueba=[[1.72, 68],
+                  [1.90, 85],
+                  [1.60, 50]]    
     datos_prueba_tam=len(datos_prueba)
     # peso[Kg]/altura^2[m]
     datos_prueba_IMC=[(datos_prueba[i][1]/datos_prueba[i][0]**2) for i in range(datos_prueba_tam)]
@@ -120,16 +154,16 @@ def main():
     # --- Normalizar los datos ---------------------------------------------------------------
     # ----------------------------------------------------------------------------------------
 
-    alturasD = [data[0] for data in datos_entrenamiento]
-    pesosD = [data[1] for data in datos_entrenamiento]
-    imcsD = [data[2] for data in datos_entrenamiento]
+    alturasD=[data[0] for data in datos_entrenamiento]
+    pesosD=[data[1] for data in datos_entrenamiento]
+    imcsD=[data[2] for data in datos_entrenamiento]
 
-    alturaD_min = min(alturasD)
-    alturaD_max = max(alturasD)
-    pesoD_min = min(pesosD)
-    pesoD_max = max(pesosD)
-    imcD_min = min(imcsD)
-    imcD_max = max(imcsD)
+    alturaD_min=min(alturasD)
+    alturaD_max=max(alturasD)
+    pesoD_min=min(pesosD)
+    pesoD_max=max(pesosD)
+    imcD_min=min(imcsD)
+    imcD_max=max(imcsD)
 
     datos_entrenamiento_normalizados = [
         [normalizar_dato(data[0], alturaD_min, alturaD_max), 
@@ -152,8 +186,9 @@ def main():
     tam_oculta=10         # Tamaño de la capa oculta 
     tam_salida=1          # Salida: IMC
     
-    learning_rate=0.1     # Aprendizaje
-    repeticiones=100      # Numero de repeticiones en el entrenamiento
+    # Mejor => lr=0.05 rep=1000
+    learning_rate=0.1     # Aprendizaje 
+    repeticiones=250      # Numero de repeticiones en el entrenamiento
     
     RedN=RedNeuronal(tam_entrada,tam_oculta,tam_salida)
     print("Tamaño de la capa oculta: {}, numero de repeticiones: {}".format(tam_oculta,repeticiones))
@@ -193,3 +228,4 @@ def main():
 
 
 main()
+
