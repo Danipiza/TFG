@@ -13,24 +13,34 @@ Pertenece al **paradigma de aprendizaje perezoso** o basado en **instancias**:
 
 Se puede aplicar a mapas de calor
 
+## Índice
+
+1. [Algoritmo](#algoritmo-para-predecir)
+2. [Determinar K optima](determinar-k-optima)
+3. [Mejoras (+ MPI)](Mejoras-(+-MPI))
+4. [TODO](todo)
+
 --- 
 
 ## Algoritmo para predecir
 Damos un valor para k, el número de vecinos más cercanos.
 
-Para cada individuo a predecir se recorre todo la población categorizada y se calcula la distancia con estos. Se escogen los k más cercanos y se asigna al valor a predecir la categoria con mayor repeteciones. Conforme avanza el algoritmo se actualiza la población con los nuevos valores.
+Para cada individuo a predecir se recorre toda la población categorizada y se calcula la distancia con estos. Se escogen los k más cercanos y se asigna al valor a predecir la categoría con mayor repeticiones. Conforme avanza el algoritmo se actualiza la población con los nuevos valores.
+
+### Complejidad
+- Complejidad Temporal: O(M*N) = **O(n^2)** se ejecutan M veces (población a predecir) y se recorre todo N (población categorizada), N crece de manera uniforme conforme se recorre la población a predecir.
+- Complejidad Espacial: O(N\*d + M\*d + N) = **O(n\*d)** guardamos los puntos en el espacio de la población categorizada (N) y población a predecir (M). _d_ es el número de dimensiones.
 
 ### Distancias 
-- Manhattan: Suma de las diferencias en valor abosuluto de todas las dimensiones del individuo.
-- Euclidea: Raiz cuadrada de la suma de las diferencias al cuadrado de todas las dimensiones del individuo.
-- Chebyshov: Máxima diferencia en valos absoluto de todas las dimensiones del individuo.
+- Manhattan: Suma de las diferencias en valor absoluto de todas las dimensiones del individuo.
+- Euclídea: Raíz cuadrada de la suma de las diferencias al cuadrado de todas las dimensiones del individuo.
+- Chebyshov: Máxima diferencia en valor absoluto de todas las dimensiones del individuo.
   
 
-
-## Determinar la k
+## Determinar K Óptima
 
 No hay una forma de determinar el **mejor valor para k**, por lo que hay que probar con varias ejecuciones. valores pequeños de k crea sonido. Valores grandes con pocos datos hará que siempre sea la misma categoría
-- Si es muy pequeño, corre el riesgo de sobreaprender (aprender conocimiento espúreo)
+- Si es muy pequeño, corre el riesgo de sobre aprender (aprender conocimiento espúreo)
 - Si es muy grande, corre el riesgo de generalizar demasiado
 
 ### Validación cruzada
@@ -47,11 +57,15 @@ No hay una forma de determinar el **mejor valor para k**, por lo que hay que pro
 
 Se paralelizar el proceso de forma muy sencilla
 ### Población Inicial dividida entre Workers.
-El Master envía a todos los Workers la población a predecir y una parte (distinta de cada Worker) de la población a inicial. Cada uno se encarga de mandar al master sus k vecinos más cercanos, y el master se encarga de recibir todos los vecinos y categorizar el individuo i-esimo a predecir. 
+El Master envía a todos los Workers la población a predecir y una parte (distinta de cada Worker) de la población inicial. Cada uno se encarga de mandar al Master sus k vecinos más cercanos, y el master se encarga de recibir todos los vecinos y categorizar el individuo i-ésimo a predecir. 
 
 #### Actualizar:
-- Actualizando el valor i-esimo a predicho en todas las poblaciones de los Workers.
+- Actualizando el valor i-ésimo a predicho en todas las poblaciones de los Workers.
 - No actualizar (es mucho más rápido, pero menos preciso)
+
+#### Complejidad
+- Complejidad Temporal: **O(M\*(N/nWorkers))** se ejecutan M veces (población a predecir) y cada Worker (nWorkers) recorren su población categorizada. Si se actualiza, la N, aumenta de manera uniforme.
+- Complejidad Espacial: **O(N\*d + (M\*d)\*nWorkers + N)** Aumenta el espacio, ya que cada Worker tiene que tener la población a predecir. **O(N\*d + (M\*d) + N)** Se puede reducir el espacio haciendo que el Master envía el inidividuo a predecir, TODO pero aumentaría el coste temporal?.
 
 #### MPI
 - [KnnMPI_1_M](https://github.com/Danipiza/TFG/blob/main/5.%20Aprendizaje_Supervisado/KNN/KnnMPI_1_M.py): manhattan sin actualizar
@@ -66,6 +80,10 @@ El Master envía a todos los Workers la población inicial y una parte (distinta
 - Actualizando los -numWorkers valores de cada iteración en todas las poblaciones de los Workers. Es decir, en cada iteración se espera a que el master reciba todas las predicciones de los workers para que este los envíe a todos y actualice la población.
 - No actualizar (es mucho más rápido, pero menos preciso)
 
+### Complejidad
+- Complejidad Temporal: **O((M/nWorkers)\*N)** se ejecutan M/nWorkers veces (población a predecir) ya que cada Worker se encarga de una parte de la población a predecir, y recorre toda la población categorizada. Si se actualiza, la N, aumenta de manera uniforme.
+- Complejidad Espacial: **O((N\*d)\*nWorkers + M\*d + N)** Aumenta el espacio, ya que cada Worker tiene que tener la población categorizada entera. 
+  
 #### MPI
 - [KnnMPI_2_M](https://github.com/Danipiza/TFG/blob/main/5.%20Aprendizaje_Supervisado/KNN/KnnMPI_2_M.py): manhattan sin actualizar
 - [KnnMPI_2_E](https://github.com/Danipiza/TFG/blob/main/5.%20Aprendizaje_Supervisado/KNN/KnnMPI_2_E.py): euclidea sin actualizar
@@ -93,3 +111,7 @@ Por tanto, se deben evitar incluir variables irrelevantes o redundantes (este ti
 - Se elegirá aquel subconjunto de variables que minimice el error de validación
 
 ### DETERMINAR K?
+
+### MEJORAR COSTE ESPACIAL MPI_1, MASTER ENVIA EL INDIVIDUO A PREDECIR, EN VEZ DE COMPARTIR TODO EL ARRAY
+
+

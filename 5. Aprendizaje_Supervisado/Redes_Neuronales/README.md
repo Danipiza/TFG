@@ -1,9 +1,21 @@
 # Red Neuronal
-Basado en la naturaleza, las Redes Neuronales se suelen representar como un cerebro, neuronas interconectadas con otras neuronas,  funcionando como una red. Una trozo de informacion fluye por muchas neuronas para dar una respuesta, como "mueve tu mano derecha".
+Basado en la naturaleza, las Redes Neuronales se suelen representar como un cerebro, neuronas interconectadas con otras neuronas,  funcionando como una red. Una trozo de información fluye por muchas neuronas para dar una respuesta, como "mueve tu mano derecha".
 
 El proceso en esta red es directa, una variable de entrada, (por ejemplo una fotografia de una playa) que despues de una serie de calculos, devuelve una salida (para el caso anterior devuelve "playa". Puede ser más especifico y devolver el nombre de la playa si ha sido entrenado para reconocer playas)
 
 ---
+
+## Índice
+
+1.
+2. [Algoritmo](#algoritmo)
+4. [Mejoras (+ MPI)](Mejoras-(+-MPI))
+5. [TODO](todo)
+
+---
+
+
+## Explicación General
 
 Estas neuronas se __representan por columnas__. Estas neuronas están conectadas con las columnas anteriores y posteriores. Y hay diferentes redes que varían las arquitecturas. Se leen de izquierda a derecha. 
 - La primera columna es la capa de entrada de la variable. 
@@ -12,9 +24,9 @@ Estas neuronas se __representan por columnas__. Estas neuronas están conectadas
 
 ![Esquema_red](https://github.com/Danipiza/TFG/assets/98972125/a440fcdd-86fc-4ab0-befe-cf02412b614b)
 
-Cada neurona hace una operación simple. Suma los valores de todas las neuronas de la columna anterior. Estos valores multiplicados por un peso que determina la importancia de conexion entre las dos neuronas. Todas las neuronas conectadas tienen un peso que iran cambiando durante el proceso de aprendizaje.
-Ademas, un valor bias puede ser añado al valor calculado. No es un valor que viene de una neurona especifica y se escoge antes de la fase de aprendizaje. Puede ser util para la red.
-Con el valor calculado se aplica a una funcion de activacion, para obtener el valor final. Se suele usar para dar un valor entre [0-1].
+Cada neurona hace una operación simple. Suma los valores de todas las neuronas de la columna anterior. Estos valores multiplicados por un peso que determina la importancia de conexión entre las dos neuronas. Todas las neuronas conectadas tienen un peso que iran cambiando durante el proceso de aprendizaje.
+Ademas, un valor bias puede ser añadido al valor calculado. No es un valor que viene de una neurona especifica y se escoge antes de la fase de aprendizaje. Puede ser util para la red.
+Con el valor calculado se aplica a una funcion de activación, para obtener el valor final. Se suele usar para dar un valor entre [0-1].
 
 ![Perceptron](https://github.com/Danipiza/TFG/assets/98972125/0bdeadf4-cfe5-4994-90db-79c8cb2a694d)
 
@@ -23,74 +35,89 @@ Cuando todas las neuronas de una columna han terminado se pasa a la siguiente co
 ---
 
 ## ¿Como aprende la Red Neuronal?
-Hay que preparar un monton de datos para entrenar a la red. Estos datos incluyen la entrada y la salida deseada para la red neuronal.
+Hay que preparar un montón de datos para entrenar a la red. Estos datos incluyen la entrada y la salida deseada para la red neuronal.
 
 ### Proceso de aprendizaje:
 Lo que queremos que haga la red neuronal, es que dado una entrada devuelva una salida. Al principio no va a ser así, solo por suerte devuelve la salida correcta. Por esto se genera la etapa de aprendizaje, en la que cada entrada tiene asociada una etiqueta, para explicar que salida deberia de haber adivinado. 
 Si acierta, los parametros actuales se guardan, y se envia la siguiente entrada. 
 Si no acierta, es decir, la salida no es igual a la etiqueta dada con la entrada, los pesos son cambiados (mencionado anteriormente que estos valores son los unicos que cambian). Este proceso se puede ver como unas combinaciones que van cambiando cuando la salida es erronea.
 
-Para determinar que peso modificar, se usa un proceso llamado "backpropagation", propagación hacia atrás en español. Como el nombre indica consiste en ir hacia atras en la red e inspeccionar cada conexion para comprobar como hubiera sido la salida con un cambio de peso.
+Para determinar que peso modificar, se usa un proceso llamado "backpropagation", propagación hacia atrás en español. Como el nombre indica consiste en ir hacia atras en la red e inspeccionar cada conexión para comprobar como hubiera sido la salida con un cambio de peso.
 
-Para finalizar este proceso de aprendizaje, tenemos un parametro para controlar como aprende la red neuronal, la tasa de aprendizaje. Determina la velocidad en la cual la red neuronal aprenderá, más bien, como modificar el peso, poco a poco, o mas rapido. Normalmente se usara 1 como parametro.
+Para finalizar este proceso de aprendizaje, tenemos un parametro para controlar como aprende la red neuronal, la tasa de aprendizaje. Determina la velocidad en la cual la red neuronal aprenderá, más bien, como modificar el peso, poco a poco, o mas rapido. Normalmente se usara 0.1 como parametro, es decir, un 10% de aprendizaje.
 
 ---
 
-## EJEMPLO SIMPLE:
-Perceptron, fue la primera red neuronal creada, consiste en dos neuronas como entrada una una neurona como salida. Esta configuracion permite crear clasificadores simples para distinguier entre dos grupos. 
+## Algoritmo
 
-Vamos a crear uan red neuronal que devuelva como salida and logica.
-- A y B son verdad  -> verdad
-- en caso contrario -> falso
+### Parámetros
+Red Neuronal:
+- Tamaño de la capa de Entrada (número de capas=1)
+- Tamaño y número de capas Ocultas.
+- Tamaño de la capa de Salida (número de capas=1)
+- Tasa de aprendizaje (Learning Rate)
+ 
+Entrenamiento:
+- Población de entrenamiento (con las etiquetas de salida)
+- Número de Repeticiones
 
-Se puede configurar para que verdad sea 1 y falso 0. 
-Definición de las librerias y valores inciales
-```
-import numpy, random, os
+Predeccion
+- Población de prediccion
 
-tA = 1  	# tasa de aprendizaje
-bias = 1 	# valor de bias 
-# pesos generados en forma de lista (3 pesos en total para 2 neuronas y bias)
-pesos = [random.random(), random.random(), random.random()] 
-```
+### Inicialización
+Una vez asignados las variables, se inicializa la red neuronal. 
+- **capas:** Array con el numero de nodos de cada capa de la red, empezando desde la capa de entrada y acabando en la de salida. Se inicializa con los parámetros asignados.
 
-Funcion para definir el trabajo de la neurona de salida. 2 parametros de entrada y la salida deseada. "error" se usa para calcular el cambio de valores de "pesos"
-```
-def Perceptron(in1, in2, output) :
-   ret = in1*pesos[0]+in2*pesos[1]+bias*pesos[2]
-   
-   if ret > 0 : # Funcion de activacion (Escalon de Heaviside)
-      ret = 1
-   else :
-      ret = 0
-	  
-   error = output – ret
-   pesos[0] += error * in1 * lr
-   pesos[1] += error * in2 * lr
-   pesos[2] += error * bias * lr
-```
+```capas=[2,10,10,1] tam. capa entrada=2, capas ocultas=2, tam. capas ocultas=[10,10] y tam. capa salida=1```
+- **pesos:** Array tridimensional, con los pesos (float) de cada nodo de la red con todos los nodos de la capa siguiente. Se inicializa con parámetros aleatorios de [0-1] ```pesos[numCapa][nodoCapaAct][nodoCapaSig]```
 
-Etapa de aprendizaje, el numero de iteraciones es la precision que queremos que tenga la red neuronal. Muchas iteraciones puede llevar a sobre ajuste, y se centra mucho en los casos dados, por lo que no puede acertar en casos que no esten en la etapa de aprendiza.
+### Entrenamiento
+Fase de entrenamiento. Ejecuta *Numero de Repeticiones* veces la población de entrenamiento, cada individuo recorre la red neuronal y en la capa de salida devuelve el valor predicho, si es acertado no cambia, si no acierta recorre hacia atrás (back-propagation) la red neuronal cambiando los pesos.
 ```
-for i in range(50) :
-   Perceptron(0,0,0) # falso y falso (falso, salida)
-   Perceptron(0,1,0) # falso y verdad (falso, salida)
-   Perceptron(1,0,0) # verdad y falso (falso, salida)
-   Perceptron(1,1,1) # verdad y verdad(verdad, salida)
-```
+forward(individuoEntrada):
+    salida=[individuoEntrada]
+    # Recorre todas las capas (menos la de salida) 
+    for i in range(numCapas-1):
+        ...
+	# Recorre todos los nodos de la capa siguiente
+	for j in range(capas[i+1]):
+	    ...
+	    suma=0
+	    # Suma todos los nodos de la capa actual con los pesos
+	    for k in range(capas[i]):
+		...
+	    salidas_capa[j]=sigmoide(suma) # Aplica funcion de activacion
+    return salidas[-1] # La ultima salida calculada, es decir, la de la capa de salida
 
-Comprobar si la red funciona
-```
-x = int(input())
-y = int(input())
-query = x*pesos[0] + y*pesos[1] + bias*pesos[2]
-if query > 0 : #activation function
-   query = 1
-else :
-   query = 0
-print(x, " or ", y, " is : ", query)
-```
+back_propagation(salida, etiqueta):
+    # Calcula el error
+    error=(salida-etiqueta)*sigmoide_derivado() # Función de activacion derivada para el entrenamiento
+    if error==0: return #Iguales
+    # Recorre hacia atras las capas, la capa de salida no la cambia por que no tiene pesos.
+    for i in range(numCapas - 2, -1, -1):
+    	...
+	# Recorre todos los nodos de la capa actual
+	for j in range(capas[i]):
+	    suma=0
+            # Suma todos los nodos de la capa siguiente (sin orden inverso, es decir, la derecha)
+            for k in range(capas[i+1]):
+		...
+	    # Actualiza los nodos
+            for k in range(capas[i+1]):
+		pesos[i][j][k]+=tasaAprendizaje*errores[k]*self.salidas[i][j] # errores se va actualizando con el recorrido
 
+```
+### Predicción
 
+Aplica la función **forward()** para cada individuo de la población de predicción, una vez entrenada la red devuelve la salida *correcta*.
+
+--- 
+
+## Mejoras (+ MPI)
+
+---
+
+## TODO
 
 [INFO](https://towardsdatascience.com/first-neural-network-for-beginners-explained-with-code-4cfd37e06eaf)
+
