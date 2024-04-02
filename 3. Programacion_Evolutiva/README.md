@@ -2,6 +2,31 @@
 
 ---
 
+## Mejoras (+MPI)
+
+### Dividir cada funcion entre los workers
+
+### Cada Worker se encarga de unas generaciones (No mejora rendimiento, mejora la eficacia)
+
+### Pipe-Lining = Segmentacion Computadores
+
+### Enviar mensajes entre procesos
+
+Master inicializa y evalua
+
+worker1 -> seleccionar
+
+worker2 -> cruzar
+
+worker3 -> mutar
+
+worker4 -> evaluar
+
+
+Worker1 -> Worker2 -> Worker3 -> Worker4
+
+
+
 ## Guia de Uso
 El proyecto se ejecuta en la clase Main. Aparece la interfaz y se rellenan los datos. 
 - Prob. Cruce y Prob. Mutación: son “double”, con un intervalo de [0, 1]

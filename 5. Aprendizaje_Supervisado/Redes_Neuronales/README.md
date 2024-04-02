@@ -7,10 +7,10 @@ El proceso en esta red es directa, una variable de entrada, (por ejemplo una fot
 
 ## Índice
 
-1.
+1. [Explicacion General](Explicación-General)
 2. [Algoritmo](#algoritmo)
-4. [Mejoras (+ MPI)](Mejoras-(+-MPI))
-5. [TODO](todo)
+3. [Mejoras (+ MPI)](Mejoras-(+-MPI))
+4. [TODO](todo)
 
 ---
 
@@ -111,13 +111,65 @@ back_propagation(salida, etiqueta):
 
 Aplica la función **forward()** para cada individuo de la población de predicción, una vez entrenada la red devuelve la salida *correcta*.
 
+### Complejidad
+- Complejidad Temporal: **O((M\*rep)\*2N^3)** *M* es el tamaño de la poblacion de entrenamiento que se ejecuta *rep* veces, y en el peor caso, todos los individuos de la población pasan por foward y backpropagation con coste cúbico.
+- Complejidad Espacial: **O(N^3)** porque los pesos se almacenan en un array tridimensional.
+
 --- 
 
 ## Mejoras (+ MPI)
 
+### Dividir la población de entrenamiento entre varios workers (No se puede ???)
+No funciona ya que la red se tiene que estar actualizando conforme se pasa el entrenamiento, si se divide el entrenamiento, cada proceso se especializa en la parte que le toca pero no en las demas.
+- Se puede hacer de manera que al predecir un individuo el master se encarga de mandar al worker mejor cualificado, o enviar a todos y predecir como el mejor.
+- transferencia de aprendizaje" o "fine-tuning". [info](https://www.youtube.com/watch?v=V1-Hm2rNkik&ab_channel=KrishNaik)
+
+#### Complejidad
+- Complejidad Temporal: **O((M\*rep)\*2N^3)** *M* es el tamaño de la poblacion de entrenamiento que se ejecuta *rep* veces, y en el peor caso, todos los individuos de la población pasan por foward y backpropagation con coste cúbico.
+- Complejidad Espacial: **O(N^3)** porque los pesos se almacenan en un array tridimensional.
+
+### Dividir por capas los workers
+El Master se encarga de la capa de entrada y el último Worker de la capa de salida. Las capas ocultas son gestionadas por los demas Workers disponibles. Así cada proceso se encarga de 1 o más capas y no toda la red.
+
+- forward(): El Master envía entradas al worker con myrank (id del master)+1, este worker al siguiente con myrank+1 y así hasta llegar al último que gestiona la última capa, por lo que siempre se esta avanzando.
+- back_propagation(): El mismo proceso pero al revés. El ultimo worker envia errores al worker anterior, y este a su anterior, asi hasta llegar al master. Cuando envia el error, el proceso que lo recibe actualiza sus pesos y envía el nuevo array de errores al siguiente proceso.
+
+![RedesNeuronalesMPI](https://github.com/Danipiza/TFG/assets/98972125/085f5b1e-ab33-47f8-85f3-b5450aa1663b)
+
+#### Complejidad
+- Complejidad Temporal: **O((M\*rep)\*2N^2)?** 
+- Complejidad Espacial: O(N^3+numWorker) = **O(N^3)** ocupa el mismo espacio pero cada worker gestiona una capa por lo que cada worker tiene sus pesos que vinculan con las siguientes capas, se añade numWorker porque cada uno necesita un espacio constante para almacenar el tamaño de la capa que hace borde para poder calcular los pesos y errores.
+
+
 ---
+
+[INFO](https://towardsdatascience.com/first-neural-network-for-beginners-explained-with-code-4cfd37e06eaf)
 
 ## TODO
 
-[INFO](https://towardsdatascience.com/first-neural-network-for-beginners-explained-with-code-4cfd37e06eaf)
+
+
+### Validacion cruzada?
+
+### Solucionar MPI 
+- pesos?
+- Distribucion de mensajes
+- bucle for en el entrenamiento en vez de aumentar el tamaño del dataset
+
+### Fine tunning:
+
+[VIDEO](https://www.youtube.com/watch?v=V1-Hm2rNkik&ab_channel=KrishNaik)
+
+La idea básica es tomar las capas de una red pre-entrenada y usarlas como base para una nueva red que se entrenará con los datos combinados. Esto se hace comúnmente en tareas de aprendizaje profundo cuando se tienen conjuntos de datos pequeños y se quiere aprovechar el conocimiento aprendido por una red entrenada en un conjunto de datos más grande.
+
+El procedimiento típico es:
+
+1. Tomar una red pre-entrenada (a menudo entrenada en un conjunto de datos grande como ImageNet o similar).
+2. Quitar la última capa (o capas) de la red, que generalmente está relacionada con la clasificación específica del conjunto de datos original.
+3. Agregar nuevas capas de salida a la red, adaptadas a la tarea específica que se está abordando.
+4. Entrenar la red con el nuevo conjunto de datos, inicializando los pesos con los valores pre-entrenados.
+5. Ajustar los pesos de toda la red (no solo las capas adicionales) en el nuevo conjunto de datos, utilizando técnicas de optimización como el descenso de gradiente estocástico.
+
+Aunque no es tan simple como combinar directamente los pesos de dos redes neuronales entrenadas con diferentes conjuntos de datos, la transferencia de aprendizaje permite aprovechar el conocimiento previo de una red pre-entrenada y adaptarlo a una tarea específica con un nuevo conjunto de datos.
+
 
