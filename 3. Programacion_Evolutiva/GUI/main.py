@@ -2,16 +2,15 @@ import sys
 import os
 
 sys.path.append(os.path.abspath("Logic"))
-# TODO QUITAR 
-#sys.path.append(os.path.abspath("View"))
+sys.path.append(os.path.abspath("View"))
 
-#from View import MainWindow 
+from View import MainWindow 
 from Logic import AlgoritmoGenetico as AGe
 
 # TODO Truncamiento no funciona muy bien para la F4
 
 
-GUI=False
+GUI=True
 
 if GUI==False:
     AG=AGe.AlgoritmoGenetico(None)
@@ -47,4 +46,4 @@ if GUI==False:
     
     val=AG.ejecuta()
     print(val)
-#else :MainWindow()
+else :MainWindow()

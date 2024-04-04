@@ -1,4 +1,13 @@
-import Gen
+import random
+
+
+class Gen:
+    def __init__(self, l, v):
+        self.v = []
+
+        if v is not None: self.v=[(v[i]) for i in range(len(v))]
+        else: self.v=[(random.randint(0,1)) for i in range(l)]
+
 
 class Individuo:
     def __init__(self, num, tam_genes, xMax, xMin, ind):
@@ -6,12 +15,12 @@ class Individuo:
         self.xMax=[]
         self.xMin=[]
         if ind is not None:
-            self.genes=[(Gen.Gen(l=None,v=ind.genes[i].v)) for i in range(len(ind.genes))]
+            self.genes=[(Gen(l=None,v=ind.genes[i].v)) for i in range(len(ind.genes))]
             
             self.xMax=ind.xMax
             self.xMin=ind.xMin
         else:
-            self.genes = [(Gen.Gen(tam_genes[i],v=None)) for i in range(num)]            
+            self.genes = [(Gen(tam_genes[i],v=None)) for i in range(num)]            
             self.xMax=xMax
             self.xMin=xMin
 
@@ -22,7 +31,7 @@ class Individuo:
     def bin2dec(self, gen):
         ret=0
         cont=1
-        for i in range(len(gen.v) - 1, -1, -1):
+        for i in range(len(gen.v)-1,-1,-1):
             if gen.v[i]==1:
                 ret+=cont
             cont*=2
@@ -43,4 +52,3 @@ class Individuo:
             for a in c.v:
                 print(a, end=" ")
         print()
-        #print("fenotipo x1:", self.fenotipo[0], "fenotipo x2:", self.fenotipo[1])

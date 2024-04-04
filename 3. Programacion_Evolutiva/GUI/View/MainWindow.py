@@ -33,13 +33,11 @@ class MainWindow:
             
     def initGUI(self):
         # Crea la ventana principal
-        # Create the main window
         root = tk.Tk()
         root.title("Algoritmo Genetico")
         root.geometry("1000x700")
 
         
-
         seleccion_opt = ["Ruleta", 
                          "Torneo Determinista", 
                          "Torneo Probabilístico", 
@@ -49,14 +47,26 @@ class MainWindow:
                          "Ranking"]
         
         cruce_opt = ["Básica", 
-                     "Uniforme"]
+                     "Uniforme",
+                     "PMX",
+                     "OX",
+                     "OX-PP",
+                     "CX",
+                     "CO"]
         
-        mutacion_opt = ["Básica"]
+        mutacion_opt = ["Básica",
+                        "Insercion",
+                        "Intercambio",
+                        "Inversion",
+                        "Heuristica"]
 
         funcion_opt = ["F1: Calibracion y Prueba",
                        "F2: Mishra Bird",
                        "F3: Holder table",
-                       "F4: Michalewicz (Binaria)"]
+                       "F4: Michalewicz (Binaria)",
+                       "Aeropuerto 1",
+                       "Aeropuerto 2",
+                       "Aeropuerto 3"]
         
 
 
@@ -131,13 +141,13 @@ class MainWindow:
         self.result_label.grid(row=12, column=1, columnspan=2, padx=5, pady=5)
 
         
-        # Add canvas for plot
+        # Canvas 
         self.fig, self.ax = plt.subplots()
         self.canvas = FigureCanvasTkAgg(self.fig, master=root)
         self.canvas_widget = self.canvas.get_tk_widget()
         self.canvas_widget.grid(row=0, column=2, rowspan=11, padx=10, pady=10) # TODO CAMBIAR POSICION -> AQUI?
 
-        # Bind close event
+        # Para poder cerrar
         root.protocol("WM_DELETE_WINDOW", self.cierra)
         
         # Start 
@@ -145,9 +155,7 @@ class MainWindow:
 
     def ejecuta(self):
         try:
-            
             self.AG=AG.AlgoritmoGenetico(self)
-            #print(self.seleccion_combo.current())
             
             self.AG.set_valores(int(self.poblacion_text.get()),
                                 int(self.generaciones_text.get()),
@@ -174,10 +182,12 @@ class MainWindow:
         y1=vals[0]
         y2=vals[1]
         y3=vals[2]
+        y4=vals[3]
         
         self.ax.plot(x, y1, color='b', label='Mejor Absoluto')
         self.ax.plot(x, y2, color='r', label='Mejor de la Generacion')
         self.ax.plot(x, y3, color='g', label='Media')
+        self.ax.plot(x, y4, color='black', label='Presion Selectiva')
         self.ax.set_xlabel('Generaciones')
         self.ax.set_ylabel('Fitness')
         self.ax.legend()
@@ -188,7 +198,9 @@ class MainWindow:
         texto="Optimo: {}\n".format(ind.fitness)
         for i in range(len(ind.genes)):
             texto+="Variable {}: {}\n".format(i+1,ind.fenotipo[i])
+        texto+="Presion Selectiva final: {}\n".format(y4[-1])
         self.result_label.config(text=texto)
+        
     
 
     def cierra(self):
