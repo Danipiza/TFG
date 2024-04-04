@@ -50,7 +50,7 @@ class Seleccion:
                                                      ind=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
         return seleccionados
     
-    # TODO
+    
     def torneoDeterministico(self, poblacion, k, tam_seleccionados):
         seleccionados=[]
         indexMax=0
@@ -79,7 +79,6 @@ class Seleccion:
 
 
 
-    # TODO
     def torneoProbabilistico(self, poblacion, k, p, tam_seleccionados):
         seleccionados=[]
         indexMax=0
@@ -124,7 +123,7 @@ class Seleccion:
 
         return seleccionados
 
-    # TODO
+    
     def truncamiento(self, poblacion, prob_seleccion, trunc, tam_seleccionados):
         seleccionados=[]
         
@@ -147,7 +146,7 @@ class Seleccion:
 		
         return seleccionados
     
-    # TODO
+    
     def restos(self, poblacion, prob_seleccion, prob_acumulada, tam_seleccionados):
         seleccionados=[]
         
@@ -184,7 +183,7 @@ class Seleccion:
         return seleccionados
 
 
-    # TODO
+    
     def ranking(self, poblacion, prob_seleccion, beta, tam_seleccionados):
         seleccionados=[]
 

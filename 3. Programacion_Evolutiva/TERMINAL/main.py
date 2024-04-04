@@ -1,14 +1,25 @@
-from mpi4py import MPI
+#from mpi4py import MPI # UCM NO FUNCIONA (NO ESTA LA BIBLIOTECA, TAMPOCO MATPLOT)
 import sys
 import os
 import random
 import math
 
+import queue
+
 from abc import ABC, abstractmethod 
+from collections import deque
+from typing import List, Tuple
 
 # --------------------------------------------------------------------------------------------------------------
 # -- MODEL -----------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------
+
+class Gen:
+    def __init__(self, l, v):
+        self.v = []
+
+        if v is not None: self.v=[(v[i]) for i in range(len(v))]
+        else: self.v=[(random.randint(0,1)) for i in range(l)]
 
 class Individuo:
     def __init__(self, num, tam_genes, xMax, xMin, ind):
@@ -32,7 +43,7 @@ class Individuo:
     def bin2dec(self, gen):
         ret=0
         cont=1
-        for i in range(len(gen.v) - 1, -1, -1):
+        for i in range(len(gen.v)-1,-1,-1):
             if gen.v[i]==1:
                 ret+=cont
             cont*=2
@@ -53,16 +64,36 @@ class Individuo:
             for a in c.v:
                 print(a, end=" ")
         print()
-        #print("fenotipo x1:", self.fenotipo[0], "fenotipo x2:", self.fenotipo[1])
 
-class Gen:
-    def __init__(self, l, v):
-        self.v = []
+# Aeropuerto 
 
-        if v is not None:
-            self.v=[(v[i]) for i in range(len(v))]
+# TODO COMPROBAR
+class IndividuoReal:
+    def __init__(self, aviones, vInd):
+        self.v=[]
+        self.fitness=0.0
+
+        if vInd is not None:         
+            for i in range(len(vInd)):
+                self.v.append(vInd[i])
         else:
-            self.v=[(random.randint(0,1)) for i in range(l)]
+            self.init(aviones)
+
+    
+          
+
+    def init(self, aviones):
+        self.v=[]
+        for i in range(aviones):		
+            self.v.append(i)
+		
+        # shuffle
+        for i in range(aviones-1,0,-1):
+            j=random.randint(0, i)  
+            temp=self.v[i]
+            self.v[i]=self.v[j]
+            self.v[j]=temp
+
 
 # --------------------------------------------------------------------------------------------------------------
 # -- FUNCION ---------------------------------------------------------------------------------------------------
@@ -154,8 +185,8 @@ class Funcion3(Funcion):
         self.xMin=[-10,-10]
     
     def fitness(self, nums):        
-        exp = abs(1-(math.sqrt(nums[0]**2+nums[1]**2))/math.pi)
-        ret = math.sin(nums[0])*math.cos(nums[1])*math.exp(exp)
+        exp=abs(1-(math.sqrt(nums[0]**2+nums[1]**2))/math.pi)
+        ret=math.sin(nums[0])*math.cos(nums[1])*math.exp(exp)
         return -abs(ret)
     
     def cmp(self, a, b): 
@@ -185,8 +216,9 @@ class Funcion4(Funcion):
             self.xMax.append(math.pi)
             self.xMin.append(0)
     
+    
     def fitness(self, nums):        
-        ret = 0.0        
+        ret=0.0        
         for i in range(1,self.d+1):		
             sin1=math.sin(nums[i-1])                           
             radians=(i*(nums[i-1]**2))/math.pi
@@ -211,6 +243,72 @@ class Funcion4(Funcion):
         if a>b: return True
         else: return False
 
+# TODO COMPROBAR
+class FuncionA(Funcion):
+
+    def __init__(self, aviones, pistas, tipo_avion, TEL):
+        self.sep = [[1, 1.5, 2],
+                    [1, 1.5, 1.5],
+            		[1, 1, 1]]
+        
+        self.aviones=aviones
+        self.pistas=pistas
+		
+        self.tipo_avion=tipo_avion
+        self.TEL=TEL
+    
+    # TODO COMPROBAR
+    def fitness(self, avion):
+        """
+        avion: List[int]
+        """
+        # -10 es el tiempo inicial para que el primer avion en llegar no tenga separacion 
+        tla=[deque([(2, -10.0)]) for _ in range(self.pistas)]
+
+        fitness=0.0
+        n=len(avion)
+        for i in range(n):
+            new_tla=0 
+            menor_tla=24.0
+            index_pista=0
+            
+            for j in range(self.pistas):
+                # Tiempo de Llegada Asignado (TLA) para la pista j + la separacion de esta pista (SEP)
+                # o el Tiempo Estimada de Llegada (TEL)
+                new_tla=max(tla[j][-1][1]+self.sep[tla[j][-1][0]][self.tipo_avion[avion[i]]], 
+                            self.TEL[j][avion[i]])
+               
+                if new_tla<menor_tla:
+                    menor_tla=new_tla
+                    index_pista=j
+
+            tla[index_pista].append((self.tipo_avion[avion[i]], menor_tla))
+
+            menor_tel=24.0
+            for j in range(self.pistas):
+                if self.TEL[j][avion[i]]<menor_tel:
+                    menor_tel=self.TEL[j][avion[i]]
+
+            fitness+=(menor_tla-menor_tel)**2
+
+        return fitness
+    
+    def cmp(self, a, b): 
+        if a<b: return a
+        else: return b
+
+    def cmpBool(self, a, b): 
+        if a<b: return True
+        else: return False
+
+    def cmpPeor(self, a, b): 
+        if a>b: return a
+        else: return b
+
+    def cmpPeorBool(self, a, b): 
+        if a>b: return True
+        else: return False
+
 
 # --------------------------------------------------------------------------------------------------------------
 # -- SELECCION -------------------------------------------------------------------------------------------------
@@ -218,20 +316,20 @@ class Funcion4(Funcion):
         
 class Pair():
     def __init__(self, key, value):
-        self.key = key
-        self.value = value
+        self.key=key
+        self.value=value
 
     def get_key(self):
         return self.key
 
     def set_key(self, key):
-        self.key = key
+        self.key=key
 
     def get_value(self):
         return self.value
 
     def set_value(self, value):
-        self.value = value
+        self.value=value
 
     def __str__(self):
         return "(" + str(self.key) + ", " + str(self.value) + ")"
@@ -243,7 +341,8 @@ class Seleccion:
     
     
     def busquedaBinaria(self, x, prob_acumulada):
-        i,j = 0,self.tam_poblacion-1
+        i=0
+        j=self.tam_poblacion-1
         while i<j:
             m=(j+i)//2
             if x>prob_acumulada[m]: i=m+1
@@ -251,22 +350,32 @@ class Seleccion:
             else: return m
         return i
 
-    def ruleta(self, poblacion, prob_acumulada, tam_seleccionados):
-        seleccionados = []
+    def ruletaBin(self, poblacion, prob_acumulada, tam_seleccionados):
+        seleccionados=[]
         for _ in range(tam_seleccionados):
-            rand = random.random()
-            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
+            rand=random.random()
+            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                                     ind=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
+        return seleccionados
+
+    # TODO
+    def ruletaReal(self, poblacion, prob_acumulada, tam_seleccionados):
+        seleccionados=[]
+        for _ in range(tam_seleccionados):
+            rand=random.random()
+            seleccionados.append(IndividuoReal(aviones=None,
+                                           vInd=poblacion[self.busquedaBinaria(rand, prob_acumulada)].v))
         return seleccionados
     
-    # TODO
-    def tornedoDeterministico(self, poblacion, tam_seleccionados, k):
+    
+    def torneoDeterministicoBin(self, poblacion, k, tam_seleccionados):
         seleccionados=[]
         indexMax=0
         for i in range(tam_seleccionados):    
-            max = float('-inf')
-            min = float('+inf')
-            indexMax = -1
-            indexMin = -1
+            max=float('-inf')
+            min=float('+inf')
+            indexMax=-1
+            indexMin=-1
             for j in range(k):        
                 randomIndex=random.randint(0,self.tam_poblacion-1)
                 randomFitness=poblacion[randomIndex].fitness
@@ -280,21 +389,48 @@ class Seleccion:
             if self.opt==True: ind=indexMax
             else: ind=indexMin
 
-            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=poblacion[ind]))
+            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                                     ind=poblacion[ind]))
+
+        return seleccionados
+    
+    # TODO
+    def torneoDeterministicoReal(self, poblacion, k, tam_seleccionados):
+        seleccionados=[]
+        indexMax=0
+        for i in range(tam_seleccionados):    
+            max=float('-inf')
+            min=float('+inf')
+            indexMax=-1
+            indexMin=-1
+            for j in range(k):        
+                randomIndex=random.randint(0,self.tam_poblacion-1)
+                randomFitness=poblacion[randomIndex].fitness
+                if randomFitness>max:
+                    max=randomFitness
+                    indexMax=randomIndex 
+                if randomFitness<min:
+                    min=randomFitness
+                    indexMin=randomIndex                
+            
+            if self.opt==True: ind=indexMax
+            else: ind=indexMin
+
+            seleccionados.append(IndividuoReal(aviones=None,
+                                               vInd=poblacion[ind].v))
 
         return seleccionados
 
 
 
-    # TODO
-    def torneoProbabilistico(self, poblacion, k, p, tam_seleccionados):
+    def torneoProbabilisticoBin(self, poblacion, k, p, tam_seleccionados):
         seleccionados=[]
         indexMax=0
         for i in range(tam_seleccionados):    
-            max = float('-inf')
-            min = float('+inf')
-            indexMax = -1
-            indexMin = -1
+            max=float('-inf')
+            min=float('+inf')
+            indexMax=-1
+            indexMin=-1
             for j in range(k):        
                 randomIndex=random.randint(0,self.tam_poblacion-1)
                 randomFitness=poblacion[randomIndex].fitness
@@ -312,57 +448,245 @@ class Seleccion:
                 if random.random()<=p: ind=indexMin
                 else: ind=indexMax
 
-            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=poblacion[ind]))
+            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                                     ind=poblacion[ind]))
+
+        return seleccionados
+    
+    # TODO
+    def torneoProbabilisticoReal(self, poblacion, k, p, tam_seleccionados):
+        seleccionados=[]
+        indexMax=0
+        for i in range(tam_seleccionados):    
+            max=float('-inf')
+            min=float('+inf')
+            indexMax=-1
+            indexMin=-1
+            for j in range(k):        
+                randomIndex=random.randint(0,self.tam_poblacion-1)
+                randomFitness=poblacion[randomIndex].fitness
+                if randomFitness>max:
+                    max=randomFitness
+                    indexMax=randomIndex 
+                if randomFitness<min:
+                    min=randomFitness
+                    indexMin=randomIndex                
+            
+            if self.opt==True: 
+                if random.random()<=p: ind=indexMax
+                else: ind=indexMin
+            else: 
+                if random.random()<=p: ind=indexMin
+                else: ind=indexMax
+
+            seleccionados.append(IndividuoReal(aviones=None,
+                                               vInd=poblacion[ind].v))
 
         return seleccionados
     
 
-    def estocasticoUniversal(self, poblacion, prob_acumulada, tam_seleccionados):
+    def estocasticoUniversalBin(self, poblacion, prob_acumulada, tam_seleccionados):
         seleccionados=[]
 		
         incr=1.0/tam_seleccionados
         rand=random.random()*incr
         for i in range(tam_seleccionados):       			
-            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
+            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                                     ind=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
 			
-            rand += incr		
+            rand+=incr		
+
+        return seleccionados
+    
+    # TODO
+    def estocasticoUniversalReal(self, poblacion, prob_acumulada, tam_seleccionados):
+        seleccionados=[]
+		
+        incr=1.0/tam_seleccionados
+        rand=random.random()*incr
+        for i in range(tam_seleccionados):       			
+            seleccionados.append(IndividuoReal(aviones=None,
+                                               vInd=poblacion[self.busquedaBinaria(rand, prob_acumulada)].v))
+			
+            rand+=incr		
 
         return seleccionados
 
-    # TODO
-    def truncamiento(self, poblacion, prob_seleccion, trunc, tam_seleccionados):
+    
+    def truncamientoBin(self, poblacion, prob_seleccion, trunc, tam_seleccionados):
         seleccionados=[]
-
-		#Pair<Individuo, Double>[] pairs = new Pair[tam_seleccionados];
+        
         pairs=[]
         for i in range(tam_seleccionados): 
             pairs.append(Pair(poblacion[i], prob_seleccion[i]))
 		
-        pairs = sorted(pairs, key=lambda x: x.value, reverse=False)
-		#Arrays.sort(pairs, Comparator.comparingDouble(p -> p.getValue()));
-
+        pairs=sorted(pairs, key=lambda x: x.value, reverse=False)
         x=0
-        num= int(1.0/trunc)
+        num=int(1.0/trunc)
         n=len(pairs)-1
-        for i in range(int((tam_seleccionados) * trunc)):		
+        for i in range(int((tam_seleccionados)*trunc)+1):		
             j=0
             while j<num and x<tam_seleccionados:            
-                seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=pairs[n-i].get_key()))
+                seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                                         ind=pairs[n-i].get_key()))
                 j+=1
                 x+=1
 			
 		
+        return seleccionados
+    
+    # TODO
+    def truncamientoReal(self, poblacion, prob_seleccion, trunc, tam_seleccionados):
+        seleccionados=[]
+        
+        pairs=[]
+        for i in range(tam_seleccionados): 
+            pairs.append(Pair(poblacion[i], prob_seleccion[i]))
+		
+        pairs=sorted(pairs, key=lambda x: x.value, reverse=False)
+        x=0
+        num=int(1.0/trunc)
+        n=len(pairs)-1
+        for i in range(int((tam_seleccionados)*trunc)+1):		
+            j=0
+            while j<num and x<tam_seleccionados:            
+                seleccionados.append(IndividuoReal(aviones=None,
+                                                   vInd=pairs[n-i].get_key().v))
+                j+=1
+                x+=1
+			
+		
+        return seleccionados
+    
+    
+    def restosBin(self, poblacion, prob_seleccion, prob_acumulada, tam_seleccionados):
+        seleccionados=[]
+        
+        x=0
+        num=0
+        aux=0.0		
+        for i in range(tam_seleccionados):		
+            aux=prob_seleccion[i]*(tam_seleccionados)
+            num=int(aux)
+			
+            for j in range(num):
+                seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                               ind=poblacion[i]))
+                x+=1
+				
+		
+        resto=[]
+        func=random.randint(0,4) # Cambiar
+        # SE SUMA LA PARTE DE elitismo PORQUE SINO SE RESTA 2 VECES, 
+        # EN LA PARTE DE restos() Y LA FUNCION RANDOM
+        if func==0: resto=self.ruletaBin(poblacion, prob_acumulada, tam_seleccionados-x)
+        elif func==1: resto=self.torneoDeterministicoBin(poblacion, 3, tam_seleccionados-x)	
+        elif func==2: resto=self.torneoProbabilisticoBin(poblacion, 3, 0.9, tam_seleccionados-x)
+        elif func==3: resto=self.estocasticoUniversalBin(poblacion, prob_acumulada, tam_seleccionados-x)
+        elif func==4: resto=self.truncamientoBin(poblacion, prob_acumulada, 0.5, tam_seleccionados-x) 
+        else: resto=self.rankingBin(poblacion, prob_seleccion, 2, tam_seleccionados-x)
+        
+        for ind in resto:
+            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                           ind=ind))
+		
+
+        return seleccionados
+    
+    # TODO
+    def restosReal(self, poblacion, prob_seleccion, prob_acumulada, tam_seleccionados):
+        seleccionados=[]
+        
+        x=0
+        num=0
+        aux=0.0		
+        for i in range(tam_seleccionados):		
+            aux=prob_seleccion[i]*(tam_seleccionados)
+            num=int(aux)
+			
+            for j in range(num):
+                seleccionados.append(IndividuoReal(aviones=None,
+                                                   vInd=poblacion[i].v))
+                x+=1
+				
+			
+        resto=[]
+        func=random.randint(0,4) # Cambiar
+        # SE SUMA LA PARTE DE elitismo PORQUE SINO SE RESTA 2 VECES, 
+        # EN LA PARTE DE restos() Y LA FUNCION RANDOM
+        if func==0: resto=self.ruletaReal(poblacion, prob_acumulada, tam_seleccionados-x)
+        elif func==1: resto=self.torneoDeterministicoReal(poblacion, 3, tam_seleccionados-x)	
+        elif func==2: resto=self.torneoProbabilisticoReal(poblacion, 3, 0.9, tam_seleccionados-x)
+        elif func==3: resto=self.estocasticoUniversalReal(poblacion, prob_acumulada, tam_seleccionados-x)
+        elif func==4: resto=self.truncamientoReal(poblacion, prob_acumulada, 0.5, tam_seleccionados-x) 
+        else: resto=self.rankingReal(poblacion, prob_seleccion, 2, tam_seleccionados-x)
+        
+        for ind in resto:
+            seleccionados.append(IndividuoReal(aviones=None,
+                                               vInd=ind.v))
+		
+
+        return seleccionados
+
+
+    
+    def rankingBin(self, poblacion, prob_seleccion, beta, tam_seleccionados):
+        seleccionados=[]
+
+        pairs=[]
+		
+        for i in range(tam_seleccionados):
+            pairs.append(Pair(poblacion[i], prob_seleccion[i]))
+
+        pairs.sort(key=lambda p: p.value, reverse=True)
+
+        val=0.0
+        acum=0.0
+        prob_acumulada=[] # tam_selec
+
+        for i in range(1,tam_seleccionados+1):		
+            val=(beta-(2*(beta-1)*((i-1)/(tam_seleccionados-1.0))))/tam_seleccionados
+            acum+=val
+            prob_acumulada.append(acum)
+				
+		
+        rand=0.0
+        for i in range(tam_seleccionados):        
+            rand = random.random()
+            seleccionados.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                           ind=pairs[self.busquedaBinaria(rand, prob_acumulada)].get_key()))		
 		
         return seleccionados
     
     # TODO
-    def restos(self, poblacion, prob_seleccion, prob_acumulada, tam_seleccionados):
-            # TODO
-            return ""
-    # TODO
-    def ranking(self):
-            # TODO
-            return ""
+    def rankingReal(self, poblacion, prob_seleccion, beta, tam_seleccionados):
+        seleccionados=[]
+
+        pairs=[]
+		
+        for i in range(tam_seleccionados):
+            pairs.append(Pair(poblacion[i], prob_seleccion[i]))
+
+        pairs.sort(key=lambda p: p.value, reverse=True)
+
+        val=0.0
+        acum=0.0
+        prob_acumulada=[] # tam_selec
+
+        for i in range(1,tam_seleccionados+1):		
+            val=(beta-(2*(beta-1)*((i-1)/(tam_seleccionados-1.0))))/tam_seleccionados
+            acum+=val
+            prob_acumulada.append(acum)
+				
+		
+        rand=0.0
+        for i in range(tam_seleccionados):        
+            rand = random.random()
+            seleccionados.append(IndividuoReal(aviones=None,
+                                               vInd=pairs[self.busquedaBinaria(rand, prob_acumulada)].get_key().v))		
+		
+        return seleccionados
+
 
 # --------------------------------------------------------------------------------------------------------------
 # -- CRUCE -----------------------------------------------------------------------------------------------------
@@ -370,14 +694,16 @@ class Seleccion:
 
 
 class Cruce:
-    def __init__(self, p):
+    def __init__(self, p, tam_elite, aviones):
         self.p=p    # int
+        self.tam_elite=tam_elite
+        self.aviones=aviones
     
     def cruce_monopuntoBin(self, selec):
         n=len(selec)
         ret=[(None) for _ in range(n)]
         if n%2==1:
-            ret[n-1] = Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[n-1])
+            ret[n-1]=Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[n-1])
             n-=1
         
         long_genes=[len(selec[0].genes[i].v) for i in range(len(selec[0].genes))]
@@ -390,16 +716,11 @@ class Cruce:
         ind2=[]
         while i<n:
             ind1=Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[i])
-            ind2=Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[i + 1])
-            """print("  (ANTES): ", end="") 
-            ind1.print_individuo()
-            print("  (ANTES): ", end="") 
-            ind2.print_individuo()"""
+            ind2=Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=selec[i+1])
             
             rand=random.random()
             if rand<self.p:                                               
                 corte=random.randint(1,corte_maximo)
-                #print("({}) CORTA EN: {}".format(i,corte))
                 cont=0
                 j=0
                 for k in range(corte):
@@ -410,32 +731,13 @@ class Cruce:
                     if j==long_genes[cont]:
                         cont+=1
                         j=0
+                        
             
-            
-            """print("(DESPUES): ", end="") 
-            ind1.print_individuo()
-            print("(DESPUES): ", end="") 
-            ind2.print_individuo()"""
-            
-            """print("RET: (ANT)")
-            #for ind in ret:
-            for j in range(i):
-                ret[j].print_individuo()
-            print("\n\n")"""
-
-            ret[i] = Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind1)
-            ret[i+1] = Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind2)
-            #ret.append(ind2)
+            ret[i]=Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind1)
+            ret[i+1]=Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=ind2)            
             i += 2     
-            """print("RET: (DESP)")
-            #for ind in ret:
-            for j in range(i):
-                ret[j].print_individuo()
-            print("\n\n")  """        
+               
         
-        """print("Cruce:")
-        for ind in ret:
-            ind.print_individuo()"""
         
         return ret
     
@@ -443,9 +745,75 @@ class Cruce:
         # TODO
         return ""
     
-    def PMX():
-        # TODO
-        return ""
+    def PMX(self, selec):
+        n=len(selec)
+        ret=[(None) for _ in range(n)] # = [n + tam_elite] no hace falta? TODO
+
+        if n%2==1 :
+            ret[n-1]=IndividuoReal(aviones=None,
+                                   vInd=selec[n-1].v) 
+            n-=1 # Descarta al ultimo si es impar
+		
+		
+		 
+        i=0
+        k=0
+        ind1=None
+        ind2=None
+        corte1=0
+        corte2=0
+        while i<n:
+            ind1=IndividuoReal(aviones=None,
+                               vInd=selec[i+1].v)
+            ind2=IndividuoReal(aviones=None,
+                               vInd=selec[i+1].v)
+
+            if random.random()<self.p:
+                pareja1={} # {int, int}
+                pareja2={} 
+
+                corte1=int(random.random()*(self.aviones-2))
+                corte2=corte1+int(random.random()*(self.aviones-corte1))
+				
+                #print("Corte en " + corte1 + " "+ corte2)
+				
+                for j in range(corte1,corte2):				
+                    temp=ind1.v[j]
+                    ind1.v[j] = ind2.v[j];					
+                    ind2.v[j] = temp;		
+					
+                    pareja1[ind1.v[j]]=ind2.v[j]
+                    pareja2[ind2.v[j]]=ind1.v[j]
+				
+                x=2
+                for j in range(self.aviones-(corte2-corte1)):				
+                    #if (pareja1.containsKey(ind1.gen.v[(corte2 + j) % num_vuelos])) {
+                    if ind1.v[(corte2+j)%self.aviones] in pareja1:                    
+                        p=pareja1[ind1.v[(corte2+j)%self.aviones]]
+
+                        #while (pareja1.containsKey(p)) {
+                        while p in pareja1:                        
+                            p=pareja1[p]						
+                        ind1.v[(corte2+j)%self.aviones]=p
+
+                    #if (pareja2.containsKey(ind2.gen.v[(corte2 + j) % num_vuelos])) {
+                    if ind2.v[(corte2+j)%self.aviones] in pareja2:
+                        p=pareja2[ind2.v[(corte2+j)%self.aviones]]
+
+                        #while (pareja2.containsKey(p)) {
+                        while p in pareja2:                        
+                            p=pareja2[p]						
+                        ind2.v[(corte2+j)%self.aviones]=p
+				
+			
+            ret[i]=IndividuoReal(aviones=None,
+                               vInd=ind1.v)
+            ret[i+1]=IndividuoReal(aviones=None,
+                               vInd=ind2.v)
+            i+=2
+			
+		
+        return ret
     
     def OX():
         # TODO
@@ -462,7 +830,6 @@ class Cruce:
     def CO():
         # TODO
         return ""
-    
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -471,8 +838,15 @@ class Cruce:
 
 
 class Mutacion:
-    def __init__(self, p):
+    def __init__(self, p, aviones, tam_elite, heur, funcion):
         self.p=p
+        self.aviones=aviones
+        self.tam_elite=tam_elite
+        self.permutaciones=[]
+        self.heur=heur
+        self.dfs(heur,0,[],[0 for i in range(heur)])
+        #print(self.permutaciones)
+        self.funcion=funcion
     
     def mut_basicaBin(self, selec):
         ret=[]
@@ -485,26 +859,180 @@ class Mutacion:
             ret.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,ind=act))
         return ret
 
-    def inversion():
-        # TODO
-        return ""
+    def inversion(self, poblacion):
+        tam_poblacion=len(poblacion)
+        ret=[] # = new Individuo[tam_poblacion];
+		
+		
+        act=None
+        for i in range(tam_poblacion):                                
+            act=IndividuoReal(aviones=None,
+                              vInd=poblacion[i].v);	
+            			
+            if random.random()<self.p:
+                corte1=int(random.random()*(len(act.v)-2))
+                corte2=corte1+int(random.random()*(len(act.v)-corte1))
+                separacion=(corte2-corte1+1)
+                for k in range(separacion//2):
+                    temp=act.v[corte1+k]
+                    act.v[corte1+k]=act.v[corte2-k]
+                    act.v[corte2-k]=temp
+			
+            ret.append(IndividuoReal(aviones=None,
+                                     vInd=act.v))
+		
+        return ret
 
-    def intercambio():
-        # TODO
-        return ""
+    def intercambio(self, poblacion):
+        tam_poblacion=len(poblacion)
+        ret=[] # = new Individuo[tam_poblacion];
+		
+		
+        act=None
+        for i in range(tam_poblacion):                                
+            act=IndividuoReal(aviones=None,
+                              vInd=poblacion[i].v);	
+            			
+            if random.random()<self.p:
+                punto1=int(random.random()*(len(act.v)-2))
+                punto2=punto1+int(random.random()*(len(act.v)-1-punto1))
+                
+                temp=act.v[punto1]
+                act.v[punto1]=act.v[punto2]
+                act.v[punto2]=temp
+                
+			
+            ret.append(IndividuoReal(aviones=None,
+                                     vInd=act.v))
+		
+        return ret
     
-    def insercion():
-        # TODO
-        return ""
+    def insercion(self, poblacion):
+        tam_poblacion=len(poblacion)
+        ret=[] # = new Individuo[tam_poblacion];
+		
+        
+        act=None
+        for i in range(tam_poblacion):                                
+            act=IndividuoReal(aviones=None,
+                              vInd=poblacion[i].v);	
+            
+            if random.random()<self.p:
+                antiguaPosicion=int(random.random()*(len(act.v)-1))
+                nuevaPosicion=antiguaPosicion
+                while nuevaPosicion==antiguaPosicion:
+                    nuevaPosicion = int(random.random()*(len(act.v)-1))
+
+                    
+				
+                if nuevaPosicion>antiguaPosicion:
+                    tmp=act.v[antiguaPosicion]
+                    for k in range(antiguaPosicion,nuevaPosicion):
+                        act.v[k]=act.v[k+1]
+					
+                    act.v[nuevaPosicion]=tmp				
+                else:
+                    tmp=act.v[antiguaPosicion]
+                    #for (int k = antiguaPosicion; k > nuevaPosicion ; k--) {
+                    for k in range(antiguaPosicion, nuevaPosicion,-1):					
+                        act.v[k]=act.v[k-1]
+					
+                    act.v[nuevaPosicion]=tmp
+					
+			
+            ret.append(IndividuoReal(aviones=None,
+                                     vInd=act.v))
+		
+        return ret
     
 
     
-    def heuristica():
-        # TODO
-        return ""    
-    def dfs():
-        # TODO
-        return ""
+    def heuristica(self, poblacion):
+        tam_poblacion=len(poblacion)
+        ret=[] # = new Individuo[tam_poblacion];
+		
+        rand=0
+		
+        cont=0
+		
+        elegidos_indx=[0 for _ in range(self.heur)]
+        elegidos_vals=[0 for _ in range(self.heur)]	
+		
+        set_elegidos={""}
+		
+        mejor_fit=float("inf")
+        mejor=[0 for _ in range(self.aviones)]
+        tmp=[0 for _ in range(self.aviones)]
+        
+
+        act=None
+        for i in range(tam_poblacion):                                
+            act=IndividuoReal(aviones=None,
+                              vInd=poblacion[i].v);	
+            
+            if random.random()<self.p:
+                print("Muta:",act.v)
+                cont=0
+                set_elegidos.clear()
+                mejor_fit=float("inf")
+
+                while cont<self.heur:
+                    numero = random.randint(0,self.aviones-1)
+                    if numero not in set_elegidos:
+                        set_elegidos.add(numero)
+                        elegidos_indx[cont]=numero
+                        elegidos_vals[cont]=act.v[numero]
+                        cont+=1
+                    
+                
+                cont=0
+                tmp=act.v
+                # Recorre las permutaciones
+                for l in self.permutaciones:                
+                    # Cambia los valores
+                    for x in l: 
+                        tmp[elegidos_indx[x]]=elegidos_vals[x]
+                    
+                    
+                    fit=self.funcion.fitness(act.v);					
+                    print("{}:{}".format(cont, act.v))
+                    print("{}:{}\n".format(cont, mejor))
+                    cont+=1
+                    if fit<mejor_fit:
+                        mejor_fit=fit
+                        mejor=tmp
+                
+                print(set_elegidos)
+                print("Final: {}\n".format(mejor))
+
+                #act=new Individuo(mejor);
+            
+					
+			
+            ret.append(IndividuoReal(aviones=None,
+                                     vInd=mejor))
+		
+        return ret  
+    
+    
+    def dfs(self, n, k, act, visitados):
+        if k==n:
+            aux=[]            
+            for x in act:
+                aux.append(x)
+            
+            self.permutaciones.append(aux)
+            return
+
+        for i in range(n):            
+            if visitados[i]==1: continue
+            
+            visitados[i]=1
+            act.append(i)
+            self.dfs(n,k+1,act,visitados)
+            act.pop(len(act)-1)
+            visitados[i]=0
+        
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -512,8 +1040,35 @@ class Mutacion:
 # --------------------------------------------------------------------------------------------------------------
 
 
+# value=1 Max, cualquier otro valor => Min
+class PQ(queue.PriorityQueue):
+    def __init__(self, value):
+        super().__init__()
+        self.value=1
+        if value==1: self.value=-1
+
+    def push(self, id, fit):
+        super().put((self.value*fit, id))
+
+    def top_fit(self):
+        fit, _ = self.queue[0]  
+        return self.value*fit
+    
+    def top_id(self):
+        _, id = self.queue[0]  
+        return id
+    
+    def pop(self):
+        _, id = super().get()
+        return id
+    
+    def size(self):
+        return self.qsize()
+
 class AlgoritmoGenetico():
-    def __init__(self):               
+    def __init__(self):
+        
+        
         self.funcion=None           # Funcion
         self.seleccion=None         # Seleccion
         self.cruce=None             # Cruce
@@ -537,7 +1092,17 @@ class AlgoritmoGenetico():
         self.prob_seleccion=[]      # double
         self.prob_seleccionAcum=[]  # double[]
 
-           
+        self.elitQ=None   
+
+        # AEROPUERTO
+        self.aviones=0
+        self.pistas=0
+        self.vuelos_id=[]
+        self.TEL=[] # 2D array
+        self.tipo_avion=[]
+
+
+        self.progreso_generaciones=[[] for _ in range(4)]
 
     # Funcion que inicializa las variables a los valores seleccionados en la interfaz
     def set_valores(self,tam_poblacion, generaciones, seleccion_idx, cruce_idx, prob_cruce, mutacion_idx,
@@ -546,12 +1111,13 @@ class AlgoritmoGenetico():
         self.poblacion=[]
         self.tam_poblacion=tam_poblacion    
         self.generaciones=generaciones      
-        self.prob_cruce = prob_cruce        
-        self.prob_mut = prob_mut    
+        self.prob_cruce=prob_cruce        
+        self.prob_mut=prob_mut    
 
         self.num_genes=num_genes # 2
         
-                
+        self.elitismo=elitismo  
+        self.tam_elite=int((tam_poblacion*(elitismo/100.0)))  
 
         self.funcion_idx=funcion_idx
 
@@ -559,22 +1125,82 @@ class AlgoritmoGenetico():
         elif funcion_idx==1: self.funcion=Funcion2()
         elif funcion_idx==2: self.funcion=Funcion3()
         elif funcion_idx==3: self.funcion=Funcion4(self.num_genes)
+        else:            
+            self.lee_archivos()
         
         self.seleccion_idx=seleccion_idx
         self.seleccion=Seleccion(tam_poblacion, self.funcion.opt)
         
         self.cruce_idx=cruce_idx
-        self.cruce=Cruce(prob_cruce)    
+        self.cruce=Cruce(prob_cruce,self.tam_elite, self.aviones)    
         
         self.mutacion_idx=mutacion_idx
-        self.mutacion=Mutacion(prob_mut)
+        self.mutacion=Mutacion(prob_mut, self.aviones, self.tam_elite, 3, self.funcion)
 
-        self.tam_genes=self.tamGenes(precision)
-        #self.mejor_total = float('-inf')
-        if self.funcion.opt==True: self.mejor_total = float('-inf')
-        else: self.mejor_total = float('+inf')
+        if funcion_idx!=-1: self.elitQ=PQ(0) # 
+        else: self.elitQ=PQ(1) # Cola prioritaria de maximos para almacenar los menores y asi comparar rapidamente
+        self.selec_elite=[]
 
-        self.elitismo=elitismo        
+        if funcion_idx<4: self.tam_genes=self.tamGenes(precision)
+        
+        self.mejor_total=float('+inf')
+        if self.funcion_idx<4:
+            if self.funcion.opt==True: self.mejor_total=float('-inf')
+            else: self.mejor_total=float('+inf')
+        
+
+    def lee_archivos(self):
+        vuelos_txt="data/"
+        TEL_txt="data/"
+
+        # LEE DE LOS TXT
+        if self.funcion_idx==4:
+            self.aviones=12
+            self.pistas=3
+            vuelos_txt+="vuelos1.txt"
+            TEL_txt+="TEL1.txt"
+        elif self.funcion_idx==5:
+            self.aviones=25
+            self.pistas=5
+            vuelos_txt+="vuelos2.txt"
+            TEL_txt+="TEL2.txt"
+        elif self.funcion_idx==6:
+            self.aviones=100
+            self.pistas=10
+            vuelos_txt+="vuelos3.txt"
+            TEL_txt+="TEL3.txt"
+        
+        i=0
+        self.vuelos_id=[None for _ in range(self.aviones)]
+        self.tipo_avion = [0 for _ in range(self.aviones)]
+        self.TEL = [[0 for _ in range(self.aviones)] for _ in range(self.pistas)]
+        
+        try:
+            # Open the file
+            with open(vuelos_txt, 'r') as vuelos_reader, open(TEL_txt, 'r') as TEL_reader:
+                for line in vuelos_reader:
+                    tokens=line.split()
+                    self.vuelos_id[i]=tokens[0]
+                    if tokens[1]=="W": self.tipo_avion[i]=0
+                    elif tokens[1]=="G": self.tipo_avion[i]=1
+                    else: self.tipo_avion[i]=2
+                    
+                    i+=1
+
+                i=0
+                for line in TEL_reader:
+                    tokens=line.split("\t")
+                    j=0
+                    for t in tokens:
+                        self.TEL[i][j]=int(t)
+                        j+=1
+                    
+                    i+=1
+        except IOError as e:
+            print("Error al leer archivos:", e)
+        
+        self.funcion = FuncionA(self.aviones, self.pistas, self.tipo_avion, self.TEL)    
+        
         
 
     def tamGenes(self, precision):   
@@ -587,126 +1213,283 @@ class AlgoritmoGenetico():
         return math.ceil((math.log10(((max-min)/precision)+1)/math.log10(2)))
 
     def ejecuta(self):
+        if self.funcion_idx<4: return self.ejecutaBin()
+        else: return self.ejecutaReal()
+
+    def ejecutaBin(self):
         selec=[]
 
         self.init_poblacion()    
-        self.evaluacion_poblacion()
-                
+        self.evaluacion_poblacionBin()                
         
         while self.generaciones > 0:
-            selec = self.seleccion_poblacion(self.tam_poblacion, 5)
+            selec=self.seleccion_poblacionBin(5)
             
-            self.poblacion = self.cruce_poblacion(selec)
-            self.poblacion = self.mutacion_poblacion(self.poblacion)
+            self.poblacion=self.cruce_poblacionBin(selec)
+            self.poblacion=self.mutacion_poblacionBin(self.poblacion)
+
+            for i in range(self.tam_elite):
+                self.poblacion.append(self.selec_elite[i])
             
-            self.evaluacion_poblacion()            
+            self.evaluacion_poblacionBin()            
             
             self.generaciones-=1
-        
-                
+
         return self.mejor_total
 
+    def ejecutaReal(self):
+        selec=[]
+
+        self.init_poblacion()    
+        self.evaluacion_poblacionReal()                
+        
+        while self.generaciones > 0:
+            selec=self.seleccion_poblacionReal(5)
+            
+            self.poblacion=self.cruce_poblacionReal(selec)
+            self.poblacion=self.mutacion_poblacionReal(self.poblacion)
+
+            for i in range(self.tam_elite):
+                self.poblacion.append(self.selec_elite[i])
+            
+            self.evaluacion_poblacionReal()            
+            
+            self.generaciones-=1
+
+        return self.mejor_total
 
     def init_poblacion(self):
-        self.poblacion = [Individuo(self.num_genes, self.tam_genes, self.funcion.xMax, self.funcion.xMin, ind=None) for _ in range(self.tam_poblacion)]
+        if self.funcion_idx<4: 
+            self.poblacion=[Individuo(self.num_genes, self.tam_genes, self.funcion.xMax, self.funcion.xMin, 
+                                                ind=None) for _ in range(self.tam_poblacion)]
+        else: 
+            self.poblacion=[IndividuoReal(aviones=self.aviones,vInd=None) for _ in range(self.tam_poblacion)]
 
-
-    # TODO 
-        # PRESION SELECTIVA
-    def evaluacion_poblacion(self):
-        
+    
+    def evaluacion_poblacionBin(self):        
         self.fitness_total=0
-        self.prob_seleccion = [(0) for _ in range(self.tam_poblacion)]
-        self.prob_seleccionAcum = [(0) for _ in range(self.tam_poblacion)]
+        self.prob_seleccion=[0 for _ in range(self.tam_poblacion)]
+        self.prob_seleccionAcum=[0 for _ in range(self.tam_poblacion)]
         if self.funcion.opt==True: 
             mejor_generacion = float('-inf')
             peor_generacion = float('+inf')
         else: 
             mejor_generacion = float('+inf')
             peor_generacion = float('-inf')
-        mejor_generacionInd=None
 
 
+        
         for i in range(self.tam_poblacion):            
             self.poblacion[i].calcular_fenotipo()
 			
 		
-
         fit=0.0
-        #fitnessTotalAdaptado = 0.0
+        indexMG=0        
         for i in range(self.tam_poblacion):
             fit=self.funcion.fitness(self.poblacion[i].fenotipo)
             self.poblacion[i].fitness=fit
             self.fitness_total+=fit
 
+            if self.elitQ.size()<self.tam_elite: self.elitQ.push(i, fit)
+            elif(self.tam_elite!=0 and self.funcion.cmpBool(fit, self.elitQ.top_fit())):
+                self.elitQ.pop()
+                self.elitQ.push(i, fit)
+			
+            
+
             #if fit>mejor_generacion: mejor_generacion=fit
             if(self.funcion.cmpBool(fit, mejor_generacion)) :
-                mejor_generacion=fit;	
-                mejor_generacionInd=self.poblacion[i]
-            peor_generacion=self.funcion.cmpPeor(peor_generacion,fit)
+                mejor_generacion=fit;	                
+                indexMG=i
+            peor_generacion=self.funcion.cmpPeor(peor_generacion, fit)
 			
+        self.selec_elite=[]
+        for _ in range(self.tam_elite):
+            self.selec_elite.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
+                                                        ind=self.poblacion[self.elitQ.pop()]))
+            
 
         #if mejor_generacion>self.mejor_total: self.mejor_total=mejor_generacion
         if(self.funcion.cmpBool(mejor_generacion, self.mejor_total)):
             self.mejor_total=mejor_generacion;	
-            self.mejor_ind=mejor_generacionInd
+            self.mejor_ind=self.poblacion[indexMG]
 		
 
 
-        """self.progreso_generaciones[0].append(self.mejor_total)
+        self.progreso_generaciones[0].append(self.mejor_total)
         self.progreso_generaciones[1].append(mejor_generacion)
-        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))"""
+        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
+        
+        
         
 
         acum=0.0
-        if peor_generacion < 0: peor_generacion *= -1
+        if peor_generacion<0: peor_generacion*=-1
 
         if self.funcion.opt==False:
-            self.fitness_total = self.tam_poblacion * 1.05 * peor_generacion - self.fitness_total
+            self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
             for i in range(self.tam_poblacion):
-                self.prob_seleccion[i] = 1.05 * peor_generacion - self.poblacion[i].fitness
-                self.prob_seleccion[i] /= self.fitness_total
+                self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
+                self.prob_seleccion[i]/=self.fitness_total
                 acum += self.prob_seleccion[i]
-                self.prob_seleccionAcum[i] = acum			
+                self.prob_seleccionAcum[i]=acum			
         else:
-            self.fitness_total = self.tam_poblacion * 1.05 * peor_generacion + self.fitness_total
+            self.fitness_total = self.tam_poblacion*1.05*peor_generacion+self.fitness_total
             for i in range(self.tam_poblacion):
-                self.prob_seleccion[i] = 1.05 * peor_generacion + self.poblacion[i].fitness
-                self.prob_seleccion[i] /= self.fitness_total
-                acum += self.prob_seleccion[i]
-                self.prob_seleccionAcum[i] = acum
+                self.prob_seleccion[i]=1.05*peor_generacion+self.poblacion[i].fitness
+                self.prob_seleccion[i]/=self.fitness_total
+                acum+=self.prob_seleccion[i]
+                self.prob_seleccionAcum[i]=acum
+        
+        # Whitley recomienda valores próximos a 1.5
+            # Valores mayores ocasionarían superindividuos
+            # Valores menores frenarían la búsqueda sin ningún beneficio
+        self.progreso_generaciones[3].append(self.tam_poblacion*self.prob_seleccion[indexMG])
+
+    def evaluacion_poblacionReal(self):        
+        self.fitness_total=0
+        self.prob_seleccion=[0 for _ in range(self.tam_poblacion)]
+        self.prob_seleccionAcum=[0 for _ in range(self.tam_poblacion)]
+
+        
+        mejor_generacion=float('+inf')
+        peor_generacion=float('-inf')
+
+		
+        fit=0.0
+        indexMG=0        
+        for i in range(self.tam_poblacion):
+            fit=self.funcion.fitness(self.poblacion[i].v)
+            self.poblacion[i].fitness=fit
+            self.fitness_total+=fit
+
+            if self.elitQ.size()<self.tam_elite: self.elitQ.push(i, fit)
+            elif(self.tam_elite!=0 and self.funcion.cmpBool(fit, self.elitQ.top_fit())):
+                self.elitQ.pop()
+                self.elitQ.push(i, fit)
 			
+            
+
+            #if fit>mejor_generacion: mejor_generacion=fit
+            if(self.funcion.cmpBool(fit, mejor_generacion)) :
+                mejor_generacion=fit;	                
+                indexMG=i
+            peor_generacion=self.funcion.cmpPeor(peor_generacion, fit)
+			
+        self.selec_elite=[]
+        for _ in range(self.tam_elite):
+            self.selec_elite.append(IndividuoReal(aviones=None,
+                                                  vInd=self.poblacion[self.elitQ.pop()].v))
+            
+
+        #if mejor_generacion>self.mejor_total: self.mejor_total=mejor_generacion
+        if(self.funcion.cmpBool(mejor_generacion, self.mejor_total)):
+            self.mejor_total=mejor_generacion;	
+            self.mejor_ind=self.poblacion[indexMG]
 		
 
-        """for i in range(self.tam_poblacion):
-            self.prob_seleccion[i] = self.poblacion[i].fitness/self.fitness_total
-            acum+=self.prob_seleccion[i]
-            self.prob_seleccionAcum[i]=acum
-        """
 
-    
-    def seleccion_poblacion(self, tam_seleccionados, k):         
-        ret=[]
-        if self.seleccion_idx==0: ret=self.seleccion.ruleta(self.poblacion, self.prob_seleccionAcum, tam_seleccionados)
-        elif self.seleccion_idx==1: ret= self.seleccion.tornedoDeterministico(self.poblacion, tam_seleccionados, k)
-        elif self.seleccion_idx==2: ret= self.seleccion.torneoProbabilistico(self.poblacion, k, 0.9, tam_seleccionados)
-        elif self.seleccion_idx==3: ret= self.seleccion.estocasticoUniversal(self.poblacion,self.prob_seleccionAcum,tam_seleccionados)
-        elif self.seleccion_idx==4: ret= self.seleccion.truncamiento(self.poblacion,self.prob_seleccion, 0.5, tam_seleccionados)
-        elif self.seleccion_idx==5: ret= self.seleccion.restos(self.poblacion,self.prob_seleccion, self.prob_seleccionAcum, tam_seleccionados)
-        else: ret=[] # TODO RANKING
-        return ret
-
-    def cruce_poblacion(self, selec):
-        ret=[]
-        if self.cruce_idx==0: ret=self.cruce.cruce_monopuntoBin(selec)
-        return ret
+        self.progreso_generaciones[0].append(self.mejor_total)
+        self.progreso_generaciones[1].append(mejor_generacion)
+        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
         
+        
+        
+        acum=0.0
+        if peor_generacion<0: peor_generacion*=-1
 
-    def mutacion_poblacion(self, selec):
-        ret=[]    
-        ret = self.mutacion.mut_basicaBin(selec)
+        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
+        for i in range(self.tam_poblacion):
+            self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
+            self.prob_seleccion[i]/=self.fitness_total
+            acum += self.prob_seleccion[i]
+            self.prob_seleccionAcum[i]=acum	
+        
+        # Whitley recomienda valores próximos a 1.5
+            # Valores mayores ocasionarían superindividuos
+            # Valores menores frenarían la búsqueda sin ningún beneficio
+        self.progreso_generaciones[3].append(self.tam_poblacion*self.prob_seleccion[indexMG])
+    
+    def seleccion_poblacionBin(self, k):         
+        ret=[]
+        if self.seleccion_idx==0: 
+            ret=self.seleccion.ruletaBin(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==1: 
+            ret=self.seleccion.torneoDeterministicoBin(self.poblacion, k, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==2: 
+            ret=self.seleccion.torneoProbabilisticoBin(self.poblacion, k, 0.9, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==3: 
+            ret=self.seleccion.estocasticoUniversalBin(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==4: 
+            ret=self.seleccion.truncamientoBin(self.poblacion, self.prob_seleccion, 0.5, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==5: 
+            ret=self.seleccion.restosBin(self.poblacion, self.prob_seleccion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
+        else: 
+            ret=self.seleccion.rankingBin(self.poblacion, self.prob_seleccion, 2, self.tam_poblacion-self.tam_elite)
         return ret
 
+    def seleccion_poblacionReal(self, k):         
+        ret=[]
+        if self.seleccion_idx==0: 
+            ret=self.seleccion.ruletaReal(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==1: 
+            ret=self.seleccion.torneoDeterministicoReal(self.poblacion, k, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==2: 
+            ret=self.seleccion.torneoProbabilisticoReal(self.poblacion, k, 0.9, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==3: 
+            ret=self.seleccion.estocasticoUniversalReal(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==4: 
+            ret=self.seleccion.truncamientoReal(self.poblacion, self.prob_seleccion, 0.5, self.tam_poblacion-self.tam_elite)
+        elif self.seleccion_idx==5: 
+            ret=self.seleccion.restosReal(self.poblacion, self.prob_seleccion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
+        else: 
+            ret=self.seleccion.rankingReal(self.poblacion, self.prob_seleccion, 2, self.tam_poblacion-self.tam_elite)
+        return ret
+
+      
+    # TODO
+    def cruce_poblacionBin(self, selec):
+        ret=[]
+        if self.cruce_idx==0: return self.cruce.cruce_monopuntoBin(selec)
+        elif self.cruce_idx==1: return ret # Uniforme
+        else:
+            print("Cruce Binario, Solo hay cruce Mono-Punto y Uniforme")
+            exit(1)
+    
+    # TODO
+    def cruce_poblacionReal(self, selec):
+        ret=[]
+        
+        if self.cruce_idx==2: return self.cruce.PMX(selec) # PMX
+        elif self.cruce_idx==3: return ret # OX
+        elif self.cruce_idx==4: return ret # OX-PP
+        elif self.cruce_idx==5: return ret # CX
+        elif self.cruce_idx==5: return ret # CO        
+        else:
+            print("Cruce Real, No tiene cruce Mono-Punto o Uniforme")
+            exit(1)
+        
+        
+    # TODO
+    def mutacion_poblacionBin(self, selec):
+        ret=[]    
+        
+        if self.mutacion_idx==0: return self.mutacion.mut_basicaBin(selec)
+        else:
+            print("Mutacion Binaria, Solo hay mutacion basica")
+            exit(1)
+    
+    # TODO
+    def mutacion_poblacionReal(self, selec):
+        ret=[]    
+        
+        if self.mutacion_idx==1: return self.mutacion.insercion(selec) # Insercion
+        elif self.mutacion_idx==2: return self.mutacion.intercambio(selec) # Intercambio
+        elif self.mutacion_idx==3: return self.mutacion.inversion(selec) # Inversion
+        elif self.mutacion_idx==4: return self.mutacion.heuristica(selec) # Heuristica
+        else:
+            print("Cruce Real, No hay Mutacion Basica")
+            exit(1)
 # --------------------------------------------------------------------------------------------------------------
 # -- MAIN ------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------
@@ -715,38 +1498,56 @@ def main():
     AG=AlgoritmoGenetico()
     
     seleccion_opt = ["Ruleta", 
-                         "Torneo Determinista", 
-                         "Torneo Probabilístico", 
-                         "Estocástico Universal",
-                         "Truncamiento",
-                         "Restos",
-                         "Ranking"]
+                     "Torneo Determinista", 
+                     "Torneo Probabilístico", 
+                     "Estocástico Universal",
+                     "Truncamiento",
+                     "Restos",
+                     "Ranking"]
         
     cruce_opt = ["Básica", 
-                    "Uniforme"]
+                 "Uniforme",
+                 "PMX",
+                 "OX",
+                 "OX-PP",
+                 "CX",
+                 "CO"]
     
-    mutacion_opt = ["Básica"]
+    mutacion_opt = ["Básica",
+                    "Insercion",
+                    "Intercambio",
+                    "Inversion",
+                    "Heuristica"]
 
     funcion_opt = ["F1: Calibracion y Prueba",
-                    "F2: Mishra Bird",
-                    "F3: Holder table",
-                    "F4: Michalewicz (Binaria)"]
+                   "F2: Mishra Bird",
+                   "F3: Holder table",
+                   "F4: Michalewicz (Binaria)",
+                   "Aeropuerto 1",
+                   "Aeropuerto 2",
+                   "Aeropuerto 3"]
         
     tam_poblacion=100
-    generaciones=100
+    generaciones=10
 
     # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
     #           | 4: Truncamiento  | 5: Restos | 6: Ranking
     seleccion_idx=0
-    # 0: Basica  | 1:  Uniforme
-    cruce_idx=0
+    # 0: Basica | 1: Uniforme | 
+    # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
+    cruce_idx=2
     prob_cruce=0.6
-    mut_idx=0 # Solo hay una (por ahora)
-    prob_mut=0.05
+    # 0: Basica    | 
+    # 1: Insercion | 2: Intercambio | 3: Inversion | 4: Heuristica
+    mut_idx=4
+    # Binario: 0.05 | Real: 0.3
+    prob_mut=0.3 
     precision=0.01
-    funcion_idx=1
+    # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
+    # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
+    funcion_idx=4
     d=2
-    elitismo=0
+    elitismo=5
 
     AG.set_valores( tam_poblacion, 
                     generaciones, 
@@ -758,17 +1559,25 @@ def main():
                     precision, 
                     funcion_idx, 
                     d, 
-                    elitismo)               
+                    elitismo)  
+        
 
-    print("\nFuncion: {}\tSeleccion: {}\tCruce: {}\tMutacion:{}\t".format(funcion_opt[funcion_idx],
+    print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
                                                                       seleccion_opt[seleccion_idx],
                                                                       cruce_opt[cruce_idx],
-                                                                      mutacion_opt[0]))
-    totalTimeStart = MPI.Wtime()
+                                                                      prob_cruce,
+                                                                      mutacion_opt[mut_idx],
+                                                                      prob_mut))
+    
+    print("Tam. Poblacion: {}\t Num. Generaciones: {}\t Elitismo: {}%".format(tam_poblacion,
+                                                                             generaciones,
+                                                                             elitismo))
+    
+    #totalTimeStart = MPI.Wtime()
     val=AG.ejecuta()
-    totalTimeEnd = MPI.Wtime()
+    #totalTimeEnd = MPI.Wtime()
     print("Valor Optimo: {}\n".format(val))
-    print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
+    #print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
 
 
 main()
