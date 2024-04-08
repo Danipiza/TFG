@@ -8,7 +8,6 @@ class Gen:
         if v is not None: self.v=[(v[i]) for i in range(len(v))]
         else: self.v=[(random.randint(0,1)) for i in range(l)]
 
-
 class Individuo:
     def __init__(self, num, tam_genes, xMax, xMin, ind):
         self.genes=[]

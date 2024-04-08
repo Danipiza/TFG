@@ -4,7 +4,7 @@
 
 ## Mejoras (+MPI)
 
-### Dividir cada funcion entre los workers
+### Dividir cada funcion entre los workers, el master pide a los workers que hagan el trabajo dividido
 
 ### Cada Worker se encarga de unas generaciones (No mejora rendimiento, mejora la eficacia)
 

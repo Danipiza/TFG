@@ -12,7 +12,7 @@ import math
 class Funcion(ABC):
     xMax=[]      # double[]. Valores maximos de los elementos de los individuos
     xMin=[]      # double[]. Valores minimos
-    opt=True        # booleano. maximizar: True, minimizar: False
+    opt=False        # booleano. maximizar: True, minimizar: False
 
     @abstractmethod
     def fitness(self,nums): 
@@ -115,7 +115,6 @@ class Funcion3(Funcion):
         if a>b: return True
         else: return False
 
-
 class Funcion4(Funcion):
 
     def __init__(self, num_genes):
@@ -153,6 +152,7 @@ class Funcion4(Funcion):
     def cmpPeorBool(self, a, b): 
         if a>b: return True
         else: return False
+
 
 class FuncionA(Funcion):
 
@@ -218,8 +218,3 @@ class FuncionA(Funcion):
     def cmpPeorBool(self, a, b): 
         if a>b: return True
         else: return False
-
-
-
-
-

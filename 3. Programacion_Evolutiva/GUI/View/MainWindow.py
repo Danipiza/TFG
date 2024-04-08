@@ -157,24 +157,64 @@ class MainWindow:
         try:
             self.AG=AG.AlgoritmoGenetico(self)
             
-            self.AG.set_valores(int(self.poblacion_text.get()),
-                                int(self.generaciones_text.get()),
-                                self.seleccion_combo.current(),
-                                self.cruce_combo.current(),
-                                float(self.probCruce_text.get()),
-                                self.mutacion_combo.current(),
-                                float(self.probMutacion_text.get()),
-                                float(self.precision_text.get()),
-                                self.funcion_combo.current(),
-                                int(self.numGenes_text.get()),
-                                int(self.elitismo_text.get()))               
+            seleccion_idx=self.seleccion_combo.current()
+            precision=float(self.precision_text.get())
+
+            tam_poblacion=int(self.poblacion_text.get())
+            if tam_poblacion<1: raise ValueError("tam. poblacion > 0")
+
+            generaciones=int(self.generaciones_text.get())
+            if generaciones<0: raise ValueError("num. generaciones >= 0")
+            
+            prob_cruce=float(self.probCruce_text.get())
+            if prob_cruce<0 or prob_cruce>1: raise ValueError("prob. cruce => [0-1]")
+            prob_mut=float(self.probMutacion_text.get())
+            if prob_mut<0 or prob_mut>1: raise ValueError("prob. mutacion => [0-1]")
+            
+            elitismo=float(self.elitismo_text.get())
+            if elitismo<0 or elitismo>100: raise ValueError("Elitismo es un porcentaje de 0-100")
+            
+            numGenes=int(self.numGenes_text.get())
+            if numGenes<0: raise ValueError("num. genes es un numero natural positivo")
+            
+            funcion_idx=self.funcion_combo.current()
+            cruce_idx=self.cruce_combo.current()            
+            mutacion_idx=self.mutacion_combo.current()
+
+            if(funcion_idx<4):
+                if funcion_idx!=3 and numGenes!=2: raise ValueError("num. genes=2")
+                if cruce_idx>1: raise ValueError("Cruce Binario: solo tiene cruce Mono-Punto y Uniforme")
+                if mutacion_idx>0: raise ValueError("Mutacion Binaria: solo tiene Mutacion Basica")
+            else:                
+                if cruce_idx<2: raise ValueError("Cruce Real: no tiene cruce Mono-Punto ni Uniforme")
+                if mutacion_idx==0: raise ValueError("Mutacion Real: no tiene Mutacion Basica")
+            
+                      
+            
+            
+
+            
+            
+            self.AG.set_valores(tam_poblacion,
+                                generaciones,
+                                seleccion_idx,
+                                cruce_idx,
+                                prob_cruce,
+                                mutacion_idx,
+                                prob_mut,
+                                precision,
+                                funcion_idx,
+                                numGenes,
+                                elitismo) 
+
+            
             
             self.AG.ejecuta()
             
-        except ValueError:
-            self.result_label.config(text="Datos inválidos")
+        except ValueError as e:
+            self.result_label.config(text="{}".format(e))
     
-    def Plot2D(self,vals, ind):       
+    def Plot2D(self, vals, ind, aviones):       
         self.ax.clear()
 
         x=[(i) for i in range(len(vals[0]))]
@@ -196,9 +236,18 @@ class MainWindow:
         # Draw plot
         self.canvas.draw()
         texto="Optimo: {}\n".format(ind.fitness)
-        for i in range(len(ind.genes)):
-            texto+="Variable {}: {}\n".format(i+1,ind.fenotipo[i])
-        texto+="Presion Selectiva final: {}\n".format(y4[-1])
+        if self.funcion_combo.current()<4:
+            for i in range(len(ind.genes)):
+                texto+="Variable {}: {}\n".format(i+1,ind.fenotipo[i])
+        elif self.funcion_combo.current()<6:
+            for i in range(aviones):
+                texto+="{} ".format(ind.v[i])            
+        else:
+            texto+="{} ".format(ind.v[0])  
+            for i in range(1,aviones):
+                if i%25==0: texto+="\n"
+                texto+="{} ".format(ind.v[i])  
+        texto+="\nPresion Selectiva final: {}\n".format(y4[-1])
         self.result_label.config(text=texto)
         
     
