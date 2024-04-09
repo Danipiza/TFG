@@ -1880,15 +1880,15 @@ def main():
                    "Aeropuerto 2",
                    "Aeropuerto 3"]
         
-    tam_poblacion=50
-    generaciones=50
+    tam_poblacion=1000
+    generaciones=100
 
     # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
     #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=0
+    seleccion_idx=1
     # 0: Basica | 1: Uniforme | 
     # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
-    cruce_idx=3 
+    cruce_idx=2
     prob_cruce=0.6
     # 0: Basica    | 
     # 1: Insercion | 2: Intercambio | 3: Inversion | 4: Heuristica
@@ -1898,7 +1898,7 @@ def main():
     precision=0.01
     # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
     # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
-    funcion_idx=4
+    funcion_idx=5
     d=2
     elitismo=0
 
@@ -1934,3 +1934,84 @@ def main():
 
 
 main()
+
+
+def pruebas():
+    
+
+    AG=AlgoritmoGenetico(None)
+    
+    seleccion_opt = ["Ruleta", 
+                     "Torneo Determinista", 
+                     "Torneo Probabilístico", 
+                     "Estocástico Universal",
+                     "Truncamiento",
+                     "Restos",
+                     "Ranking"]
+        
+    cruce_opt = ["Básica", 
+                 "Uniforme",
+                 "PMX",
+                 "OX",
+                 "OX-PP",
+                 "CX",
+                 "CO"]
+    
+    mutacion_opt = ["Básica",
+                    "Insercion",
+                    "Intercambio",
+                    "Inversion",
+                    "Heuristica"]
+
+    funcion_opt = ["F1: Calibracion y Prueba",
+                   "F2: Mishra Bird",
+                   "F3: Holder table",
+                   "F4: Michalewicz (Binaria)",
+                   "Aeropuerto 1",
+                   "Aeropuerto 2",
+                   "Aeropuerto 3"]
+        
+    tam_poblacion=1000
+    generaciones=0
+
+    # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
+    #           | 4: Truncamiento  | 5: Restos | 6: Ranking
+    seleccion_idx=0
+    # 0: Basica | 1: Uniforme | 
+    # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
+    cruce_idx=2
+    prob_cruce=0.6
+    # 0: Basica    | 
+    # 1: Insercion | 2: Intercambio | 3: Inversion | 4: Heuristica
+    mut_idx=2
+    # Binario: 0.05 | Real: 0.3
+    prob_mut=0.3 
+    precision=0.01
+    # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
+    # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
+    funcion_idx=6
+    d=2
+    elitismo=0
+
+    AG.set_valores( tam_poblacion, 
+                    generaciones, 
+                    seleccion_idx,
+                    cruce_idx, 
+                    prob_cruce,
+                    mut_idx, 
+                    prob_mut,
+                    precision, 
+                    funcion_idx, 
+                    d, 
+                    elitismo) 
+    
+    print("Inicializar y evaluar, tam_poblacion={}. Funcion={}".format(tam_poblacion, funcion_opt[funcion_idx]))
+
+    totalTimeStart = MPI.Wtime()
+    AG.init_poblacion()
+    AG.evaluacion_poblacionReal()
+
+    totalTimeEnd = MPI.Wtime()
+    print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
+
+#pruebas()
