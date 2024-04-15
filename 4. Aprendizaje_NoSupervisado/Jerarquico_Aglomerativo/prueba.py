@@ -567,9 +567,6 @@ def ejecuta_completa(poblacion, distancia, clusts):
     timeStart=MPI.Wtime()
     JA=Jerarquico_Aglom(poblacion,k,2,distancia)
     asignaciones, centroides=JA.ejecuta(clusts) 
-
-    timeEnd=MPI.Wtime()
-    print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
     
     asignacionesFin=[[-1 for _ in range(n)] for _ in range(clusts)]
     for numClust in range(clusts):
@@ -594,7 +591,8 @@ def ejecuta_completa(poblacion, distancia, clusts):
 
     
 
-    
+    timeEnd=MPI.Wtime()
+    print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
     
     fits=[evaluacion(poblacion, asignacionesFin[i],centroidesFin[i]) for i in range(clusts)]
 
@@ -611,7 +609,7 @@ def main():
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    poblacion=lee("100_2D")
+    poblacion=lee("1000_2D")
         
     #ejecuta_diferentes_poblaciones(poblacion,1)
 

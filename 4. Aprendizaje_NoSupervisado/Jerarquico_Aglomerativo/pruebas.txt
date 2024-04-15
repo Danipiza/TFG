@@ -1,7 +1,7 @@
 Array desordenado con valores de 0-10000
 
 Array[0:100]
-Centroide. Tiempo de ejecucion: 0.010078299965243787
+Centroide. Tiempo de ejecucion: 0.015078299965243787
 Simple   . Tiempo de ejecucion: 0.03170089999912307
 Completa . Tiempo de ejecucion: 0.02838729997165501
 

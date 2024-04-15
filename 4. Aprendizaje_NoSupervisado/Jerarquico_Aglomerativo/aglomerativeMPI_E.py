@@ -54,13 +54,13 @@ def main():
 
     # Inicializa centros
     if myrank==MASTER:       
-        #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]
+        poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]
         
         # 6000      1 generacion de puntos aleatorios
         # 6000_2    2 generaciones de puntos aleatorios
         # 6000_3    6 generaciones de puntos aleatorios
         # 100000_2D     1 generacion de puntos aleatorios
-        poblacion=lee("10000_2D")            
+        #poblacion=lee("10000_2D")            
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones
@@ -357,8 +357,6 @@ def main():
                 
                 
                 # Actualiza indices
-                
-               
                 filas.pop(tmp)
                 tam-=1
                 for i in range(tmp,tam): 

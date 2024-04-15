@@ -9,7 +9,36 @@ from abc import ABC, abstractmethod
 from collections import deque
 from typing import List, Tuple
 
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 
+def GUI(mejor_total, mejor_generacion, media):    
+    # Create figure and axes
+    #fig, axs = plt.subplots(2, 2, figsize=(18, 12), gridspec_kw={'width_ratios': [1, 2]})
+    n=len(mejor_total)
+    # Define data for the first plot
+    x1 = [i for i in range(1, n + 1)]  
+    # Define data for the second plot       
+
+    # Crear la figura y GridSpec
+    fig = plt.figure(figsize=(10, 6))
+    gs = GridSpec(1, 1, figure=fig)
+
+    # Grafico 1 (arriba a la izquierda)
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax1.plot(x1, mejor_total, color='b', linestyle='-')    
+    ax1.plot(x1, mejor_generacion, color='r', linestyle='-') 
+    ax1.plot(x1, media, color='g', linestyle='-') 
+    ax1.set_xlabel('Generaciones')
+    ax1.set_ylabel('Fitness')
+    ax1.set_title('2D-Plot"')
+    ax1.grid(True)
+
+    
+    
+    
+    plt.tight_layout() # Ajustar la disposición de los subplots    
+    plt.show() # Mostrar los gráficos
 
 # -----------------------------------------------------------------------------------------------
 # --- INDIVIDUO ---------------------------------------------------------------------------------
@@ -1582,7 +1611,7 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #self.MW.Plot2D(self.progreso_generaciones, self.mejor_ind, self.aviones)
+        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
 
         return self.mejor_total
 
@@ -1605,7 +1634,7 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #self.MW.Plot2D(self.progreso_generaciones, self.mejor_ind, self.aviones)
+        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
 
         return self.mejor_total
 
@@ -1898,7 +1927,7 @@ def main():
     precision=0.01
     # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
     # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
-    funcion_idx=5
+    funcion_idx=6
     d=2
     elitismo=0
 

@@ -184,8 +184,8 @@ def main():
     tam_salida=1                # Salida: IMC
 
     # Mejor => lr=0.05 rep=1000
-    learning_rate=0.1           # Aprendizaje
-    repeticiones=1              # Numero de repeticiones en el entrenamiento
+    learning_rate=0.05           # Aprendizaje
+    repeticiones=1000              # Numero de repeticiones en el entrenamiento
 
     RedN=RedNeuronal(tam_entrada,tam_capas_ocultas,tam_salida)
     print("Tamaños de las capas ocultas: {}, numero de repeticiones: {}".format(tam_capas_ocultas, repeticiones))

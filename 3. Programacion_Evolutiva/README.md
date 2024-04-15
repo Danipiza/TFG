@@ -4,13 +4,11 @@
 
 ## Mejoras (+MPI)
 
+### Cada Worker se encarga de unas generaciones y se comparte los resultados cada x generaciones para actualizar la poblacion con los mejores
+
 ### Dividir cada funcion entre los workers, el master pide a los workers que hagan el trabajo dividido
 
-### Cada Worker se encarga de unas generaciones (No mejora rendimiento, mejora la eficacia)
-
-### Pipe-Lining = Segmentacion Computadores
-
-### Enviar mensajes entre procesos
+### Pipe-Lining = Segmentacion como en Arquitectura de Computadores
 
 Master inicializa y evalua
 

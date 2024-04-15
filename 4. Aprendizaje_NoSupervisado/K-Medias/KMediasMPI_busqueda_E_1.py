@@ -158,7 +158,7 @@ def main():
                     for _ in range(numWorkers):
                         datos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                        
                         source_rank=status.Get_source() 
-                        print("Recibe de ", source_rank)
+                        #print("Recibe de ", source_rank)
                         # Suma los centroides
                         for i in range(numCluster):
                             for j in range(d):
@@ -173,7 +173,7 @@ def main():
                         for j in range(d):              
                             centroidesNuevos[i][j]/=indsCluster[i]
                     
-                    print("Cluster", len(centroidesNuevos))
+                    #print("Cluster", len(centroidesNuevos))
                     # FINALIZA
                     if(compara_centros(d, centroides,centroidesNuevos)): 
                         for i in range(1,numWorkers+1):
