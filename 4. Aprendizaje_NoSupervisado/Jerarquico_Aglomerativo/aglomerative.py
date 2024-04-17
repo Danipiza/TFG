@@ -14,6 +14,11 @@ tmpM=[0 for _ in range(self.n)]
 M=[tmpM for _ in range(self.n-1)] 
 """
 
+"""
+- 6000_1_2D:    2551.1138351000263s ? lo puse a las 21.30 termino a las 23.31 no tiene sentido
+"""
+
+
 # Mejor
 
 def lee(archivo):
@@ -498,23 +503,30 @@ def ejecuta_centroide(poblacion, distancia, clusts):
     JA=Jerarquico_Aglom(poblacion,k,0,distancia)
     asignaciones, centroides=JA.ejecuta(clusts)    
     
+    """for x in asignaciones:
+        print("Len=",len(x),x)"""
     
     asignacionesFin=[[-1 for _ in range(n)] for _ in range(clusts)]
     for numClust in range(clusts):
         for i in range(numClust+1):
             for j in asignaciones[numClust][i]:
                 asignacionesFin[numClust][j]=i
+        #print(asignacionesFin[i])
         
     
 
     timeEnd=MPI.Wtime()
     print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
+
+   
     
     fits=[evaluacion(poblacion, asignacionesFin[i],centroides[i]) for i in range(clusts)]
 
     DBs=[davies_bouldin(poblacion, i, asignacionesFin[i-1], centroides[i-1]) for i in range(2,clusts+1)] 
     
     dbMejor=calcula_DB_mejor(DBs)
+
+    """print("F",DBs)"""
 
     GUI(clusts, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])
 
@@ -552,7 +564,7 @@ def ejecuta_simple(poblacion, distancia, clusts):
     print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
     
     
-
+    print(centroidesFin[0])
     fits=[evaluacion(poblacion, asignacionesFin[i],centroidesFin[i]) for i in range(clusts)]
 
     DBs=[davies_bouldin(poblacion, i, asignacionesFin[i-1], centroidesFin[i-1]) for i in range(2,clusts+1)]     
@@ -606,18 +618,24 @@ def ejecuta_completa(poblacion, distancia, clusts):
 
 
 def main():
-    #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]
+    #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]
     # 6000      1 generacion de puntos aleatorios
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    poblacion=lee("100_2D")
+    archivo="6000_1_2D"
+    C=7
+    dists=["Manhattan","Euclidea"]
+    distancia=1
+    poblacion=lee(archivo)
+
+    print("\nEjecutando archivo: {}, numero de clusters para la GUI: {}, distancia: {}\n".format(archivo, C, dists[distancia]))
         
     #ejecuta_diferentes_poblaciones(poblacion,1)
 
-    ejecuta_centroide(poblacion, 0, 7)
-    #ejecuta_simple(poblacion, 0, 7)
-    #ejecuta_completa(poblacion, 0, 7)
+    #ejecuta_centroide(poblacion, distancia, C)
+    ejecuta_simple(poblacion, distancia, C)
+    #ejecuta_completa(poblacion, distancia, C)
 
     
 

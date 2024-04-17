@@ -8,22 +8,28 @@ import math
 import copy
 
 # EJECUTAR
-# mpiexec -np 4 python aglomMPI.py
+# mpiexec -np 4 python aglomerativeMPI_E_sim.py
 
+# NO HACE FALTA MEJORA DEL CALCULO DE NUEVAS DISTANCIAS EN LA FILA CON CENTROIDES
+# PORQUE EL TIEMPO DE CALCULO ES MUY PEQUEÑO
+
+# EN SIMPLE Y COMPLETO SI. SE COMPARAN CON UN COSTE O(N^2) TODOS LOS INDIVIDUOS DE 1 CLUSTER CON EL OTRO
+# Y ESTE PROCESO SE REPEITE PARA CADA COLUMNA, COSTE O(N^3)?
 
 """
+SOLUCIONAR IMPARES??
 NORMAL:
-- 100       0.01502120001451s
-- 1000      7.91433090000646s
+- 100       0.03670289996080s
+- 1000      14.3837430999847s
 
 MPI: 3 Workers
-- 100:      0.01098049999563s  
-- 1000:     3.31902259998605s
+- 100:      0.04917249997379s  
+- 1000:     13.2454861999722s
 
 
 MPI: 7 Workers
-- 100:      0.01193810001132s
-- 1000:     2.06959120000829s
+- 100:      0.05854490003548s
+- 1000:     12.9388973999884s
 
 """
 
@@ -57,7 +63,9 @@ def main():
     status = MPI.Status()
     myrank=comm.Get_rank()
     numProc=comm.Get_size()
-    numWorkers=numProc-1
+    
+    numWorkersDist=2
+    numWorkers=numProc-1-numWorkersDist
 
     
 
@@ -67,17 +75,21 @@ def main():
 
     # Inicializa centros
     if myrank==MASTER:       
-        #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]
-        
-        poblacion=lee("1000_2D")            
+        poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
+        archivo="100_2D"
+        C=7
+        poblacion=lee(archivo)
+
+        print("\nEjecutando archivo: {}, numero de clusters para la GUI: {}, distancia: Euclidea\n".format(archivo, C))           
         
         n=len(poblacion)        
         d=len(poblacion[0])     
-        C=7
         
+    clustersCentros=[[x] for x in poblacion]    
         
     # Envia la poblacion entera a los workers
     poblacion=comm.bcast(poblacion, root=MASTER)   
+    clustersCentros=comm.bcast(clustersCentros, root=MASTER)   
     # Envia el numero de individuos a los workers
     n=comm.bcast(n, root=MASTER)
     # Envia el numero de dimensiones a los workers
@@ -95,20 +107,22 @@ def main():
         
         
     if myrank==MASTER:  
+        k=C-1
         asig=[[] for _ in range(C)]
         centr=[[] for _ in range(C)]
     
         
         # Info TODO OPTIMIZAR?
         # Array de clusters
-        clusters=[[x] for x in poblacion]         
+        clusters=[[i] for i in range(n)]            
         # Array con los centros de cada cluster
-        clustersCentros=[x for x in poblacion]  
+          
 
         asignacion=[[] for _ in range(C)]
         centroides=[[] for _ in range(C)]
 
         workers=[i for i in range(1,numWorkers+1)]
+        workersDist=[i for i in range(numWorkers+1,numWorkers+1+numWorkersDist)]
         # Diccionario con las asignaciones
         filasAsig={}
         workerFilas=[[] for _ in range(numWorkers)]
@@ -145,6 +159,10 @@ def main():
                 der.reverse()
                 for x in izq:
                     workerFilas[i-1].append(x)
+                if i==1 and n%2==1:
+                    workerFilas[i-1].append(tuplas[cont][0])
+                    filasAsig[tuplas[cont][0]]=1
+                    cont+=1
                 for x in der:
                     workerFilas[i-1].append(x)
                 comm.send(izq,dest=i)
@@ -231,9 +249,7 @@ def main():
             
             
             
-            aux=filasAsig[c2]
-            
-                                
+            aux=filasAsig[c2]                                         
             
             for i in workers:
                 comm.send(c1,dest=i)
@@ -244,6 +260,45 @@ def main():
            
             # ACTUALIZA INDICES
             n-=1
+            
+            tam=(n-c1-1)//numWorkersDist
+            mod=(n-c1-1)%numWorkersDist
+            cont=0
+            punt=c1+1
+            
+            if tam>=1:
+                for i in range(mod):                    
+                    comm.send([punt,punt+tam+1],dest=workersDist[i])
+                    comm.send(minW,dest=workersDist[i])
+                    comm.send(c1,dest=workersDist[i])
+                    comm.send(c2,dest=workersDist[i])
+                    punt+=tam+1
+                for i in range(mod,numWorkersDist):                    
+                    comm.send([punt,punt+tam],dest=workersDist[i])
+                    comm.send(minW,dest=workersDist[i])
+                    comm.send(c1,dest=workersDist[i])
+                    comm.send(c2,dest=workersDist[i])
+                    punt+=tam
+            elif mod!=0:
+                for i in range(mod):                    
+                    comm.send([punt,punt],dest=workersDist[i])
+                    comm.send(minW,dest=workersDist[i])
+                    comm.send(c1,dest=workersDist[i])
+                    comm.send(c2,dest=workersDist[i])
+                    punt+=1
+                for i in range(mod,numWorkersDist):                    
+                    comm.send(0,dest=workersDist[i])
+                    comm.send(minW,dest=workersDist[i])
+                    comm.send(c1,dest=workersDist[i])
+                    comm.send(c2,dest=workersDist[i])                
+            else: 
+                for i in workersDist:                        
+                    comm.send(0,dest=i)
+                    comm.send(minW,dest=i)
+                    comm.send(c1,dest=i)
+                    comm.send(c2,dest=i)
+                    
+
             for i in range(c2,n): # Sin error
             #for i in range(aux,n):
                 filasAsig[i]=filasAsig[i+1]
@@ -254,25 +309,15 @@ def main():
             for x in clusters[c2]:
                 clusters[c1].append(x)
             # ELIMINA EL CLUSTER DE LA FILA ELIMINADA
+            
+            # Actualiza centro    
+            for x in clustersCentros[c2]:
+                clustersCentros[c1].append(x)                
+            
             del clusters[c2]
             del clustersCentros[c2]
             
-            
-
-            # ACTUALIZA EL CLUSTER NUEVO
-            clustNew=[0 for _ in range(d)]
-
-            for x in clusters[c1]:
-                for a in range(d):
-                    clustNew[a]+=x[a]
-            tam=len(clusters[c1])
-            for a in range(d):
-                clustNew[a]/=tam
-
-            # ACTUALIZA EL CLUSTER DE c1
-            clustersCentros[c1]=clustNew
-            
-            
+                       
             
             
             # RECIBE DEL worker QUE ELIMINA FILAS
@@ -285,15 +330,15 @@ def main():
 
             # ENVIA EL NUEVO CLUSTER
             for i in workers:
-                comm.send(clustNew,dest=i)
+                comm.send(clustersCentros[c1],dest=i)
             
-            # GUI TODO
+            
             # PARA LA GUI y comprobar el mejor numero de clusters
-            """if n-3<C: 
-                print("Cond:",n-1)
-                print("Len:",len(asig))
-                asig[n-3]=copy.deepcopy(clusters)
-                centr[n-3]=copy.deepcopy(clustersCentros)"""
+            if n<C+1:                 
+                asig[k]=copy.deepcopy(clusters)
+                centr[k]=copy.deepcopy(clustersCentros)
+                """print("n=",n, "tamAsig=",len(asig[n-1]))"""         
+                k-=1
 
 
             # TERMINA CUANDO SOLO QUEDA UNO
@@ -316,62 +361,120 @@ def main():
                 c1=comm.recv(source=workers[0])
                 c2=comm.recv(source=workers[0])
 
+                n-=1
+                tam=(n-c1-1)//numWorkersDist
+                mod=(n-c1-1)%numWorkersDist
+                cont=0
+                punt=c1+1
+                
+                if tam>=1:
+                    for i in range(mod):                    
+                        comm.send([punt,punt+tam+1],dest=workersDist[i])
+                        comm.send(aux,dest=workersDist[i])
+                        comm.send(c1,dest=workersDist[i])
+                        comm.send(c2,dest=workersDist[i])
+                        punt+=tam+1
+                    for i in range(mod,numWorkersDist):                    
+                        comm.send([punt,punt+tam],dest=workersDist[i])
+                        comm.send(aux,dest=workersDist[i])
+                        comm.send(c1,dest=workersDist[i])
+                        comm.send(c2,dest=workersDist[i])
+                        punt+=tam
+                elif mod!=0:
+                    for i in range(mod):                    
+                        comm.send([punt,punt],dest=workersDist[i])
+                        comm.send(aux,dest=workersDist[i])
+                        comm.send(c1,dest=workersDist[i])
+                        comm.send(c2,dest=workersDist[i])
+                        punt+=1
+                    for i in range(mod,numWorkersDist):                    
+                        comm.send(0,dest=workersDist[i])
+                        comm.send(aux,dest=workersDist[i])
+                        comm.send(c1,dest=workersDist[i])
+                        comm.send(c2,dest=workersDist[i])                
+                else: 
+                    for i in workersDist:                        
+                        comm.send(0,dest=i)
+                        comm.send(aux,dest=i)
+                        comm.send(c1,dest=i)
+                        comm.send(c2,dest=i)
+
                 # JUNTA LOS CLUSTERS
                 for x in clusters[c2]:
                     clusters[c1].append(x)
                 # ELIMINA EL CLUSTER DE LA FILA ELIMINADA
+                
+                # Actualiza centro    
+                for x in clustersCentros[c2]:
+                    clustersCentros[c1].append(x)                
+                
                 del clusters[c2]
                 del clustersCentros[c2]
+                
+                
 
-                # ACTUALIZA EL CLUSTER NUEVO
-                clustNew=[0 for _ in range(d)]
 
-                for x in clusters[c1]:
-                    for a in range(d):
-                        clustNew[a]+=x[a]
-                tam=len(clusters[c1])
-                for a in range(d):
-                    clustNew[a]/=tam
+                comm.send(clustersCentros[c1],dest=workers[0])
 
-                # ACTUALIZA EL CLUSTER DE c1
-                clustersCentros[c1]=clustNew
-
-                comm.send(clustNew,dest=workers[0])
+                
+                if n+1<C+2:  # TODO?
+                    asig[k]=copy.deepcopy(clusters)
+                    centr[k]=copy.deepcopy(clustersCentros)
+                    """print("n=",n, "tamAsig=",len(asig[n-1]))"""                
+                    k-=1
 
                 data=comm.recv(source=workers[0])
                 if data==-1: break
-
-
+                
+        
+        for i in workersDist:
+            comm.send(-1,dest=i)
 
         timeEnd=MPI.Wtime()
         print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
+        print("Termina master")
+        
 
         """for x in asig:
-            print(x)
+            print("Len=",len(x))#,x)"""
         
+        """n=len(poblacion)
         asignacionesFin=[[-1 for _ in range(n)] for _ in range(C)]
         for numClust in range(C):
-            print(numClust)
             for i in range(numClust+1):
                 for j in asig[numClust][i]:
-                    asignacionesFin[numClust][j]=i"""
+                    asignacionesFin[numClust][j]=i
             
+        centroidesFin=[] 
+        for numClust in range(C):
+            tmpClust=[]
+            for j in range(numClust+1):
+                m=len(centr[numClust][j])
+                tmp=[0 for _ in range(d)]
+                for x in centr[numClust][j]:
+                    for a in range(d):
+                        tmp[a]+=x[a]
+                for a in range(d):
+                    tmp[a]/=m
+                tmpClust.append(tmp)                      
+
+            centroidesFin.append(tmpClust)    
         
 
-        
-        """fits=[evaluacion(poblacion, asignacionesFin[i],centroides[i]) for i in range(C)]
+        fits=[evaluacion(poblacion, asignacionesFin[i],centroidesFin[i]) for i in range(C)]
 
-        DBs=[davies_bouldin(poblacion, i, asignacionesFin[i-1], centroides[i-1]) for i in range(2,C+1)] 
+        DBs=[davies_bouldin(poblacion, i, asignacionesFin[i-1], centroidesFin[i-1]) for i in range(2,C+1)] 
         
         dbMejor=calcula_DB_mejor(DBs)
 
-        GUI(C, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])"""
 
+        GUI(C, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])"""
+        
         # ----------------------------------------------------------------------
         # ----------------------------------------------------------------------
 
     
-    else : # WORKER
+    elif myrank<=numWorkers : # WORKER
         
         
         # ----------------------------------------------------------------------
@@ -437,8 +540,9 @@ def main():
             minD=float("inf")                 
             cont+=1
 
-            for i in range(tam):
-                for j in range(filas[i]+1,n):
+            
+            for i in range(tam):                
+                for j in range(filas[i]+1,n):                    
                     if minD>M[i][j]: 
                         minD=M[i][j]
                         c1=filas[i]
@@ -502,6 +606,7 @@ def main():
                 tam-=1
                 if tam==0:
                     comm.send(-1,dest=MASTER)
+                    print("Worker {} TERMINA SE QUEDA SIN FILAS\n".format(myrank))
                     exit(1) # TERMINA LA EJECUCION
                 else: 
                     comm.send(1,dest=MASTER)
@@ -511,8 +616,6 @@ def main():
                     filasDic.pop(filas[i])               
                     filas[i]-=1
                     filasDic[filas[i]]=i
-
-                
             else:
                 
                 # ELIMINA COLUMNA c2            
@@ -531,35 +634,58 @@ def main():
                     filasDic[filas[i]]=i
                 
             # ELIMINA EL CLUSTER DE LA FILA ELIMINADA
-            del poblacion[c2]
+            del clustersCentros[c2]
             
             
             # ACTUALIZA EL CLUSTER DE c1
-            clustNew=comm.recv(source=MASTER)
-            poblacion[c1]=clustNew
+            clustersCentros[c1]=comm.recv(source=MASTER)
             
             #if cont==4: izq[10000]=0
 
-            
-
+            """print("WORKER {}: poblacion= {}\n\n".format(myrank, clustersCentros))"""
+            c1N=len(clustersCentros[c1])
             # ACTUALIZA COLUMNAS (1 POR FILA)                                      
             for i in range(tam):
                 if M[i][c1]==-1: break # SI ES -1 LAS DEMAS TAMBIEN LO SERAN
                 aux=0.0
                 
-                for a in range(d):
-                    aux+=(poblacion[filas[i]][a]-poblacion[c1][a])**2             
-                M[i][c1]=math.sqrt(aux)        
+                nDist=float("inf")
+                distTMP=0
+                c2N=len(clustersCentros[i])
+                for x in range(c1N):            # Recorre los individuos de "c1"
+                    for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                        distTMP=0
+                        for a in range(d):
+                            distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+                        if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"
+
+                M[i][c1]=math.sqrt(nDist)
             
             n-=1 # REDUCE EL TAMAÑO DE LA POBLACION
 
+            
             # ACTUALIZA FILA (SOLO EL WORKER DE c1)
-            if w==myrank:                                
+            if w==myrank:                
+                fila=[-1 for _ in range(c1+1)]
+                for i in range(numWorkersDist):                    
+                    data=comm.recv(source=numWorkers+1+i)                    
+                    for x in data:
+                        fila.append(x)
+                """M[filasDic[c1]]=math.sqrt(nDist)"""
+                
                 for i in range(c1+1,n):                    
                     aux=0.0
-                    for a in range(d):
-                        aux+=(poblacion[i][a]-poblacion[c1][a])**2             
-                    M[filasDic[c1]][i]=math.sqrt(aux)
+                    nDist=float("inf")
+                    c2N=len(clustersCentros[i])
+                    for x in range(c1N):            # Recorre los individuos de "c1"
+                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                            distTMP=0
+                            for a in range(d):                                
+                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+                            if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
+                    M[filasDic[c1]][i]=math.sqrt(nDist)
+                print("Fila workers:",fila,"\n")
+                #print("Fila worker:",M[filasDic[c1]], "\n")
 
 
             
@@ -573,7 +699,8 @@ def main():
 
 
         if tam==1: 
-            comm.send(-1,dest=MASTER)            
+            comm.send(-1,dest=MASTER)
+            print("Worker {} TERMINA TODO\n".format(myrank))            
             exit(1)
         else: comm.send(0,dest=MASTER)
 
@@ -619,37 +746,89 @@ def main():
                 filasDic[filas[i]]=i
 
             # ELIMINA EL CLUSTER DE LA FILA ELIMINADA
-            del poblacion[c2]
+            del clustersCentros[c2]
             
             # ACTUALIZA EL CLUSTER DE c1
-            clustNew=comm.recv(source=MASTER)
-            poblacion[c1]=clustNew
+            clustersCentros[c1]=comm.recv(source=MASTER)
 
 
             
 
+            c1N=len(clustersCentros[c1])
             # ACTUALIZA COLUMNAS (1 POR FILA)                                      
             for i in range(tam):
                 if M[i][c1]==-1: break # SI ES -1 LAS DEMAS TAMBIEN LO SERAN
                 aux=0.0
                 
-                for a in range(d):
-                    aux+=(poblacion[filas[i]][a]-poblacion[c1][a])**2             
-                M[i][c1]=math.sqrt(aux)        
+                nDist=float("inf")
+                distTMP=0
+                c2N=len(clustersCentros[i])
+                for x in range(c1N):            # Recorre los individuos de "c1"
+                    for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                        distTMP=0
+                        for a in range(d):
+                            distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+                        if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"
+
+                M[i][c1]=math.sqrt(nDist)
             
             n-=1 # REDUCE EL TAMAÑO DE LA POBLACION
 
             # ACTUALIZA FILA (SOLO EL WORKER DE c1)
-            if w==myrank:                                
-                for i in range(c1+1,n):                    
-                    aux=0.0
-                    for a in range(d):
-                        aux+=(poblacion[i][a]-poblacion[c1][a])**2             
-                    M[filasDic[c1]][i]=math.sqrt(aux)
+            """fila=[-1 for i in range(c1+1)]
+            for i in range(numWorkersDist):                    
+                data=comm.recv(source=numWorkers+1+i)                    
+                for x in data:
+                    fila.append(x)
+            M[filasDic[c1]]=math.sqrt(nDist)"""
+
+            for i in range(c1+1,n):                    
+                aux=0.0
+                for x in range(c1N):            # Recorre los individuos de "c1"
+                    for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                        distTMP=0                        
+                        for a in range(d):
+                            distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+                        if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
+                M[filasDic[c1]][i]=math.sqrt(nDist)
             
             if tam==1:comm.send(-1,dest=MASTER)
             else: comm.send(0,dest=MASTER)
-               
+    else:
+        while(True):
+            data=comm.recv(source=MASTER)
+            """print("WORKER {}, data= {}".format(myrank, data),end="")"""            
+            if data==-1: 
+                print("TERMINA")
+                exit(1)
+            w=comm.recv(source=MASTER)
+            c1=comm.recv(source=MASTER)
+            c2=comm.recv(source=MASTER)
+            
+            if data==0: 
+                comm.send([],dest=w)
+                print("")
+                continue
+            """print(" worker a enviar: {}. c1={}, c2={}".format(w,c1,c2))"""
+            for x in clustersCentros[c2]:
+                clustersCentros[c1].append(x)            
+            del clustersCentros[c2]
+
+            fila=[]
+            c1N=len(clustersCentros[c1])
+            for i in range(data[0],data[1]):                    
+                aux=0.0
+                nDist=float("inf")
+                c2N=len(clustersCentros[i])
+                for x in range(c1N):            # Recorre los individuos de "c1"
+                    for y in range(c2N):        # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                        distTMP=0
+                        for a in range(d):                                
+                            distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+                        if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
+                fila.append(math.sqrt(nDist))
+            
+            comm.send(fila,dest=w)           
 
 
 
