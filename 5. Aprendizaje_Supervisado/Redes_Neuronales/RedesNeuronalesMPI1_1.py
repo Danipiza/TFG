@@ -1,12 +1,12 @@
-# FUNCIONA PERO NO MUY BIEN, ESTA CON poblacion*100 y sin append 
-
 from mpi4py import MPI
 import random
 import os
 import math
 
+# PIPE LINE
+
 # EJECUTAR
-# mpiexec -np 3 python RedesNeuronalesMPI.py
+# mpiexec -np 3 python RedesNeuronalesMPI1_1.py
 
 def lee(archivo):
     dir=os.getcwd()
@@ -62,44 +62,61 @@ def sigmoide(x):
 def sigmoide_derivado(x):
     return x*(1-x)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def main():
     MASTER = 0              # int.  Valor del proceso master
     END_OF_PROCESSING=-2    # int.  Valor para que un worker termine su ejecucion
     
-    timeStart=0.0           # double.   Para medir el tiempo de ejecucion
+    # Para medir el tiempo de ejecucion
+    timeStart=0.0           # double.   
     timeEnd=0.0
 
-    # DATOS A COMPARTIR 
+    # -----------------------------------------------------------------------------------------
+    # --- DATOS A COMPARTIR -------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------
     tam_entrada=0
     tam_oculta=0
-    tam_salida=0
+    tam_salida=0          
     
-    
-    
-    
-    # MASTER
+    # --- MASTER-------------------------------------------------------------------------------
     entrada=[]          # Valores de altura y peso, de los datos de entrenamiento/prediccion
-    # Ultimo worker
+    
+    # --- ULTIMO WORKER -----------------------------------------------------------------------    
     etiquetas=[]        # Etiquetas para ver el error, y actualizar con backpropagation.
-
-    # TODOS
+    
+    # --- TODOS -------------------------------------------------------------------------------
     capas=[]            # Numero de nodos de cada capa.
     capa_siguiente=0    # Numero de nodos de la siguiente capa.
     numCapas=0          # Numero de capas de cada proceso
     
-    pesos=[]            # Peso de cada capa, nodo, siguiente nodo. peso[capa][act][sig] (menos el ultimo worker)
-    salidas=[]          # salida de cada capa, nodo de la entrada que recibe. salida[capa][nodo]
-    errores=[]          # Errores para actualizar cada capa
+    
+    pesos=[]    # Peso de cada capa, nodo, siguiente nodo. peso[capa][act][sig] (menos el ultimo worker)           
+    salidas=[]  # Salida de cada capa, nodo de la entrada que recibe. salida[capa][nodo]
+    errores=[]  # Errores para actualizar cada capa
 
-    learning_rate=0     # Aprendizaje.
-    tam_entrenamiento=0      # tam_entrenamiento
+    learning_rate=0         # Aprendizaje.
+    tam_entrenamiento=0     
     repeticiones=0
     entrada_prueba_tam=0
     
         
     
-
-    # Init MPI.  rank y tag de MPI y el numero de procesos creados (el primero es el master)
+    # -----------------------------------------------------------------------------------------
+    # --- INIT MPI. ---------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------    
     tag=0
     comm=MPI.COMM_WORLD    
     status = MPI.Status()
@@ -107,26 +124,34 @@ def main():
     numProc=comm.Get_size()
     numWorkers=numProc-1
 
-    
+    # -----------------------------------------------------------------------------------------
+    # --- INIT DATOS --------------------------------------------------------------------------
+    # -----------------------------------------------------------------------------------------
     
     if myrank==MASTER:        
-        #poblacion=lee("datos2042")
-        poblacion=lee("datos80")
-        poblacion=poblacion
-        
+
+        poblacion=lee("datos2042")
+        #poblacion=lee("datos80")  
+        """poblacion=[poblacion[0],poblacion[-1]]
+        print(poblacion)"""
 
         
         poblacion_prueba = [[1.72, 68],
                             [1.90, 85],
-                            [1.60, 50]]        
+                            [1.60, 50]]  
+        
         entrada_prueba_tam=len(poblacion_prueba)
+        
         # peso[Kg]/altura^2[m]
         entrada_prueba_IMC=[(poblacion_prueba[i][1]/poblacion_prueba[i][0]**2) for i in range(entrada_prueba_tam)]
+        
+        # PARA QUE IMPRIMA EL ULTIMO WORKER 
+        comm.send(poblacion_prueba,dest=2)    
 
-        # ----------------------------------------------------------------------------------------
-        # --- Normalizar los datos ---------------------------------------------------------------
-        # ----------------------------------------------------------------------------------------
+        
 
+        
+        # --- NORMALIZAR LOS DATOS ------------------------------------------------------------
         alturasD=[data[0] for data in poblacion]
         pesosD=[data[1] for data in poblacion]
         imcsD=[data[2] for data in poblacion]
@@ -147,72 +172,102 @@ def main():
                          normalizar_dato(data[1], pesoD_min, pesoD_max)] for data in poblacion_prueba]
         
         
-        # ----------------------------------------------------------------------------------------
-        # --- Definir la red neuronal ------------------------------------------------------------
-        # ----------------------------------------------------------------------------------------
         
+        # --- DEFINIR LA RED NEURONAL ---------------------------------------------------------        
         tam_entrada=2
+        tam_oculta=10
         tam_salida=1
         learning_rate=0.1
-        tam_entrenamiento=80
-        repeticiones=1#00
-                
+        tam_entrenamiento=len(poblacion)
+        repeticiones=100
+
         """ Reparte capas TODO cambiar 
         tam_capas_ocultas=[10 for _ in range(2)] # 2 capas con 10 nodos
         """
+
+        print("Tam.Poblacion: {} \tTam. Capa oculta: {} \tNumero de repeticiones: {}\n".format(tam_entrenamiento, tam_oculta,repeticiones))
         
-        capas=[2]
-        comm.send([5],dest=1)
-        comm.send([1],dest=2)
+
+        # --- ENVIAR DATOS DE LA RED NEURONAL -------------------------------------------------        
         
-        capa_siguiente=5
-        comm.send(1,dest=1)
+        # TAMAÑO DE CAPAS DE CADA PROCESO
+        capas=[tam_entrada]
+        comm.send([tam_oculta],dest=1)
+        comm.send([tam_salida],dest=numWorkers)
         
-        # Etiquetas para el ultimo worker
+        # TAMAÑO DE LA CAPA SIGUIENTE CAPA DE CADA PROCESO (SOLO 1 CAPA)
+        capa_siguiente=tam_oculta
+        comm.send(tam_salida,dest=1)
+        
+        # ETIQUETAS PARA EL ULTIMO WORKER
         comm.send(tam_salida, dest=numWorkers)
         etiquetas=[]
         for x in entrada:
             etiquetas.append(x[2])               
         comm.send(etiquetas, dest=numWorkers)
-        
+
+        # VALORES DE CADA INDIVIDUO DEL ENTRENAMIENTO
         comm.send(entrada_prueba_IMC,dest=numWorkers)
         comm.send(imcD_min,dest=numWorkers)
         comm.send(imcD_max,dest=numWorkers)
-    else: # Reciben capas
+    else: 
+        # ULTIMO WORKER RECIBE POBLACION PRUEBA PARA IMPRIMIR CORRECTA
+        if myrank==2: poblacion_prueba=comm.recv(source=MASTER)   
+
+        # TODOS RECIBEN SU TAMAÑO DE CAPA
         capas=comm.recv(source=MASTER)
+        # TODOS MENOS EL ULTIMO WORKER RECIBEN EL TAMAÑO DE LA SIGUIENTE CAPA
         if myrank!=numWorkers: capa_siguiente=comm.recv(source=MASTER)
         else: capa_siguiente=None
 
-    
+    # APRENDIZAJE
     learning_rate=comm.bcast(learning_rate,root=MASTER)
+    # TAMAÑO DE LA POBLACION
     tam_entrenamiento=comm.bcast(tam_entrenamiento,root=MASTER)
+    # NUMERO DE REPETICIONES
     repeticiones=comm.bcast(repeticiones,root=MASTER)
+    # TAMAÑO DE LA POBLACION
     entrada_prueba_tam=comm.bcast(entrada_prueba_tam,root=MASTER)
     
+    # NUMERO DE CAPAS DE CADA PROCESO
     numCapas=len(capas)
 
     # INICIALIZAR PESOS (el ultimo worker no tiene siguiente capa)
     pesos=[]
-    """if myrank!=numWorkers:        
+    if myrank!=numWorkers:        
         for i in range(numCapas-1): # Capas intermedias
             pesos_capa = [[random.uniform(-1, 1) for _ in range(capas[i+1])] for _ in range(capas[i])]
             pesos.append(pesos_capa)
         # Ultima capa del proceso con la capa siguiente
         pesos_capa = [[random.uniform(-1, 1) for _ in range(capa_siguiente)] for _ in range(capas[numCapas-1])]
-        pesos.append(pesos_capa)"""
-    
-    if myrank==0: pesos=[[[0.009291877242879387, -0.9951147922523249, 0.08905839012024352, -0.15405719243715832, 0.9174549957969651], [-0.8001749047430002, 0.6196351179863628, 0.4978160737825592, -0.6339024012446859, 0.6613399652927408]]]
-    elif myrank==1:pesos=[[[0.6036843685017934], [-0.4981216808767255], [0.9150399216812313], [0.10772396548746266], [0.8819651957740591]]]
+        pesos.append(pesos_capa)
+
+    """if myrank==0: 
+        #print(pesos)
+        pesos=[[[0.33586051475778667, 0.04865394057108752, 0.32946261101217966, 0.22869094964703596, 0.9771201021055296], 
+                [-0.6810104847358278, -0.06055518782126046, -0.6328324830100489, 0.7619612558605722, 0.8769042816683505]]]
+        
+    elif myrank==1:
+        #print(pesos)
+        pesos=[[[0.6075948464616394], [-0.6070452781745583], [-0.30293535175767183], [-0.2358202682424062], [-0.5777739940220865]]]"""
+        
     
 
-    if myrank!=numWorkers:
-        print("(ANTES) ID: {}. pesos={}".format(myrank,pesos))
+    """if myrank!=numWorkers:
+        print("(ANTES) ID: {}. pesos={}".format(myrank,pesos))"""
     
+    if myrank==numWorkers:
+        tam_salida=comm.recv(source=MASTER)
+        etiquetas=comm.recv(source=MASTER)
+        
+        entrada_prueba_IMC=comm.recv(source=MASTER)
+        imcD_min=comm.recv(source=MASTER)
+        imcD_max=comm.recv(source=MASTER)
+
     timeStart = MPI.Wtime()
 
     for cont in range(repeticiones):
         salidas=[[] for _ in range(tam_entrenamiento)]
-        
         
         
        
@@ -360,11 +415,11 @@ def main():
                             pesos[i][j][k]+=learning_rate*errores[k]*salidas[tam_entrenamiento+ind-espacio][i][j]
 
                     errores = nuevos_errores
-            timeEntrEnd = MPI.Wtime()
-            print("Tiempo de Entrenamiento: {}s\n".format(timeEntrEnd-timeStart))
+            
         elif myrank!=numProc-1: # Worker1 (OCULTA)
             # FORWARD
-            entrada=comm.recv(source=myrank-1) # Recibe                         
+            entrada=comm.recv(source=myrank-1) # Recibe     
+            
             #salidas.append([entrada]) 
             salidas[0]=[entrada]
             # Capas INTERMEDIAS del PROCESO
@@ -395,7 +450,7 @@ def main():
             
             # Devuelve el ultimo elemento                
             comm.send(salidas[0][-1],dest=myrank+1)
-
+            
             # BACKPROPAGATION Y FORWARD
             for ind in range(tam_entrenamiento-1):                              
                 errores=comm.recv(source=myrank+1)            
@@ -471,7 +526,7 @@ def main():
                 # Devuelve el ultimo elemento
                 comm.send(salidas[ind+1][-1],dest=myrank+1)            
                 
-
+            
 
             # BACKPROPAGATION
             errores=comm.recv(source=myrank+1)            
@@ -509,15 +564,7 @@ def main():
 
             # ENVIA AL ANTERIOR
             comm.send(errores,dest=myrank-1)
-        else: # Worker2 (SALIDA)        
-
-            tam_salida=comm.recv(source=MASTER)
-            etiquetas=comm.recv(source=MASTER)
-            
-            entrada_prueba_IMC=comm.recv(source=MASTER)
-            imcD_min=comm.recv(source=MASTER)
-            imcD_max=comm.recv(source=MASTER)
-            
+        else: # Worker2 (SALIDA)                            
 
             for i in range(tam_entrenamiento):            
                 data=comm.recv(source=myrank-1) # Recibe float:IMC calculado (TODO mejorar?)
@@ -531,10 +578,12 @@ def main():
 
         comm.Barrier()
         
-    if myrank!=numWorkers:
-        print("(DESPUES) ID: {}. pesos={}".format(myrank,pesos))
+    """if myrank!=numWorkers:
+        print("(DESPUES) ID: {}. pesos={}".format(myrank,pesos))"""
 
-
+    if myrank==MASTER:
+        timeEntrEnd = MPI.Wtime()
+        print("Tiempo de Entrenamiento: {}s\n".format(timeEntrEnd-timeStart))
     
     timePredStart = MPI.Wtime()
 
@@ -623,11 +672,12 @@ def main():
         
         for i in range(entrada_prueba_tam):
             data=comm.recv(source=myrank-1) # Recibe float:IMC calculado (TODO mejorar?)
-            
+            prediccion=desnormalizar_dato(data[0],imcD_min,imcD_max)
             #print(data,imcD_min,imcD_max)
-            print(desnormalizar_dato(data[0],imcD_min,imcD_max))
-            """print(  f"Altura: {datos_prueba[i][0]:.2f}m. Peso: {datos_prueba[i][1]:.2f}kg. "
-                f"IMC Predicho: {prediccion:.3f}. IMC Real: {datos_prueba_IMC[i]:.3f}. Fallo: {abs(prediccion-datos_prueba_IMC[i]):.3f}")"""
+            """print(desnormalizar_dato(data[0],imcD_min,imcD_max))"""
+
+            print(  f"Altura: {poblacion_prueba[i][0]:.2f}m. Peso: {poblacion_prueba[i][1]:.2f}kg. "
+                f"IMC Predicho: {prediccion:.3f}. IMC Real: {entrada_prueba_IMC[i]:.3f}. Fallo: {abs(prediccion-entrada_prueba_IMC[i]):.3f}")
             
         
                    

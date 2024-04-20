@@ -71,9 +71,15 @@ class RedNeuronal:
         self.salidas_oculta=[]
         self.salida=0.0
 
-        # Inicializar los pesos de manera aleatoria
-        self.pesos_entrada_oculta=[[random.uniform(-1, 1) for _ in range(self.tam_oculta)] for _ in range(self.tam_entrada)]
+        # Inicializar los pesos de manera aleatoria        
+        
+        self.pesos_entrada_oculta=[[random.uniform(-1, 1) for _ in range(self.tam_oculta)] for _ in range(self.tam_entrada)]        
         self.pesos_salida_oculta=[random.uniform(-1, 1) for _ in range(self.tam_oculta)]
+        
+
+        """self.pesos_entrada_oculta=[[0.33586051475778667, 0.04865394057108752, 0.32946261101217966, 0.22869094964703596, 0.9771201021055296], [-0.6810104847358278, -0.06055518782126046, -0.6328324830100489, 0.7619612558605722, 0.8769042816683505]]
+        self.pesos_salida_oculta=[0.6075948464616394, -0.6070452781745583, -0.30293535175767183, -0.2358202682424062, -0.5777739940220865]
+        """
 
     # Propagacion hacia adelante (forward propagation)
     def forward(self,entrada):        
@@ -183,22 +189,22 @@ def main():
     
     # (Num de nodos)
     tam_entrada=2         # Entrada: Altura y peso
-    tam_oculta=10         # Tamaño de la capa oculta 
+    tam_oculta=5         # Tamaño de la capa oculta 
     tam_salida=1          # Salida: IMC
     
     # Mejor => lr=0.05 rep=1000
     learning_rate=0.1     # Aprendizaje 
-    repeticiones=250      # Numero de repeticiones en el entrenamiento
+    repeticiones=100      # Numero de repeticiones en el entrenamiento
     
     RedN=RedNeuronal(tam_entrada,tam_oculta,tam_salida)
-    print("Tamaño de la capa oculta: {}, numero de repeticiones: {}".format(tam_oculta,repeticiones))
     
+    print("Tam.Poblacion: {} \tTam. Capa oculta: {} \tNumero de repeticiones: {}\n".format(len(datos_entrenamiento), tam_oculta,repeticiones))
     # ----------------------------------------------------------------------------------------
     # --- Entrenamiento ----------------------------------------------------------------------
     # ----------------------------------------------------------------------------------------
     
     timeStart=MPI.Wtime()
-    print("\nEntrenamiento:")
+    print("Entrenamiento:")
 
     for _ in range(repeticiones):
         for data in datos_entrenamiento_normalizados:

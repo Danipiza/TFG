@@ -355,6 +355,7 @@ def main():
         
         
         
+        
         data=comm.recv(source=workers[0])
         if data==0: # CONTINUA
             while(True):
@@ -432,13 +433,12 @@ def main():
 
         timeEnd=MPI.Wtime()
         print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
-        print("Termina master")
         
 
         """for x in asig:
             print("Len=",len(x))#,x)"""
         
-        """n=len(poblacion)
+        n=len(poblacion)
         asignacionesFin=[[-1 for _ in range(n)] for _ in range(C)]
         for numClust in range(C):
             for i in range(numClust+1):
@@ -468,7 +468,7 @@ def main():
         dbMejor=calcula_DB_mejor(DBs)
 
 
-        GUI(C, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])"""
+        GUI(C, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])
         
         # ----------------------------------------------------------------------
         # ----------------------------------------------------------------------
@@ -540,7 +540,6 @@ def main():
             minD=float("inf")                 
             cont+=1
 
-            
             for i in range(tam):                
                 for j in range(filas[i]+1,n):                    
                     if minD>M[i][j]: 
@@ -666,12 +665,12 @@ def main():
             
             # ACTUALIZA FILA (SOLO EL WORKER DE c1)
             if w==myrank:                
-                fila=[-1 for _ in range(c1+1)]
+                """fila=[-1 for _ in range(c1+1)]
                 for i in range(numWorkersDist):                    
                     data=comm.recv(source=numWorkers+1+i)                    
                     for x in data:
                         fila.append(x)
-                """M[filasDic[c1]]=math.sqrt(nDist)"""
+                M[filasDic[c1]]=fila"""
                 
                 for i in range(c1+1,n):                    
                     aux=0.0
@@ -684,7 +683,7 @@ def main():
                                 distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
                             if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
                     M[filasDic[c1]][i]=math.sqrt(nDist)
-                print("Fila workers:",fila,"\n")
+                
                 #print("Fila worker:",M[filasDic[c1]], "\n")
 
 
@@ -696,7 +695,7 @@ def main():
             #if cont==3: izq[10000]=0
             
             
-
+        
 
         if tam==1: 
             comm.send(-1,dest=MASTER)
@@ -780,7 +779,7 @@ def main():
                 data=comm.recv(source=numWorkers+1+i)                    
                 for x in data:
                     fila.append(x)
-            M[filasDic[c1]]=math.sqrt(nDist)"""
+            M[filasDic[c1]]=fila"""
 
             for i in range(c1+1,n):                    
                 aux=0.0

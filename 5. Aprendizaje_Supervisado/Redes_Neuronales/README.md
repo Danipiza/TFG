@@ -1,4 +1,42 @@
 # Red Neuronal
+
+## TODO
+
+## BUSQUEDA DE LA MEJOR TASA DE APRENDIZAJE (learning rate)
+
+## CON HILOS MEJOR? MEMORIA COMPARTIDA EN VEZ DE DISTRIBUIDA
+
+### Solucionar MPI1
+- pesos?
+
+
+### MPI0 Fine tunning:
+Varios Workers ejecutan la clase RedNeuronal con diferentes parte del entrenamiento
+y se juntan en uno al finalizar
+
+[VIDEO](https://www.youtube.com/watch?v=V1-Hm2rNkik&ab_channel=KrishNaik)
+
+La idea básica es tomar las capas de una red pre-entrenada y usarlas como base para una nueva red que se entrenará con los datos combinados. Esto se hace comúnmente en tareas de aprendizaje profundo cuando se tienen conjuntos de datos pequeños y se quiere aprovechar el conocimiento aprendido por una red entrenada en un conjunto de datos más grande.
+
+El procedimiento típico es:
+
+1. Tomar una red pre-entrenada (a menudo entrenada en un conjunto de datos grande como ImageNet o similar).
+2. Quitar la última capa (o capas) de la red, que generalmente está relacionada con la clasificación específica del conjunto de datos original.
+3. Agregar nuevas capas de salida a la red, adaptadas a la tarea específica que se está abordando.
+4. Entrenar la red con el nuevo conjunto de datos, inicializando los pesos con los valores pre-entrenados.
+5. Ajustar los pesos de toda la red (no solo las capas adicionales) en el nuevo conjunto de datos, utilizando técnicas de optimización como el descenso de gradiente estocástico.
+
+Aunque no es tan simple como combinar directamente los pesos de dos redes neuronales entrenadas con diferentes conjuntos de datos, la transferencia de aprendizaje permite aprovechar el conocimiento previo de una red pre-entrenada y adaptarlo a una tarea específica con un nuevo conjunto de datos.
+
+
+### Validacion cruzada?
+
+---
+
+---
+
+---
+
 Basado en la naturaleza, las Redes Neuronales se suelen representar como un cerebro, neuronas interconectadas con otras neuronas,  funcionando como una red. Una trozo de información fluye por muchas neuronas para dar una respuesta, como "mueve tu mano derecha".
 
 El proceso en esta red es directa, una variable de entrada, (por ejemplo una fotografia de una playa) que despues de una serie de calculos, devuelve una salida (para el caso anterior devuelve "playa". Puede ser más especifico y devolver el nombre de la playa si ha sido entrenado para reconocer playas)
@@ -145,31 +183,6 @@ El Master se encarga de la capa de entrada y el último Worker de la capa de sal
 
 [INFO](https://towardsdatascience.com/first-neural-network-for-beginners-explained-with-code-4cfd37e06eaf)
 
-## TODO
 
-
-
-### Validacion cruzada?
-
-### Solucionar MPI 
-- pesos?
-- Distribucion de mensajes
-- bucle for en el entrenamiento en vez de aumentar el tamaño del dataset
-
-### Fine tunning:
-
-[VIDEO](https://www.youtube.com/watch?v=V1-Hm2rNkik&ab_channel=KrishNaik)
-
-La idea básica es tomar las capas de una red pre-entrenada y usarlas como base para una nueva red que se entrenará con los datos combinados. Esto se hace comúnmente en tareas de aprendizaje profundo cuando se tienen conjuntos de datos pequeños y se quiere aprovechar el conocimiento aprendido por una red entrenada en un conjunto de datos más grande.
-
-El procedimiento típico es:
-
-1. Tomar una red pre-entrenada (a menudo entrenada en un conjunto de datos grande como ImageNet o similar).
-2. Quitar la última capa (o capas) de la red, que generalmente está relacionada con la clasificación específica del conjunto de datos original.
-3. Agregar nuevas capas de salida a la red, adaptadas a la tarea específica que se está abordando.
-4. Entrenar la red con el nuevo conjunto de datos, inicializando los pesos con los valores pre-entrenados.
-5. Ajustar los pesos de toda la red (no solo las capas adicionales) en el nuevo conjunto de datos, utilizando técnicas de optimización como el descenso de gradiente estocástico.
-
-Aunque no es tan simple como combinar directamente los pesos de dos redes neuronales entrenadas con diferentes conjuntos de datos, la transferencia de aprendizaje permite aprovechar el conocimiento previo de una red pre-entrenada y adaptarlo a una tarea específica con un nuevo conjunto de datos.
 
 

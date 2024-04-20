@@ -3,6 +3,8 @@ import random
 import os
 import math
 
+# NO FUNCIONA HAY QUE CAMBIARLO
+
 # EJECUTAR
 # mpiexec -np 5 python RedesNeuronalesMPI0.py
 

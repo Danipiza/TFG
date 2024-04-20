@@ -22,6 +22,10 @@ import copy
 """
 Divide el calculo de nuevas distancias para la fila
 
+- 100_2D
+mpiexec -np 6 python aglomerativeMPI_E_sim2.py 
+NO FUNCIONA line 791, in main distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+mpiexec -np 5 python aglomerativeMPI_E_sim2.py
 
 SOLUCIONAR IMPARES??
 NORMAL:
@@ -81,7 +85,7 @@ def main():
     # Inicializa centros
     if myrank==MASTER:       
         #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
-        archivo="6000_1_2D"
+        archivo="100_2D"
         C=7
         poblacion=lee(archivo)
 
