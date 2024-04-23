@@ -6,7 +6,7 @@ import os
 import math
 
 # EJECUTAR
-# mpiexec -np 5 python KMediasMPI_busqueda_E.py
+# mpiexec -np 5 python KMediasMPI_busqueda_E_1.py
 
 # TIEMPO: (datos=100000.txt, k=6, times=5)
 # Tiempo de ejecucion normal:               346.92305260000285s
@@ -54,7 +54,7 @@ def main():
         # 6000_2    2 generaciones de puntos aleatorios
         # 6000_3    6 generaciones de puntos aleatorios
         # 100000_2D     1 generacion de puntos aleatorios
-        poblacion=lee("100000_2D")            
+        poblacion=lee("6000_1_2D")            
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones

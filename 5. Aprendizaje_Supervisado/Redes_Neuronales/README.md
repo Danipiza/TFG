@@ -2,6 +2,32 @@
 
 ## TODO
 
+Fine-tuning a Neural Network explained
+https://www.youtube.com/watch?v=5T-iXNNiwIs&ab_channel=deeplizard
+
+Batch Normalization (“batch norm”) explained
+https://www.youtube.com/watch?v=dXB-KQYkzNU&ab_channel=deeplizard
+
+
+Batch Size in a Neural Network explained
+https://www.youtube.com/watch?v=U4WB9p6ODjM&list=PLZbbT5o_s2xq7LwI2y8_QtvuXZedL6tQU&index=37&ab_channel=deeplizard
+
+Convolutional Neural Networks (CNNs) explained
+https://www.youtube.com/watch?v=YRhxdVk_sIs&ab_channel=deeplizard
+
+Overfitting in a Neural Network explained
+https://www.youtube.com/watch?v=DEMmkFC6IGM&list=PLZbbT5o_s2xq7LwI2y8_QtvuXZedL6tQU&index=13&ab_channel=deeplizard
+
+Underfitting in a Neural Network explained
+https://www.youtube.com/watch?v=0h8lAm5Ki5g&list=PLZbbT5o_s2xq7LwI2y8_QtvuXZedL6tQU&index=14&ab_channel=deeplizard
+
+One-hot Encoding explained
+https://www.youtube.com/watch?v=v_4KWmkwmsU&list=PLZbbT5o_s2xq7LwI2y8_QtvuXZedL6tQU&index=19&ab_channel=deeplizard
+
+Bias in an Artificial Neural Network explained | How bias impacts training
+https://www.youtube.com/watch?v=HetFihsXSys&list=PLZbbT5o_s2xq7LwI2y8_QtvuXZedL6tQU&index=33&ab_channel=deeplizard
+
+
 ## BUSQUEDA DE LA MEJOR TASA DE APRENDIZAJE (learning rate)
 
 ## CON HILOS MEJOR? MEMORIA COMPARTIDA EN VEZ DE DISTRIBUIDA

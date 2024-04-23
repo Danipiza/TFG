@@ -468,16 +468,16 @@ def main():
     poblacion=lee("100_2_2D")
     
     # Numero de clusters ejecutados [1-k]
-    k=12
+    k=5
     
     # Variables: poblacion, numero de clusters, manh o eucl
-    #asignacion=ejecuta_uno(poblacion, k, 1)
+    asignacion=ejecuta_uno(poblacion, k, 1)
 
     # Variables: poblacion, numero de clusters, manh o eucl, numero de repeticiones del algoritmo
     #asignacion=ejecuta_varios(poblacion, k, 0, 10)
 
 
-    ejecuta_busquedaM(poblacion, k, 20)
+    #ejecuta_busquedaM(poblacion, k, 20)
     #ejecuta_busquedaE(poblacion, k, 8)
 
 main()

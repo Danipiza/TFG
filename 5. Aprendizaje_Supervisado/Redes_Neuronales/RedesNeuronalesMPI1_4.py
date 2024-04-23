@@ -180,7 +180,7 @@ def main():
         tam_oculta=10
         tam_salida=1
         learning_rate=0.1
-        repeticiones=100
+        repeticiones=10
         tam_entrenamiento=len(poblacion)
         tam_poblacion=tam_entrenamiento
         tam_entrenamiento*=repeticiones
@@ -321,8 +321,9 @@ def main():
             
             # Devuelve el ultimo elemento
             """comm.send(salidas[ind][-1],dest=1)"""
-            requestS=comm.isend(salidas[ind][-1],dest=1)
-            requestS.wait()
+            requestS=comm.send(salidas[ind][-1],dest=1)
+            #requestS=comm.isend(salidas[ind][-1],dest=1)
+            #requestS.wait()
         
         # BACKPROPAGATION Y FORWARD
         for ind in range(espacio,tam_entrenamiento):            
@@ -359,9 +360,10 @@ def main():
             salidas[ind].append(salidas_capa)
             
             # Devuelve el ultimo elemento
-            """comm.send(salidas[ind][-1],dest=1)"""
-            requestS=comm.isend(salidas[ind][-1],dest=1)
-            requestS.wait()
+            comm.send(salidas[ind][-1],dest=1)
+            #requestS=comm.isend(salidas[ind][-1],dest=1)
+            #requestS.wait()
+
 
             errores=request.wait() 
             # ACTUALIZA
@@ -439,9 +441,9 @@ def main():
         
     elif myrank!=numProc-1: # Worker1 (OCULTA)
         # FORWARD
-        """entrada=comm.recv(source=myrank-1) # Recibe   """  
-        request=comm.irecv(source=myrank-1) # Recibe  
-        entrada=request.wait()
+        entrada=comm.recv(source=myrank-1) # Recibe   
+        #request=comm.irecv(source=myrank-1) # Recibe  
+        #entrada=request.wait()
         
         #salidas.append([entrada]) 
         salidas[0]=[entrada]
@@ -472,9 +474,9 @@ def main():
         salidas[0].append(salidas_capa)
         
         # Devuelve el ultimo elemento                
-        """comm.send(salidas[0][-1],dest=myrank+1)"""
-        requestS=comm.isend(salidas[0][-1],dest=myrank+1)
-        requestS.wait()
+        comm.send(salidas[0][-1],dest=myrank+1)
+        #requestS=comm.isend(salidas[0][-1],dest=myrank+1)
+        #requestS.wait()
         
         # BACKPROPAGATION Y FORWARD
         for ind in range(tam_entrenamiento-1):                              
@@ -482,9 +484,9 @@ def main():
             requestB=comm.irecv(source=myrank+1)    
             
             # ENVIA FORWARD              
-            """entrada=comm.recv(source=myrank-1) # Recibe  """ 
-            requestF=comm.irecv(source=myrank-1) # Recibe   
-            entrada=requestF.wait()
+            entrada=comm.recv(source=myrank-1) # Recibe  
+            #requestF=comm.irecv(source=myrank-1) # Recibe   
+            #entrada=requestF.wait()
             
 
             #salidas.append([entrada])
@@ -517,9 +519,9 @@ def main():
             salidas[ind+1].append(salidas_capa)
             
             # Devuelve el ultimo elemento
-            """comm.send(salidas[ind+1][-1],dest=myrank+1) """  
-            requestS=comm.isend(salidas[ind+1][-1],dest=myrank+1) 
-            requestS.wait()
+            comm.send(salidas[ind+1][-1],dest=myrank+1) 
+            #requestS=comm.isend(salidas[ind+1][-1],dest=myrank+1) 
+            #requestS.wait()
 
             errores=requestB.wait()
 
@@ -556,9 +558,9 @@ def main():
                 errores = nuevos_errores
 
             # ENVIA AL ANTERIOR
-            """comm.send(errores,dest=myrank-1)"""
-            requestS=comm.isend(errores,dest=myrank-1)
-            requestS.wait()
+            comm.send(errores,dest=myrank-1)
+            #requestS=comm.isend(errores,dest=myrank-1)
+            #requestS.wait()
             
                      
             
