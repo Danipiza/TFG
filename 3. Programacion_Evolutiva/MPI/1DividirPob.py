@@ -1,4 +1,4 @@
-from mpi4py import MPI # UCM NO FUNCIONA (NO ESTA LA BIBLIOTECA, TAMPOCO MATPLOT)
+from mpi4py import MPI 
 import sys
 import os
 import random
@@ -14,10 +14,47 @@ from matplotlib.gridspec import GridSpec
 
 import re
 
-def GUI(mejor_total, mejor_generacion, media):    
+# mpiexec -np 5 python 1DividirPob.py
+
+"""
+Metodo 1. Dividir la poblacion.
+
+Cada worker se encarga de una subpoblacion.
+El MASTER selecciona la poblacion a cruzar y mutar, y la divide entre a los workers
+Los WORKERS ejecutar el algoritmo y cuando termina la ejecucion se la envian al MASTER
+    para volver a empezar   
+"""
+
+
+"""
+MASTER:
+
+RECIBE POBLACION DE LOS WORKERS (evaluada)
+while():
+    selec()
+    ENVIA SELECCION DIVIVIDA
+    RECIBE NUEVA POBLACION (mutada, cruzada y evaluada) DE LOS WORKERS
+"""
+
+"""
+WORKER:
+
+init()
+evaluacion()
+ENVIA
+while():
+    RECIBE POBLACION (dividida) A PROCESAR
+    cruce()
+    mutacion()
+    evaluacion()
+    ENVIA SU POBLACION 
+"""
+
+
+def GUI(fits):    
     # Create figure and axes
     #fig, axs = plt.subplots(2, 2, figsize=(18, 12), gridspec_kw={'width_ratios': [1, 2]})
-    n=len(mejor_total)
+    n=len(fits)
     # Define data for the first plot
     x1 = [i for i in range(1, n + 1)]  
     # Define data for the second plot       
@@ -28,10 +65,8 @@ def GUI(mejor_total, mejor_generacion, media):
 
     # Grafico 1 (arriba a la izquierda)
     ax1 = fig.add_subplot(gs[0, 0])
-    ax1.plot(x1, mejor_total, color='b', linestyle='-')    
-    ax1.plot(x1, mejor_generacion, color='r', linestyle='-') 
-    ax1.plot(x1, media, color='g', linestyle='-') 
-    ax1.set_xlabel('Generaciones')
+    ax1.plot(x1, fits, color='b', linestyle='-')    
+    ax1.set_xlabel('Generaciones Master')
     ax1.set_ylabel('Fitness')
     ax1.set_title('2D-Plot"')
     ax1.grid(True)
@@ -42,9 +77,19 @@ def GUI(mejor_total, mejor_generacion, media):
     plt.tight_layout() # Ajustar la disposición de los subplots    
     plt.show() # Mostrar los gráficos
 
+def tamGenes(precision, num_genes, funcion):   
+    ret = []
+    for i in range(num_genes):
+        ret.append(tamGen(precision, funcion.xMin[i], funcion.xMax[i]))
+    return ret
+
+def tamGen(precision, min, max):
+    return math.ceil((math.log10(((max-min)/precision)+1)/math.log10(2)))
+
 # -----------------------------------------------------------------------------------------------
 # --- INDIVIDUO ---------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------
+
 
 
 class Gen:
@@ -103,9 +148,10 @@ class IndividuoReal:
         self.v=[]
         self.fitness=0.0
 
-        if vInd is not None:         
-            for i in range(len(vInd)):
-                self.v.append(vInd[i])
+        if vInd is not None:  
+            self.fitness=vInd.fitness
+            for x in vInd.v:
+                self.v.append(x)
         else:
             self.init(aviones)
 
@@ -263,7 +309,6 @@ class Progn(Exp):
 
     def duplica(self):
         return Progn()
-
 
 # TERMINALES
 class Izquierda(Exp):
@@ -676,11 +721,12 @@ class IndividuoGramatica:
         for x in self.operaciones:
             aux+=x+", "
         return self.gramatica
-        
+  
 
 # -----------------------------------------------------------------------------------------------
 # --- FUNCION -----------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------
+
 
 
 class Funcion(ABC):
@@ -1017,12 +1063,10 @@ class FuncionArbol:
         if a<b: return True
         else: return False
 
-
 # -----------------------------------------------------------------------------------------------
 # --- SELECCION ---------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------
 
-# TODO QUITAR POR TUPLA DE PYTHON?
 class Pair():
     def __init__(self, key, value):
         self.key=key
@@ -1072,7 +1116,7 @@ class Seleccion:
         for _ in range(tam_seleccionados):
             rand=random.random()
             seleccionados.append(IndividuoReal(aviones=None,
-                                           vInd=poblacion[self.busquedaBinaria(rand, prob_acumulada)].v))
+                                           vInd=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
         return seleccionados
     
     def ruletaArbol(self, poblacion, prob_acumulada, tam_seleccionados):
@@ -1140,7 +1184,7 @@ class Seleccion:
             else: ind=indexMin
 
             seleccionados.append(IndividuoReal(aviones=None,
-                                               vInd=poblacion[ind].v))
+                                               vInd=poblacion[ind]))
 
         return seleccionados
 
@@ -1255,7 +1299,7 @@ class Seleccion:
                 else: ind=indexMax
 
             seleccionados.append(IndividuoReal(aviones=None,
-                                               vInd=poblacion[ind].v))
+                                               vInd=poblacion[ind]))
 
         return seleccionados
     
@@ -1342,7 +1386,7 @@ class Seleccion:
         rand=random.random()*incr
         for i in range(tam_seleccionados):       			
             seleccionados.append(IndividuoReal(aviones=None,
-                                               vInd=poblacion[self.busquedaBinaria(rand, prob_acumulada)].v))
+                                               vInd=poblacion[self.busquedaBinaria(rand, prob_acumulada)]))
 			
             rand+=incr		
 
@@ -1413,7 +1457,7 @@ class Seleccion:
             j=0
             while j<num and x<tam_seleccionados:            
                 seleccionados.append(IndividuoReal(aviones=None,
-                                                   vInd=pairs[n-i].get_key().v))
+                                                   vInd=pairs[n-i].get_key()))
                 j+=1
                 x+=1
 			
@@ -1513,7 +1557,7 @@ class Seleccion:
 			
             for j in range(num):
                 seleccionados.append(IndividuoReal(aviones=None,
-                                                   vInd=poblacion[i].v))
+                                                   vInd=poblacion[i]))
                 x+=1
 				
 			
@@ -1530,7 +1574,7 @@ class Seleccion:
         
         for ind in resto:
             seleccionados.append(IndividuoReal(aviones=None,
-                                               vInd=ind.v))
+                                               vInd=ind))
 		
 
         return seleccionados
@@ -1655,7 +1699,7 @@ class Seleccion:
         for i in range(tam_seleccionados):        
             rand = random.random()
             seleccionados.append(IndividuoReal(aviones=None,
-                                               vInd=pairs[self.busquedaBinaria(rand, prob_acumulada)].get_key().v))		
+                                               vInd=pairs[self.busquedaBinaria(rand, prob_acumulada)].get_key()))		
 		
         return seleccionados
 
@@ -1715,7 +1759,6 @@ class Seleccion:
 		
         return seleccionados
 
-    
 # -----------------------------------------------------------------------------------------------
 # --- CRUCE -------------------------------------------------------------------------------------
 # -----------------------------------------------------------------------------------------------
@@ -1833,7 +1876,7 @@ class Cruce:
 
         if n%2==1 :
             ret[n-1]=IndividuoReal(aviones=None,
-                                   vInd=selec[n-1].v) 
+                                   vInd=selec[n-1]) 
             n-=1 # Descarta al ultimo si es impar
 		
 		
@@ -1849,9 +1892,9 @@ class Cruce:
         corte2=0
         while i<n:
             ind1=IndividuoReal(aviones=None,
-                               vInd=selec[i].v)
+                               vInd=selec[i])
             ind2=IndividuoReal(aviones=None,
-                               vInd=selec[i+1].v)
+                               vInd=selec[i+1])
             if random.random()<self.p:                
                 pareja1={} # {int, int}
                 pareja2={} 
@@ -1892,9 +1935,9 @@ class Cruce:
 				
 			
             ret[i]=IndividuoReal(aviones=None,
-                               vInd=ind1.v)
+                               vInd=ind1)
             ret[i+1]=IndividuoReal(aviones=None,
-                               vInd=ind2.v)
+                               vInd=ind2)
             i+=2
 			
 		
@@ -1906,7 +1949,7 @@ class Cruce:
 
         if n%2==1 :
             ret[n-1]=IndividuoReal(aviones=None,
-                                   vInd=selec[n-1].v) 
+                                   vInd=selec[n-1]) 
             n-=1 # Descarta al ultimo si es impar
 
         i=0
@@ -1920,9 +1963,9 @@ class Cruce:
         corte2=0
         while i<n:
             ind1=IndividuoReal(aviones=None,
-                               vInd=selec[i].v)
+                               vInd=selec[i])
             ind2=IndividuoReal(aviones=None,
-                               vInd=selec[i+1].v)
+                               vInd=selec[i+1])
 
             if random.random()<self.p:
                 corte1 = (int) (random.random() * (self.aviones - 2))
@@ -1969,9 +2012,9 @@ class Cruce:
 
             
             ret[i]=IndividuoReal(aviones=None,
-                               vInd=ind1.v)
+                               vInd=ind1)
             ret[i+1]=IndividuoReal(aviones=None,
-                               vInd=ind2.v)
+                               vInd=ind2)
             i+=2
         
         return ret
@@ -1983,7 +2026,7 @@ class Cruce:
 
         if n%2==1 :
             ret[n-1]=IndividuoReal(aviones=None,
-                                   vInd=selec[n-1].v) 
+                                   vInd=selec[n-1]) 
             n-=1 # Descarta al ultimo si es impar
 
         i=0
@@ -1994,9 +2037,9 @@ class Cruce:
         validos=[0 for _ in range(self.aviones-pp)]
         while i<n:
             ind1=IndividuoReal(aviones=None,
-                               vInd=selec[i].v)
+                               vInd=selec[i])
             ind2=IndividuoReal(aviones=None,
-                               vInd=selec[i+1].v)
+                               vInd=selec[i+1])
 
             if random.random()<self.p:    
 
@@ -2059,9 +2102,9 @@ class Cruce:
 
             
             ret[i]=IndividuoReal(aviones=None,
-                               vInd=ind1.v)
+                               vInd=ind1)
             ret[i+1]=IndividuoReal(aviones=None,
-                               vInd=ind2.v)
+                               vInd=ind2)
             i+=2
         
         return ret
@@ -2072,7 +2115,7 @@ class Cruce:
 
         if n%2==1 :
             ret[n-1]=IndividuoReal(aviones=None,
-                                   vInd=selec[n-1].v) 
+                                   vInd=selec[n-1]) 
             n-=1 # Descarta al ultimo si es impar
 		
 		
@@ -2082,9 +2125,9 @@ class Cruce:
         ind2=None
         while i<n:
             ind1=IndividuoReal(aviones=None,
-                               vInd=selec[i].v)
+                               vInd=selec[i])
             ind2=IndividuoReal(aviones=None,
-                               vInd=selec[i+1].v)
+                               vInd=selec[i+1])
 
             if random.random()<self.p:
                 pareja1={}
@@ -2114,9 +2157,9 @@ class Cruce:
 				
 			
             ret[i]=IndividuoReal(aviones=None,
-                               vInd=ind1.v)
+                               vInd=ind1)
             ret[i+1]=IndividuoReal(aviones=None,
-                               vInd=ind2.v)
+                               vInd=ind2)
             i+=2
 			
 		
@@ -2128,7 +2171,7 @@ class Cruce:
 
         if n%2==1 :
             ret[n-1]=IndividuoReal(aviones=None,
-                                   vInd=selec[n-1].v) 
+                                   vInd=selec[n-1]) 
             n-=1 # Descarta al ultimo si es impar
 		
 		
@@ -2140,9 +2183,9 @@ class Cruce:
         corte1=0
         while i<n:
             ind1=IndividuoReal(aviones=None,
-                               vInd=selec[i].v)
+                               vInd=selec[i])
             ind2=IndividuoReal(aviones=None,
-                               vInd=selec[i+1].v)
+                               vInd=selec[i+1])
 
             if random.random()<self.p:
                 listaDinamica=[i for i in range(0,self.aviones)]
@@ -2208,9 +2251,9 @@ class Cruce:
 				
 			
             ret[i]=IndividuoReal(aviones=None,
-                               vInd=ind1.v)
+                               vInd=ind1)
             ret[i+1]=IndividuoReal(aviones=None,
-                               vInd=ind2.v)
+                               vInd=ind2)
             i+=2
 			
 		
@@ -2268,7 +2311,34 @@ class Cruce:
 
         return ret
 
-    
+    def cruce_poblacionGramatica(self, selec, d):
+        n=len(selec)
+        ret=[]
+
+        if n%2==1:
+            ret.append(selec[-1])
+            n-=1  
+
+        corte_maximo=d-1
+
+        for i in range(0, n, 2):
+            ind1=selec[i]
+            ind2=selec[i+1]
+            if random.random()<self.p:
+                corte=random.randint(1, corte_maximo)
+
+                for j in range(corte):
+                    ind1.cromosoma[j], ind2.cromosoma[j] = ind2.cromosoma[j], ind1.cromosoma[j]
+
+            ret.append(IndividuoGramatica(ind1.tam_cromosoma, self.filas, self.columnas,
+                                            cromosoma=ind1.cromosoma,ind=None))
+            ret.append(IndividuoGramatica(ind2.tam_cromosoma, self.filas, self.columnas,
+                                            cromosoma=ind2.cromosoma,ind=None))
+            
+
+        return ret  
+
+
 
 # -----------------------------------------------------------------------------------------------
 # --- MUTACION ----------------------------------------------------------------------------------
@@ -2314,7 +2384,7 @@ class Mutacion:
         act=None
         for i in range(tam_poblacion):                                
             act=IndividuoReal(aviones=None,
-                              vInd=poblacion[i].v);	
+                              vInd=poblacion[i]);	
             			
             if random.random()<self.p:
                 corte1=int(random.random()*(len(act.v)-2))
@@ -2326,7 +2396,7 @@ class Mutacion:
                     act.v[corte2-k]=temp
 			
             ret.append(IndividuoReal(aviones=None,
-                                     vInd=act.v))
+                                     vInd=act))
 		
         return ret
 
@@ -2339,7 +2409,7 @@ class Mutacion:
         act=None
         for i in range(tam_poblacion):                                
             act=IndividuoReal(aviones=None,
-                              vInd=poblacion[i].v);	
+                              vInd=poblacion[i]);	
             			
             if random.random()<self.p:
                 punto1=int(random.random()*(len(act.v)-2))
@@ -2351,7 +2421,7 @@ class Mutacion:
                 
 			
             ret.append(IndividuoReal(aviones=None,
-                                     vInd=act.v))
+                                     vInd=act))
 		
         return ret
     
@@ -2364,7 +2434,7 @@ class Mutacion:
         act=None
         for i in range(tam_poblacion):                                
             act=IndividuoReal(aviones=None,
-                              vInd=poblacion[i].v);	
+                              vInd=poblacion[i]);	
             
             if random.random()<self.p:
                 antiguaPosicion=int(random.random()*(len(act.v)-1))
@@ -2390,7 +2460,7 @@ class Mutacion:
 					
 			
             ret.append(IndividuoReal(aviones=None,
-                                     vInd=act.v))
+                                     vInd=act))
 		
         return ret
     
@@ -2416,7 +2486,7 @@ class Mutacion:
         act=None
         for i in range(tam_poblacion):                                
             act=IndividuoReal(aviones=None,
-                              vInd=poblacion[i].v);	
+                              vInd=poblacion[i]);	
             
             if random.random()<self.p:
                 cont=0
@@ -2453,7 +2523,7 @@ class Mutacion:
                                         vInd=mejor))
             else: 
                 ret.append(IndividuoReal(aviones=None,
-                                        vInd=act.v))
+                                        vInd=act))
             
 					
 			
@@ -2647,6 +2717,18 @@ class Mutacion:
 
         return ret
 
+    def mutacion_poblacionGramatica(self, selec, long_cromosoma):
+        ret=[]
+
+        for ind in selec:
+            if random.random()<self.p:
+                rand=random.randint(0, long_cromosoma - 1)
+                ind.cromosoma[rand]=random.randint(0, 255)
+            
+            ret.append(IndividuoGramatica(ind.tam_cromosoma, self.filas, self.columnas,
+                                            cromosoma=ind.cromosoma,ind=None))
+        return ret
+    
 
 # -----------------------------------------------------------------------------------------------
 # --- ALGORITMO GENETICO ------------------------------------------------------------------------
@@ -2677,796 +2759,6 @@ class PQ(queue.PriorityQueue):
     def size(self):
         return self.qsize()
 
-class AlgoritmoGenetico():
-    def __init__(self,MW):
-        self.MW=MW                  # Class: MainWindow
-        
-        
-        self.funcion=None           # Funcion
-        self.seleccion=None         # Seleccion
-        self.cruce=None             # Cruce
-        self.mutacion=None          # Mutacion
-
-        self.poblacion=[]           # Individuo[]
-        self.tam_genes=[]           # int[]
-
-        self.tam_poblacion=0        # int
-        self.generaciones=0         # int
-        self.num_genes=0            # int
-        self.prob_cruce=0.0         # double (0.1)
-        self.prob_mut=0.0           # double (0-1)
-
-        self.precision=0.0          # double (1, 0.01, 0.001, ...)
-        self.elitismo=0             # int (0-100%)
-
-        self.mejor_total=0.0        # double
-        self.mejor_ind=None         # Individuo
-        self.fitness_total=0        # double
-        self.prob_seleccion=[]      # double
-        self.prob_seleccionAcum=[]  # double[]
-
-        self.elitQ=None   
-
-        # AEROPUERTO
-        self.aviones=0
-        self.pistas=0
-        self.vuelos_id=[]
-        self.TEL=[] # 2D array
-        self.tipo_avion=[]
-
-
-        self.progreso_generaciones=[[] for _ in range(4)]
-
-    # Funcion que inicializa las variables a los valores seleccionados en la interfaz
-    def set_valores(self,tam_poblacion, generaciones, seleccion_idx, cruce_idx, prob_cruce, mutacion_idx,
-                    prob_mut, precision, funcion_idx, num_genes, elitismo,
-                    modo, profundidad, long_cromosoma, filas, columnas, bloating_idx,ticks):
-        
-        self.poblacion=[]
-        self.tam_poblacion=tam_poblacion    
-        self.generaciones=generaciones      
-        self.prob_cruce=prob_cruce        
-        self.prob_mut=prob_mut    
-
-        self.num_genes=num_genes # 2
-        
-        self.elitismo=elitismo  
-        self.tam_elite=int((tam_poblacion*(elitismo/100.0)))  
-
-        self.aviones=0
-
-        self.funcion_idx=funcion_idx
-
-        self.ini_idx=modo
-        self.profundidad=profundidad
-        self.long_cromosoma=long_cromosoma
-        self.filas=filas
-        self.columnas=columnas
-        self.bloating_idx=bloating_idx
-        self.ticks=ticks
-
-
-        if funcion_idx==0: self.funcion=Funcion1()
-        elif funcion_idx==1: self.funcion=Funcion2()
-        elif funcion_idx==2: self.funcion=Funcion3()
-        elif funcion_idx==3: self.funcion=Funcion4(self.num_genes)
-        elif funcion_idx<7:            
-            self.lee_archivos()
-        elif funcion_idx>=7: self.funcion=FuncionArbol(self.filas, self.columnas, self.ticks, obstaculos=False)
-        #else: self.funcion=None # TODO GRAMATICA
-        
-        self.seleccion_idx=seleccion_idx
-        self.seleccion=Seleccion(tam_poblacion, self.funcion.opt)
-        
-        self.cruce_idx=cruce_idx
-        self.cruce=Cruce(prob_cruce,self.tam_elite, self.aviones)    
-        
-        self.mutacion_idx=mutacion_idx        
-        self.mutacion=Mutacion(prob_mut, 
-                               self.aviones, 
-                               self.tam_elite, 3, 
-                               self.filas, self.columnas, 
-                               self.funcion)
-
-        if funcion_idx!=-1: self.elitQ=PQ(0) # 
-        else: self.elitQ=PQ(1) # Cola prioritaria de maximos para almacenar los menores y asi comparar rapidamente
-        self.selec_elite=[]
-
-        if funcion_idx<4: self.tam_genes=self.tamGenes(precision)
-        
-        self.mejor_total=float('+inf')
-        if self.funcion_idx<4:
-            if self.funcion.opt==True: self.mejor_total=float('-inf')
-            else: self.mejor_total=float('+inf')
-        elif self.funcion_idx>6:            
-            self.mejor_total=float('-inf')
-        
-
-    def lee_archivos(self):
-        vuelos_txt="data/"
-        TEL_txt="data/"
-
-        # LEE DE LOS TXT
-        if self.funcion_idx==4:
-            self.aviones=12
-            self.pistas=3
-            vuelos_txt+="vuelos1.txt"
-            TEL_txt+="TEL1.txt"
-        elif self.funcion_idx==5:
-            self.aviones=25
-            self.pistas=5
-            vuelos_txt+="vuelos2.txt"
-            TEL_txt+="TEL2.txt"
-        elif self.funcion_idx==6:
-            self.aviones=100
-            self.pistas=10
-            vuelos_txt+="vuelos3.txt"
-            TEL_txt+="TEL3.txt"
-        
-        i=0
-        self.vuelos_id=[None for _ in range(self.aviones)]
-        self.tipo_avion = [0 for _ in range(self.aviones)]
-        self.TEL = [[0 for _ in range(self.aviones)] for _ in range(self.pistas)]
-        
-        try:
-            # Open the file
-            with open(vuelos_txt, 'r') as vuelos_reader, open(TEL_txt, 'r') as TEL_reader:
-                for line in vuelos_reader:
-                    tokens=line.split()
-                    self.vuelos_id[i]=tokens[0]
-                    if tokens[1]=="W": self.tipo_avion[i]=0
-                    elif tokens[1]=="G": self.tipo_avion[i]=1
-                    else: self.tipo_avion[i]=2
-                    
-                    i+=1
-
-                i=0
-                for line in TEL_reader:
-                    tokens=line.split("\t")
-                    j=0
-                    for t in tokens:
-                        self.TEL[i][j]=int(t)
-                        j+=1
-                    
-                    i+=1
-        except IOError as e:
-            print("Error al leer archivos:", e)
-        
-        self.funcion = FuncionA(self.aviones, self.pistas, self.tipo_avion, self.TEL)    
-        
-        
-
-    def tamGenes(self, precision):   
-        ret = []
-        for i in range(self.num_genes):
-            ret.append(self.tamGen(precision, self.funcion.xMin[i], self.funcion.xMax[i]))
-        return ret
-
-    def tamGen(self, precision, min, max):
-        return math.ceil((math.log10(((max-min)/precision)+1)/math.log10(2)))
-
-    def ejecuta(self):
-        if self.funcion_idx<4: return self.ejecutaBin()
-        elif self.funcion_idx<7: return self.ejecutaReal()
-        elif self.funcion_idx==7: return self.ejecutaArbol()
-        else: return self.ejecutaGramatica()
-
-    def ejecutaBin(self):
-        selec=[]
-
-        self.init_poblacion()    
-        self.evaluacion_poblacionBin()                
-        
-        while self.generaciones > 0:
-            selec=self.seleccion_poblacionBin(5)
-            
-            self.poblacion=self.cruce_poblacionBin(selec)
-            self.poblacion=self.mutacion_poblacionBin(self.poblacion)
-
-            for i in range(self.tam_elite):                
-                self.poblacion.append(self.selec_elite[i])
-            
-            self.evaluacion_poblacionBin()            
-            
-            self.generaciones-=1
-		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
-        return self.mejor_total
-
-    def ejecutaReal(self):
-        selec=[]
-
-        self.init_poblacion()    
-        self.evaluacion_poblacionReal()                
-        
-        while self.generaciones > 0:
-            selec=self.seleccion_poblacionReal(5)
-            
-            self.poblacion=self.cruce_poblacionReal(selec)
-            self.poblacion=self.mutacion_poblacionReal(self.poblacion)
-
-            for i in range(self.tam_elite):
-                self.poblacion.append(self.selec_elite[i])
-            
-            self.evaluacion_poblacionReal()            
-            
-            self.generaciones-=1
-		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
-        return self.mejor_total
-
-    def ejecutaArbol(self):
-        selec=[]
-
-        self.init_poblacionArbol(0)            
-        self.evaluacion_poblacionArbol()                
-        
-        while self.generaciones > 0:
-            selec=self.seleccion_poblacionArbol(5)           
-            
-            self.poblacion=self.cruce_poblacionArbol(selec)              
-            self.poblacion=self.mutacion_poblacionArbol(self.poblacion)  
-
-            for i in range(self.tam_elite):                
-                self.poblacion.append(self.selec_elite[i])
-            
-            self.evaluacion_poblacionArbol()    
-                   
-            
-            self.generaciones-=1
-		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
-        return self.mejor_total
-    
-    def ejecutaGramatica(self):
-        selec=[]
-        
-        self.init_poblacionGramatica(0)       
-        """for x in self.poblacion:
-            print(x)   """  
-        self.evaluacion_poblacionGramatica()                
-        
-        while self.generaciones > 0:
-            selec=self.seleccion_poblacionGramatica(5)           
-            
-            self.poblacion=self.cruce_poblacionGramatica(selec, self.long_cromosoma)              
-            self.poblacion=self.mutacion_poblacionGramatica(self.poblacion)  
-
-            for i in range(self.tam_elite):                
-                self.poblacion.append(self.selec_elite[i])
-            
-            self.evaluacion_poblacionGramatica()    
-                   
-            
-            self.generaciones-=1
-		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
-        return self.mejor_total
-
-
-    def init_poblacion(self):
-        if self.funcion_idx<4: 
-            self.poblacion=[Individuo(self.num_genes, self.tam_genes, self.funcion.xMax, self.funcion.xMin, 
-                                                ind=None) for _ in range(self.tam_poblacion)]
-        else: 
-            self.poblacion=[IndividuoReal(aviones=self.aviones,vInd=None) for _ in range(self.tam_poblacion)]
-
-    def init_poblacionArbol(self, x):
-        self.poblacion=[]
-
-        if self.ini_idx==2:  # RAMPED & HALF
-            D=self.profundidad-1
-            tam=(self.tam_poblacion-x)//D
-            mod=(self.tam_poblacion-x)%D
-            mod2=tam % 2
-
-            if mod!=0:
-                mod2=(tam+1)%2
-                for d in range(self.profundidad, self.profundidad - mod, -1):
-                    for i in range((tam+1)//2):
-                        self.poblacion.append(IndividuoArbol(0, d, self.filas, self.columnas, ind=None))
-                        self.poblacion.append(IndividuoArbol(1, d, self.filas, self.columnas, ind=None))
-                    if mod2==1:
-                        self.poblacion.append(IndividuoArbol(1, d, self.filas, self.columnas, ind=None))
-                mod2=tam%2
-                for d in range(self.profundidad-mod,1,-1):
-                    for i in range(tam//2):
-                        self.poblacion.append(IndividuoArbol(0, d, self.filas, self.columnas, ind=None))
-                        self.poblacion.append(IndividuoArbol(1, d, self.filas, self.columnas, ind=None))
-                    if mod2==1:
-                        self.poblacion.append(IndividuoArbol(1, d, self.filas, self.columnas, ind=None))
-            else:
-                for d in range(2,self.profundidad+1):
-                    for i in range(tam//2):
-                        self.poblacion.append(IndividuoArbol(0, d, self.filas, self.columnas, ind=None))
-                        self.poblacion.append(IndividuoArbol(1, d, self.filas, self.columnas, ind=None))
-                    if mod2==1:
-                        self.poblacion.append(IndividuoArbol(1, d, self.filas, self.columnas, ind=None))
-
-        else:  # COMPLETO o CRECIENTE
-            for i in range(self.tam_poblacion-x):
-                self.poblacion.append(IndividuoArbol(self.ini_idx,self.profundidad, 
-                                                     self.filas, self.columnas,ind=None))
-
-        if x!=0:
-            while len(self.elitQ)!=0:
-                self.poblacion.append(IndividuoArbol(self.ini_idx,self.profundidad, 
-                                                     self.filas, self.columnas, 
-                                                     self.elitQ.pop().getId()))
-    
-    def init_poblacionGramatica(self, x):
-        self.poblacion=[]
-
-        for i in range(self.tam_poblacion-x):
-            self.poblacion.append(IndividuoGramatica(self.long_cromosoma, self.filas, self.columnas,
-                                    cromosoma=None, ind=None))
-
-        if x != 0:
-            while len(self.elitQ) != 0:
-                self.poblacion.append(IndividuoGramatica(tam_cromosoma=None, filas=None, columnas=None,
-                    cromosoma=None,ind=self.elitQ.pop().getId()))
-
-
-
-
-    def evaluacion_poblacionBin(self):        
-        self.fitness_total=0
-        self.prob_seleccion=[0 for _ in range(self.tam_poblacion)]
-        self.prob_seleccionAcum=[0 for _ in range(self.tam_poblacion)]
-        if self.funcion.opt==True: 
-            mejor_generacion = float('-inf')
-            peor_generacion = float('+inf')
-        else: 
-            mejor_generacion = float('+inf')
-            peor_generacion = float('-inf')
-
-
-        
-        for i in range(self.tam_poblacion):            
-            self.poblacion[i].calcular_fenotipo()
-			
-		
-        fit=0.0
-        indexMG=0        
-        for i in range(self.tam_poblacion):
-            fit=self.funcion.fitness(self.poblacion[i].fenotipo)
-            self.poblacion[i].fitness=fit
-            self.fitness_total+=fit
-
-            if self.elitQ.size()<self.tam_elite: self.elitQ.push(i, fit)
-            elif(self.tam_elite!=0 and self.funcion.cmpBool(fit, self.elitQ.top_fit())):
-                self.elitQ.pop()
-                self.elitQ.push(i, fit)
-			
-            
-
-            #if fit>mejor_generacion: mejor_generacion=fit
-            if(self.funcion.cmpBool(fit, mejor_generacion)) :
-                mejor_generacion=fit;	                
-                indexMG=i
-            peor_generacion=self.funcion.cmpPeor(peor_generacion, fit)
-			
-        self.selec_elite=[]
-        for _ in range(self.tam_elite):
-            self.selec_elite.append(Individuo(num=None,tam_genes=None,xMax=None,xMin=None,
-                                                        ind=self.poblacion[self.elitQ.pop()]))
-            
-
-        #if mejor_generacion>self.mejor_total: self.mejor_total=mejor_generacion
-        if(self.funcion.cmpBool(mejor_generacion, self.mejor_total)):
-            self.mejor_total=mejor_generacion;	
-            self.mejor_ind=self.poblacion[indexMG]
-		
-
-
-        self.progreso_generaciones[0].append(self.mejor_total)
-        self.progreso_generaciones[1].append(mejor_generacion)
-        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
-        
-        
-        
-
-        acum=0.0
-        if peor_generacion<0: peor_generacion*=-1
-
-        if self.funcion.opt==False:
-            self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
-            for i in range(self.tam_poblacion):
-                self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
-                self.prob_seleccion[i]/=self.fitness_total
-                acum += self.prob_seleccion[i]
-                self.prob_seleccionAcum[i]=acum			
-        else:
-            self.fitness_total = self.tam_poblacion*1.05*peor_generacion+self.fitness_total
-            for i in range(self.tam_poblacion):
-                self.prob_seleccion[i]=1.05*peor_generacion+self.poblacion[i].fitness
-                self.prob_seleccion[i]/=self.fitness_total
-                acum+=self.prob_seleccion[i]
-                self.prob_seleccionAcum[i]=acum
-        
-        # Whitley recomienda valores próximos a 1.5
-            # Valores mayores ocasionarían superindividuos
-            # Valores menores frenarían la búsqueda sin ningún beneficio
-        self.progreso_generaciones[3].append(self.tam_poblacion*self.prob_seleccion[indexMG])
-
-    def evaluacion_poblacionReal(self):        
-        self.fitness_total=0
-        self.prob_seleccion=[0 for _ in range(self.tam_poblacion)]
-        self.prob_seleccionAcum=[0 for _ in range(self.tam_poblacion)]
-
-        
-        mejor_generacion=float('+inf')
-        peor_generacion=float('-inf')
-
-		
-        fit=0.0
-        indexMG=0        
-        for i in range(self.tam_poblacion):
-            fit=self.funcion.fitness(self.poblacion[i].v)
-            self.poblacion[i].fitness=fit
-            self.fitness_total+=fit
-
-            if self.elitQ.size()<self.tam_elite: self.elitQ.push(i, fit)
-            elif(self.tam_elite!=0 and self.funcion.cmpBool(fit, self.elitQ.top_fit())):
-                self.elitQ.pop()
-                self.elitQ.push(i, fit)
-			
-            
-
-            #if fit>mejor_generacion: mejor_generacion=fit
-            if(self.funcion.cmpBool(fit, mejor_generacion)) :
-                mejor_generacion=fit;	                
-                indexMG=i
-            peor_generacion=self.funcion.cmpPeor(peor_generacion, fit)
-			
-        self.selec_elite=[]
-        for _ in range(self.tam_elite):
-            self.selec_elite.append(IndividuoReal(aviones=None,
-                                                  vInd=self.poblacion[self.elitQ.pop()].v))
-            
-
-        #if mejor_generacion>self.mejor_total: self.mejor_total=mejor_generacion
-        if(self.funcion.cmpBool(mejor_generacion, self.mejor_total)):
-            self.mejor_total=mejor_generacion;	
-            self.mejor_ind=self.poblacion[indexMG]
-		
-
-
-        self.progreso_generaciones[0].append(self.mejor_total)
-        self.progreso_generaciones[1].append(mejor_generacion)
-        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
-        
-        
-        
-        acum=0.0
-        if peor_generacion<0: peor_generacion*=-1
-
-        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
-        for i in range(self.tam_poblacion):
-            self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
-            self.prob_seleccion[i]/=self.fitness_total
-            acum += self.prob_seleccion[i]
-            self.prob_seleccionAcum[i]=acum	
-        
-        # Whitley recomienda valores próximos a 1.5
-            # Valores mayores ocasionarían superindividuos
-            # Valores menores frenarían la búsqueda sin ningún beneficio
-        self.progreso_generaciones[3].append(self.tam_poblacion*self.prob_seleccion[indexMG])
-    
-    def evaluacion_poblacionArbol(self):        
-        self.fitness_total=0
-        self.prob_seleccion=[0 for _ in range(self.tam_poblacion)]
-        self.prob_seleccionAcum=[0 for _ in range(self.tam_poblacion)]
-
-        
-        mejor_generacion=float('-inf')
-        peor_generacion=float('+inf')
-
-		
-        fit=0.0
-        indexMG=0        
-        for i in range(self.tam_poblacion):
-            fit=self.funcion.fitness(self.poblacion[i])
-            self.poblacion[i].fitness=fit
-            self.fitness_total+=fit
-
-            if self.elitQ.size()<self.tam_elite: self.elitQ.push(i, fit)
-            elif(self.tam_elite!=0 and self.funcion.cmpBool(fit, self.elitQ.top_fit())):
-                self.elitQ.pop()
-                self.elitQ.push(i, fit)
-			
-            
-
-            #if fit>mejor_generacion: mejor_generacion=fit
-            if(self.funcion.cmpBool(fit, mejor_generacion)) :
-                mejor_generacion=fit;	                
-                indexMG=i
-            peor_generacion=self.funcion.cmpPeor(peor_generacion, fit)
-			
-        self.selec_elite=[]
-        for _ in range(self.tam_elite):            
-            self.selec_elite.append(IndividuoArbol(modo=None, profundidad=None, filas=None, columnas=None, 
-                                                  ind=self.poblacion[self.elitQ.pop()]))
-            
-
-        #if mejor_generacion>self.mejor_total: self.mejor_total=mejor_generacion
-        if(self.funcion.cmpBool(mejor_generacion, self.mejor_total)):
-            self.mejor_total=mejor_generacion;	
-            self.mejor_ind=self.poblacion[indexMG]
-		
-
-
-        self.progreso_generaciones[0].append(self.mejor_total)
-        self.progreso_generaciones[1].append(mejor_generacion)
-        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
-        
-        
-        
-        acum=0.0
-        if peor_generacion<0: peor_generacion*=-1
-
-        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
-        for i in range(self.tam_poblacion):
-            self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
-            self.prob_seleccion[i]/=self.fitness_total
-            acum += self.prob_seleccion[i]
-            self.prob_seleccionAcum[i]=acum	
-        
-        # Whitley recomienda valores próximos a 1.5
-            # Valores mayores ocasionarían superindividuos
-            # Valores menores frenarían la búsqueda sin ningún beneficio
-        self.progreso_generaciones[3].append(self.tam_poblacion*self.prob_seleccion[indexMG])
-
-    def evaluacion_poblacionGramatica(self):        
-        self.fitness_total=0
-        self.prob_seleccion=[0 for _ in range(self.tam_poblacion)]
-        self.prob_seleccionAcum=[0 for _ in range(self.tam_poblacion)]
-
-        
-        mejor_generacion=float('-inf')
-        peor_generacion=float('+inf')
-
-		
-        fit=0.0
-        indexMG=0        
-        for i in range(self.tam_poblacion):
-            fit=self.funcion.fitness(self.poblacion[i])
-            self.poblacion[i].fitness=fit
-            self.fitness_total+=fit
-
-            if self.elitQ.size()<self.tam_elite: self.elitQ.push(i, fit)
-            elif(self.tam_elite!=0 and self.funcion.cmpBool(fit, self.elitQ.top_fit())):
-                self.elitQ.pop()
-                self.elitQ.push(i, fit)
-			
-            
-
-            #if fit>mejor_generacion: mejor_generacion=fit
-            if(self.funcion.cmpBool(fit, mejor_generacion)) :
-                mejor_generacion=fit;	                
-                indexMG=i
-            peor_generacion=self.funcion.cmpPeor(peor_generacion, fit)
-			
-        self.selec_elite=[]
-        for _ in range(self.tam_elite):            
-            self.selec_elite.append(IndividuoArbol(modo=None, profundidad=None, filas=None, columnas=None, 
-                                                  ind=self.poblacion[self.elitQ.pop()]))
-            
-
-        #if mejor_generacion>self.mejor_total: self.mejor_total=mejor_generacion
-        if(self.funcion.cmpBool(mejor_generacion, self.mejor_total)):
-            self.mejor_total=mejor_generacion;	
-            self.mejor_ind=self.poblacion[indexMG]
-		
-
-
-        self.progreso_generaciones[0].append(self.mejor_total)
-        self.progreso_generaciones[1].append(mejor_generacion)
-        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
-        
-        
-        
-        acum=0.0
-        if peor_generacion<0: peor_generacion*=-1
-
-        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
-        for i in range(self.tam_poblacion):
-            self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
-            self.prob_seleccion[i]/=self.fitness_total
-            acum += self.prob_seleccion[i]
-            self.prob_seleccionAcum[i]=acum	
-        
-        # Whitley recomienda valores próximos a 1.5
-            # Valores mayores ocasionarían superindividuos
-            # Valores menores frenarían la búsqueda sin ningún beneficio
-        self.progreso_generaciones[3].append(self.tam_poblacion*self.prob_seleccion[indexMG])
-
-
-
-    def seleccion_poblacionBin(self, k):         
-        ret=[]
-        
-        if self.seleccion_idx==0: 
-            ret=self.seleccion.ruletaBin(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==1: 
-            ret=self.seleccion.torneoDeterministicoBin(self.poblacion, k, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==2: 
-            ret=self.seleccion.torneoProbabilisticoBin(self.poblacion, k, 0.9, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==3: 
-            ret=self.seleccion.estocasticoUniversalBin(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==4: 
-            ret=self.seleccion.truncamientoBin(self.poblacion, self.prob_seleccion, 0.5, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==5: 
-            ret=self.seleccion.restosBin(self.poblacion, self.prob_seleccion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        else: 
-            ret=self.seleccion.rankingBin(self.poblacion, self.prob_seleccion, 2, self.tam_poblacion-self.tam_elite)
-        return ret
-
-    def seleccion_poblacionReal(self, k):         
-        ret=[]
-        
-        if self.seleccion_idx==0: 
-            ret=self.seleccion.ruletaReal(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==1: 
-            ret=self.seleccion.torneoDeterministicoReal(self.poblacion, k, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==2: 
-            ret=self.seleccion.torneoProbabilisticoReal(self.poblacion, k, 0.9, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==3: 
-            ret=self.seleccion.estocasticoUniversalReal(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==4: 
-            ret=self.seleccion.truncamientoReal(self.poblacion, self.prob_seleccion, 0.5, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==5: 
-            ret=self.seleccion.restosReal(self.poblacion, self.prob_seleccion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        else: 
-            ret=self.seleccion.rankingReal(self.poblacion, self.prob_seleccion, 2, self.tam_poblacion-self.tam_elite)
-        return ret
-    
-    def seleccion_poblacionArbol(self, k):         
-        ret=[]
-        
-        if self.seleccion_idx==0: 
-            ret=self.seleccion.ruletaArbol(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==1: 
-            ret=self.seleccion.torneoDeterministicoArbol(self.poblacion, k, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==2: 
-            ret=self.seleccion.torneoProbabilisticoArbol(self.poblacion, k, 0.9, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==3: 
-            ret=self.seleccion.estocasticoUniversalArbol(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==4: 
-            ret=self.seleccion.truncamientoArbol(self.poblacion, self.prob_seleccion, 0.5, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==5: 
-            ret=self.seleccion.restosArbol(self.poblacion, self.prob_seleccion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        else: 
-            ret=self.seleccion.rankingArbol(self.poblacion, self.prob_seleccion, 2, self.tam_poblacion-self.tam_elite)
-        return ret
-    
-    def seleccion_poblacionGramatica(self, k):         
-        ret=[]
-        
-        if self.seleccion_idx==0: 
-            ret=self.seleccion.ruletaGramatica(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==1: 
-            ret=self.seleccion.torneoDeterministicoGramatica(self.poblacion, k, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==2: 
-            ret=self.seleccion.torneoProbabilisticoGramatica(self.poblacion, k, 0.9, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==3: 
-            ret=self.seleccion.estocasticoUniversalGramatica(self.poblacion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==4: 
-            ret=self.seleccion.truncamientoGramatica(self.poblacion, self.prob_seleccion, 0.5, self.tam_poblacion-self.tam_elite)
-        elif self.seleccion_idx==5: 
-            ret=self.seleccion.restosGramatica(self.poblacion, self.prob_seleccion, self.prob_seleccionAcum, self.tam_poblacion-self.tam_elite)
-        else: 
-            ret=self.seleccion.rankingGramatica(self.poblacion, self.prob_seleccion, 2, self.tam_poblacion-self.tam_elite)
-        return ret
-
-      
-    def cruce_poblacionBin(self, selec):
-        ret=[]
-        if self.cruce_idx==0: return self.cruce.cruce_monopuntoBin(selec)
-        elif self.cruce_idx==1: return self.cruce.cruce_uniformeBin(selec)
-        else:
-            print("Cruce Binario, Solo hay cruce Mono-Punto y Uniforme")
-            exit(1)
-    
-    # TODO
-    def cruce_poblacionReal(self, selec):
-        ret=[]
-        
-        if self.cruce_idx==2: return self.cruce.PMX(selec) # PMX
-        elif self.cruce_idx==3: return self.cruce.OX(selec) # OX
-        elif self.cruce_idx==4: return self.cruce.OX_PP(selec,3)
-        elif self.cruce_idx==5: return self.cruce.CX(selec)
-        elif self.cruce_idx==6: return self.cruce.CO(selec)      
-        else:
-            print("Cruce Real, No tiene cruce Mono-Punto o Uniforme o Intercambio")
-            exit(1)
-
-    def cruce_poblacionArbol(self, selec):
-        ret=[]
-        
-        if self.cruce_idx==7: return self.cruce.intercambioArbol(selec) # PMX     
-        else:
-            print("Cruce Arbol, Solo tiene intercambio (7)")
-            exit(1)
-
-    def cruce_poblacionGramatica(self, selec, d):
-        n=len(selec)
-        ret=[]
-
-        if n%2==1:
-            ret.append(selec[-1])
-            n-=1  
-
-        corte_maximo=d-1
-
-        for i in range(0, n, 2):
-            ind1 = selec[i]
-            ind2 = selec[i+1]
-            if random.random() < self.prob_cruce:
-                corte = random.randint(1, corte_maximo)
-
-                for j in range(corte):
-                    ind1.cromosoma[j], ind2.cromosoma[j] = ind2.cromosoma[j], ind1.cromosoma[j]
-
-            ret.append(IndividuoGramatica(ind1.tam_cromosoma, self.filas, self.columnas,
-                                          cromosoma=ind1.cromosoma,ind=None))
-            ret.append(IndividuoGramatica(ind2.tam_cromosoma, self.filas, self.columnas,
-                                          cromosoma=ind2.cromosoma,ind=None))
-            
-
-        return ret     
-        
-        
-    def mutacion_poblacionBin(self, selec):
-        ret=[]    
-        
-        if self.mutacion_idx==0: return self.mutacion.mut_basicaBin(selec)
-        else:
-            print("Mutacion Binaria, Solo hay mutacion basica")
-            exit(1)
-    
-    def mutacion_poblacionReal(self, selec):
-        ret=[]    
-        
-        if self.mutacion_idx==1: return self.mutacion.insercion(selec)
-        elif self.mutacion_idx==2: return self.mutacion.intercambio(selec) 
-        elif self.mutacion_idx==3: return self.mutacion.inversion(selec) 
-        elif self.mutacion_idx==4: return self.mutacion.heuristica(selec)
-        else:
-            print("Cruce Real, No hay Mutacion Basica")
-            exit(1)
-
-    def mutacion_poblacionArbol(self, selec):
-        ret=[]   
-        if self.mutacion_idx==5: return self.mutacion.terminal(selec) 
-        elif self.mutacion_idx==6: return self.mutacion.funcional(selec) 
-        elif self.mutacion_idx==7: return self.mutacion.arbol(selec)  
-        elif self.mutacion_idx==8: return self.mutacion.permutacion(selec) 
-        elif self.mutacion_idx==9: return self.mutacion.hoist(selec)  
-        elif self.mutacion_idx==10: return self.mutacion.contraccion(selec) 
-        elif self.mutacion_idx==11: return self.mutacion.expansion(selec)   
-        else:
-            print("Cruce Arbol, No hay Mutacion Basica o las reales")
-            exit(1)
-
-    def mutacion_poblacionGramatica(self, selec):
-        ret=[]
-
-        for ind in selec:
-            if random.random()<self.prob_mut:
-                rand=random.randint(0, self.long_cromosoma - 1)
-                ind.cromosoma[rand]=random.randint(0, 255)
-            
-            ret.append(IndividuoGramatica(ind.tam_cromosoma, self.filas, self.columnas,
-                                          cromosoma=ind.cromosoma,ind=None))
-        return ret  
-        
-       
-
 
 # -----------------------------------------------------------------------------------------------
 # --- MAIN --------------------------------------------------------------------------------------
@@ -3474,7 +2766,10 @@ class AlgoritmoGenetico():
 
 
 def main():
-    AG=AlgoritmoGenetico(None)
+    MASTER = 0              # int.  Valor del proceso master
+    END_OF_PROCESSING=-2    # int.  Valor para que un worker termine su ejecucion
+
+    
     
     seleccion_opt = ["Ruleta", 
                      "Torneo Determinista", 
@@ -3519,292 +2814,1019 @@ def main():
                    "Aeropuerto 3",
                    "Arbol",
                    "Gramatica"]
-        
-    tam_poblacion=500
-    generaciones=250
-
-    # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
-    #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=1
     
-    # 0: Basica | 1: Uniforme | 
-    # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
-    # 7: Intercambio
-    cruce_idx=2
-    prob_cruce=0.6
-    
-    # 0: Basica    |     
-    # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
-    # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
-    #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-    mut_idx=1
-    prob_mut=0.3 # Binario: 0.05 | Real: 0.3
+    # DATOS A COMPARTIR
+    tam_poblacion=0
+    tam_poblacionDiv=0
+    generaciones=0
+    num_genes=0
+    tam_genes=[]
+    seleccion_idx=0
+    cruce_idx=0
+    prob_cruce=0.0
+    mut_idx=0
+    prob_mut=0.0 
+    precision=0.00 
+    funcion_idx=0
+    elitismo=0 
 
-    precision=0.001
-
-    # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
-    # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
-    # 7: Arbol        | 8: Gramatica
-    funcion_idx=4
-    d=2
-    elitismo=0
-
-    # 0: Completa | 1: Creciente | 2: Ramped & Half 
     modo=0
-    profundidad=4
-
-    long_cromosoma=100
-
-    filas=8
-    columnas=8
-    # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
+    profundidad=0
+    long_cromosoma=0
+    filas=0
+    columnas=0    
     bloating_idx=0
-    ticks=100
+    ticks=0
 
-    AG.set_valores( tam_poblacion, 
-                    generaciones, 
-                    seleccion_idx,
-                    cruce_idx, 
-                    prob_cruce,
-                    mut_idx, 
-                    prob_mut,
-                    precision, 
-                    funcion_idx, 
-                    d, 
-                    elitismo,
-                    
-                    modo,
-                    profundidad,
-                    long_cromosoma,
-                    filas,
-                    columnas,
-                    bloating_idx,
-                    ticks)  
+    poblacion=[]           # Individuo[]   
+    mejor_total=0.0        
+    
+    # 
+    num_torneo=5 
+
+    funcion=None
+    seleccion=None
+    cruce=None
+    mutacion=None
+
+    elitQ=None
+    tam_elite=0
+    selec_elite=[]
+
+    aviones=0
+    pistas=0
+    vuelos_id=[]
+    tipo_avion=[]
+    TEL=[]
+
+    # Init MPI.  rank y tag de MPI y el numero de procesos creados (el primero es el master)
+    tag=0
+    comm=MPI.COMM_WORLD    
+    status = MPI.Status()
+    myrank=comm.Get_rank()
+    numProc=comm.Get_size()
+    numWorkers=numProc-1
+
+    if myrank==MASTER:
+        tam_poblacion=500
+        tam_poblacionDiv=tam_poblacion//numWorkers
+        tam_poblacion=tam_poblacionDiv*numWorkers
+
+        generaciones=250
+
+        # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
+        #           | 4: Truncamiento  | 5: Restos | 6: Ranking
+        seleccion_idx=1
+        # 0: Basica | 1: Uniforme | 
+        # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
+        # 7: Intercambio
+        cruce_idx=2
+        prob_cruce=0.6
+        # 0: Basica    |     
+        # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
+        # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
+        #              | 9: Hoist       | 10: Contraccion | 11: Expansion
+        mut_idx=1
+        # Binario: 0.05 | Real: 0.3
+        prob_mut=0.05    
+        precision=0.001
+        # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
+        # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
+        # 7: Arbol        | 8: Gramatica
+        funcion_idx=4
+        num_genes=2
+
+        # 0: Completa | 1: Creciente | 2: Ramped & Half 
+        modo=0
+        profundidad=4
+
+        long_cromosoma=100
+
+        filas=8
+        columnas=8
+        # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
+        bloating_idx=0
+        ticks=100
         
 
-    print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
+        if funcion_idx==0: funcion=Funcion1()
+        elif funcion_idx==1: funcion=Funcion2()
+        elif funcion_idx==2: funcion=Funcion3()
+        elif funcion_idx==3: funcion=Funcion4(num_genes)
+        elif funcion_idx<7:
+            vuelos_txt="data/"
+            TEL_txt="data/"
+
+            # LEE DE LOS TXT
+            if funcion_idx==4:
+                aviones=12
+                pistas=3
+                vuelos_txt+="vuelos1.txt"
+                TEL_txt+="TEL1.txt"
+            elif funcion_idx==5:
+                aviones=25
+                pistas=5
+                vuelos_txt+="vuelos2.txt"
+                TEL_txt+="TEL2.txt"
+            elif funcion_idx==6:
+                aviones=100
+                pistas=10
+                vuelos_txt+="vuelos3.txt"
+                TEL_txt+="TEL3.txt"
+            
+            i=0
+            vuelos_id=[None for _ in range(aviones)]
+            tipo_avion = [0 for _ in range(aviones)]
+            TEL = [[0 for _ in range(aviones)] for _ in range(pistas)]
+            
+            try:
+                # Open the file
+                with open(vuelos_txt, 'r') as vuelos_reader, open(TEL_txt, 'r') as TEL_reader:
+                    for line in vuelos_reader:
+                        tokens=line.split()
+                        vuelos_id[i]=tokens[0]
+                        if tokens[1]=="W": tipo_avion[i]=0
+                        elif tokens[1]=="G": tipo_avion[i]=1
+                        else: tipo_avion[i]=2
+                        
+                        i+=1
+
+                    i=0
+                    for line in TEL_reader:
+                        tokens=line.split("\t")
+                        j=0
+                        for t in tokens:
+                            TEL[i][j]=int(t)
+                            j+=1
+                        
+                        i+=1
+            except IOError as e:
+                print("Error al leer archivos:", e)
+            
+            funcion = FuncionA(aviones, pistas, tipo_avion, TEL)   
+        else: funcion=FuncionArbol(filas, columnas, ticks, obstaculos=False)
+
+        seleccion=Seleccion(tam_poblacion, funcion.opt)
+        cruce=Cruce(prob_cruce,tam_elite, aviones)    
+        mutacion=Mutacion(prob_mut, 
+                               aviones, 
+                               tam_elite, 3, 
+                               filas, columnas, 
+                               funcion)
+
+        elitismo=0
+        tam_elite=int((tam_poblacion*(elitismo/100.0)))  
+        if funcion_idx!=-1: elitQ=PQ(0) # TODO
+        else: elitQ=PQ(1) # Cola prioritaria de maximos para almacenar los menores y asi comparar rapidamente
+        selec_elite=[]
+
+        if funcion_idx<4: tam_genes=tamGenes(precision, num_genes,funcion)
+
+        print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
                                                                       seleccion_opt[seleccion_idx],
                                                                       cruce_opt[cruce_idx],
                                                                       prob_cruce,
                                                                       mutacion_opt[mut_idx],
                                                                       prob_mut))
-    
-    print("Tam. Poblacion: {}\t Num. Generaciones: {}\t Elitismo: {}%".format(tam_poblacion,
+        print("Tam. Poblacion: {}\t Num. Generaciones: {}\t Elitismo: {}%".format(tam_poblacion,
                                                                              generaciones,
                                                                              elitismo))
-    
+
     totalTimeStart = MPI.Wtime()
-    val=AG.ejecuta()
-    totalTimeEnd = MPI.Wtime()
-    print("Valor Optimo: {}\n".format(val))
-    print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
 
+    tam_poblacionDiv=comm.bcast(tam_poblacionDiv, root=MASTER)
+    generaciones=comm.bcast(generaciones, root=MASTER)
+    seleccion_idx=comm.bcast(seleccion_idx, root=MASTER)
+    cruce_idx=comm.bcast(cruce_idx, root=MASTER)
+    prob_cruce=comm.bcast(prob_cruce, root=MASTER)
+    mut_idx=comm.bcast(mut_idx, root=MASTER)
+    prob_mut=comm.bcast(prob_mut, root=MASTER)
+    precision=comm.bcast(precision, root=MASTER)
+    funcion_idx=comm.bcast(funcion_idx, root=MASTER)
+    num_genes=comm.bcast(num_genes, root=MASTER)
+    elitismo=comm.bcast(elitismo, root=MASTER) 
+    tam_genes=comm.bcast(tam_genes, root=MASTER) 
 
+    modo=comm.bcast(modo, root=MASTER)
+    profundidad=comm.bcast(profundidad, root=MASTER)
+    long_cromosoma=comm.bcast(long_cromosoma, root=MASTER)
+    filas=comm.bcast(filas, root=MASTER)
+    columnas=comm.bcast(columnas, root=MASTER)
+    bloating_idx=comm.bcast(bloating_idx, root=MASTER)
+    ticks=comm.bcast(ticks, root=MASTER)
 
-
-
-def pruebas():
+    funcion=comm.bcast(funcion, root=MASTER) 
+    #seleccion no se comparte
+    cruce=comm.bcast(cruce, root=MASTER) 
+    mutacion=comm.bcast(mutacion, root=MASTER) 
+    #elitQ
+    #selec_elite
+    if funcion_idx>3:
+        aviones=comm.bcast(aviones, root=MASTER) 
+        pistas=comm.bcast(pistas, root=MASTER) 
+        vuelos_id=comm.bcast(vuelos_id, root=MASTER) 
+        tipo_avion=comm.bcast(tipo_avion, root=MASTER) 
+        TEL=comm.bcast(TEL, root=MASTER) 
     
-
-    AG=AlgoritmoGenetico(None)
     
-    seleccion_opt = ["Ruleta:\t\t", 
-                     "Torneo Determinista:\t", 
-                     "Torneo Probabilístico:\t", 
-                     "Estocástico Universal:\t",
-                     "Truncamiento:\t\t",
-                     "Restos:\t\t",
-                     "Ranking:\t\t"]
+    if myrank==MASTER:
         
-    cruce_opt = ["Básica", 
-                 "Uniforme",
-                 
-                 "PMX",
-                 "OX",
-                 "OX-PP",
-                 "CX",
-                 "CO",
-                 
-                 "Intercambio"]
-    
-    mutacion_opt = ["Básica",
-                    
-                    "Insercion",
-                    "Intercambio",
-                    "Inversion",
-                    "Heuristica",
-                    
-                    "Terminal",
-                    "Funcional",
-                    "Arbol",
-                    "Permutacion",
-                    "Hoist",
-                    "Contraccion",
-                    "Expansion"]
+        poblacion=[]
+        prob_seleccionAcum=[]
+        prob_seleccion=[]
 
-    funcion_opt = ["F1: Calibracion y Prueba",
-                   "F2: Mishra Bird",
-                   "F3: Holder table",
-                   "F4: Michalewicz (Binaria)",
-                   "Aeropuerto 1",
-                   "Aeropuerto 2",
-                   "Aeropuerto 3",
-                   "Arbol",
-                   "Gramatica"]
+        if funcion_idx<4: # BINARIO
+            #RECIBE POBLACION DE LOS WORKERS (evaluada)
+            for _ in range(numWorkers):
+                data=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
+                source_rank=status.Get_source() 
+                for x in data:
+                    poblacion.append(Individuo(num=None, tam_genes=None, xMax=None, xMin=None, 
+                                               ind=x))
+                if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccionAcum.append(x)
+                if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccion.append(x)
+
+                
+
+            progreso=[]
+            
+            while generaciones>0:
+                selec=[]
+                if seleccion_idx==0: 
+                    selec=seleccion.ruletaBin(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==1: 
+                    selec=seleccion.torneoDeterministicoBin(poblacion, num_torneo, tam_poblacion-tam_elite)
+                elif seleccion_idx==2: 
+                    selec=seleccion.torneoProbabilisticoBin(poblacion, num_torneo, 0.9, tam_poblacion-tam_elite)
+                elif seleccion_idx==3: 
+                    selec=seleccion.estocasticoUniversalBin(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==4: 
+                    selec=seleccion.truncamientoBin(poblacion, prob_seleccion, 0.5, tam_poblacion-tam_elite)
+                elif seleccion_idx==5: 
+                    selec=seleccion.restosBin(poblacion, prob_seleccion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                else: 
+                    selec=seleccion.rankingBin(poblacion, prob_seleccion, 2, tam_poblacion-tam_elite)
+                
+                #ENVIA SELECCION DIVIVIDA
+                izq=0
+                for i in range(1,numWorkers+1):                
+                    comm.send(selec[izq:izq+tam_poblacionDiv],dest=i)
+                    izq+=tam_poblacionDiv
+                
+                # PROCESA POBLACION RECIBIDA (La anterior poblacion no la que se acaba de enviar)
+                if tam_elite>0:
+                    for i in range(tam_poblacion):
+                        if elitQ.size()<tam_elite: elitQ.push(i, poblacion[i].fitness)
+                        elif(tam_elite!=0 and funcion.cmpBool(poblacion[i].fitness, elitQ.top_fit())):
+                            elitQ.pop()
+                            elitQ.push(i, poblacion[i].fitness)               
+
+                    selec_elite=[]
+                    for _ in range(tam_elite):
+                        selec_elite.append(Individuo(num=None, tam_genes=None, xMax=None, xMin=None, 
+                                                     ind=poblacion[elitQ.pop()]))
+                    progreso.append(selec_elite[-1].fitness)
+                else: # No hay elitismo
+                    mejor_generacion=float("inf")
+                    for ind in poblacion:
+                        if mejor_generacion>ind.fitness: mejor_generacion=ind.fitness
+                    progreso.append(mejor_generacion)
+                        
+
+                #RECIBE NUEVA POBLACION (mutada, cruzada y evaluada) DE LOS WORKERS
+                data=comm.recv(source=MPI.ANY_SOURCE)            
+                for _ in range(numWorkers-1):                                
+                    for x in data:
+                        poblacion.append(Individuo(num=None, tam_genes=None, xMax=None, xMin=None, 
+                                               ind=x))
+                    data=comm.recv(source=MPI.ANY_SOURCE)
+                tmp=len(data)
+                for i in range(tmp-tam_elite):
+                    poblacion.append(Individuo(num=None, tam_genes=None, xMax=None, xMin=None, 
+                                               ind=data[i]))
+                for i in range(tam_elite):
+                    poblacion.append(selec_elite[i])
+
+                
+
+                generaciones-=1
+        elif funcion_idx<7:
+            #RECIBE POBLACION DE LOS WORKERS (evaluada)
+            for _ in range(numWorkers):
+                data=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
+                source_rank=status.Get_source() 
+                for x in data:
+                    poblacion.append(IndividuoReal(aviones=None,vInd=x))
+                if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccionAcum.append(x)
+                if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccion.append(x)
+
+                
+
+            progreso=[]
+            
+            while generaciones>0:
+                selec=[]
+                if seleccion_idx==0: 
+                    selec=seleccion.ruletaReal(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==1: 
+                    selec=seleccion.torneoDeterministicoReal(poblacion, num_torneo, tam_poblacion-tam_elite)
+                elif seleccion_idx==2: 
+                    selec=seleccion.torneoProbabilisticoReal(poblacion, num_torneo, 0.9, tam_poblacion-tam_elite)
+                elif seleccion_idx==3: 
+                    selec=seleccion.estocasticoUniversalReal(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==4: 
+                    selec=seleccion.truncamientoReal(poblacion, prob_seleccion, 0.5, tam_poblacion-tam_elite)
+                elif seleccion_idx==5: 
+                    selec=seleccion.restosReal(poblacion, prob_seleccion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                else: 
+                    selec=seleccion.rankingReal(poblacion, prob_seleccion, 2, tam_poblacion-tam_elite)
+                
+                #ENVIA SELECCION DIVIVIDA
+                izq=0
+                for i in range(1,numWorkers+1):                
+                    comm.send(selec[izq:izq+tam_poblacionDiv],dest=i)
+                    izq+=tam_poblacionDiv
+                
+                # PROCESA POBLACION RECIBIDA (La anterior poblacion no la que se acaba de enviar)
+                if tam_elite>0:
+                    for i in range(tam_poblacion):
+                        if elitQ.size()<tam_elite: elitQ.push(i, poblacion[i].fitness)
+                        elif(tam_elite!=0 and funcion.cmpBool(poblacion[i].fitness, elitQ.top_fit())):
+                            elitQ.pop()
+                            elitQ.push(i, poblacion[i].fitness)               
+
+                    selec_elite=[]
+                    for _ in range(tam_elite):
+                        selec_elite.append(IndividuoReal(aviones=None,
+                                                        vInd=poblacion[elitQ.pop()]))
+                    progreso.append(selec_elite[-1].fitness)
+                else: # No hay elitismo
+                    mejor_generacion=float("inf")
+                    for ind in poblacion:
+                        if mejor_generacion>ind.fitness: mejor_generacion=ind.fitness
+                    progreso.append(mejor_generacion)
+                        
+
+                #RECIBE NUEVA POBLACION (mutada, cruzada y evaluada) DE LOS WORKERS
+                data=comm.recv(source=MPI.ANY_SOURCE)            
+                for _ in range(numWorkers-1):                                
+                    for x in data:
+                        #poblacion.append(x)
+                        poblacion.append(IndividuoReal(aviones=None,vInd=x))
+                    data=comm.recv(source=MPI.ANY_SOURCE)
+                tmp=len(data)
+                for i in range(tmp-tam_elite):
+                    #poblacion.append(data[i])
+                    poblacion.append(IndividuoReal(aviones=None,vInd=data[i]))
+                for i in range(tam_elite):
+                    poblacion.append(selec_elite[i])
+
+                
+
+                generaciones-=1
+        elif funcion_idx==7:
+            #RECIBE POBLACION DE LOS WORKERS (evaluada)
+            for _ in range(numWorkers):
+                data=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
+                source_rank=status.Get_source() 
+                for x in data:
+                    poblacion.append(IndividuoArbol(modo=None, profundidad=None, filas=None, columnas=None, 
+                                                    ind=x))
+                if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccionAcum.append(x)
+                if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccion.append(x)
+
+                
+
+            progreso=[]
+            
+            while generaciones>0:
+                selec=[]
+                if seleccion_idx==0: 
+                    selec=seleccion.ruletaArbol(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==1: 
+                    selec=seleccion.torneoDeterministicoArbol(poblacion, num_torneo, tam_poblacion-tam_elite)
+                elif seleccion_idx==2: 
+                    selec=seleccion.torneoProbabilisticoArbol(poblacion, num_torneo, 0.9, tam_poblacion-tam_elite)
+                elif seleccion_idx==3: 
+                    selec=seleccion.estocasticoUniversalArbol(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==4: 
+                    selec=seleccion.truncamientoArbol(poblacion, prob_seleccion, 0.5, tam_poblacion-tam_elite)
+                elif seleccion_idx==5: 
+                    selec=seleccion.restosArbol(poblacion, prob_seleccion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                else: 
+                    selec=seleccion.rankingArbol(poblacion, prob_seleccion, 2, tam_poblacion-tam_elite)
+                
+                #ENVIA SELECCION DIVIVIDA
+                izq=0
+                for i in range(1,numWorkers+1):                
+                    comm.send(selec[izq:izq+tam_poblacionDiv],dest=i)
+                    izq+=tam_poblacionDiv
+                
+                # PROCESA POBLACION RECIBIDA (La anterior poblacion no la que se acaba de enviar)
+                if tam_elite>0:
+                    for i in range(tam_poblacion):
+                        if elitQ.size()<tam_elite: elitQ.push(i, poblacion[i].fitness)
+                        elif(tam_elite!=0 and funcion.cmpBool(poblacion[i].fitness, elitQ.top_fit())):
+                            elitQ.pop()
+                            elitQ.push(i, poblacion[i].fitness)               
+
+                    selec_elite=[]
+                    for _ in range(tam_elite):
+                        selec_elite.append(IndividuoArbol(modo=None, profundidad=None, filas=None, columnas=None, 
+                                                    ind=poblacion[elitQ.pop()]))
+                        
+                    progreso.append(selec_elite[-1].fitness)
+                else: # No hay elitismo
+                    mejor_generacion=float("inf")
+                    for ind in poblacion:
+                        if mejor_generacion>ind.fitness: mejor_generacion=ind.fitness
+                    progreso.append(mejor_generacion)
+                        
+
+                #RECIBE NUEVA POBLACION (mutada, cruzada y evaluada) DE LOS WORKERS
+                data=comm.recv(source=MPI.ANY_SOURCE)            
+                for _ in range(numWorkers-1):                                
+                    for x in data:                        
+                        poblacion.append(IndividuoArbol(modo=None, profundidad=None, filas=None, columnas=None, 
+                                                    ind=x))
+                    data=comm.recv(source=MPI.ANY_SOURCE)
+                tmp=len(data)
+                for i in range(tmp-tam_elite):                    
+                    poblacion.append(IndividuoArbol(modo=None, profundidad=None, filas=None, columnas=None, 
+                                                    ind=data[i]))
+                for i in range(tam_elite):
+                    poblacion.append(selec_elite[i])
+
+                
+
+                generaciones-=1
+        else:
+            #RECIBE POBLACION DE LOS WORKERS (evaluada)
+            for _ in range(numWorkers):
+                data=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
+                source_rank=status.Get_source() 
+                for x in data:
+                    poblacion.append(IndividuoGramatica(tam_cromosoma=None, filas=None, columnas=None, cromosoma=None,  
+                                                        ind=x))
+                if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccionAcum.append(x)
+                if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                    data=comm.recv(source=source_rank)
+                    for x in data:
+                        prob_seleccion.append(x)
+
+                
+
+            progreso=[]
+            
+            while generaciones>0:
+                selec=[]
+                if seleccion_idx==0: 
+                    selec=seleccion.ruletaGramatica(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==1: 
+                    selec=seleccion.torneoDeterministicoGramatica(poblacion, num_torneo, tam_poblacion-tam_elite)
+                elif seleccion_idx==2: 
+                    selec=seleccion.torneoProbabilisticoGramatica(poblacion, num_torneo, 0.9, tam_poblacion-tam_elite)
+                elif seleccion_idx==3: 
+                    selec=seleccion.estocasticoUniversalGramatica(poblacion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                elif seleccion_idx==4: 
+                    selec=seleccion.truncamientoGramatica(poblacion, prob_seleccion, 0.5, tam_poblacion-tam_elite)
+                elif seleccion_idx==5: 
+                    selec=seleccion.restosGramatica(poblacion, prob_seleccion, prob_seleccionAcum, tam_poblacion-tam_elite)
+                else: 
+                    selec=seleccion.rankingGramatica(poblacion, prob_seleccion, 2, tam_poblacion-tam_elite)
+                
+                #ENVIA SELECCION DIVIVIDA
+                izq=0
+                for i in range(1,numWorkers+1):                
+                    comm.send(selec[izq:izq+tam_poblacionDiv],dest=i)
+                    izq+=tam_poblacionDiv
+                
+                # PROCESA POBLACION RECIBIDA (La anterior poblacion no la que se acaba de enviar)
+                if tam_elite>0:
+                    for i in range(tam_poblacion):
+                        if elitQ.size()<tam_elite: elitQ.push(i, poblacion[i].fitness)
+                        elif(tam_elite!=0 and funcion.cmpBool(poblacion[i].fitness, elitQ.top_fit())):
+                            elitQ.pop()
+                            elitQ.push(i, poblacion[i].fitness)               
+
+                    selec_elite=[]
+                    for _ in range(tam_elite):
+                        selec_elite.append(IndividuoGramatica(tam_cromosoma=None, filas=None, columnas=None, cromosoma=None,  
+                                                        ind=poblacion[elitQ.pop()]))                        
+                        
+                    progreso.append(selec_elite[-1].fitness)
+                else: # No hay elitismo
+                    mejor_generacion=float("inf")
+                    for ind in poblacion:
+                        if mejor_generacion>ind.fitness: mejor_generacion=ind.fitness
+                    progreso.append(mejor_generacion)
+                        
+
+                #RECIBE NUEVA POBLACION (mutada, cruzada y evaluada) DE LOS WORKERS
+                data=comm.recv(source=MPI.ANY_SOURCE)            
+                for _ in range(numWorkers-1):                                
+                    for x in data:                        
+                        poblacion.append(IndividuoGramatica(tam_cromosoma=None, filas=None, columnas=None, cromosoma=None,  
+                                                        ind=x))
+                        
+                    data=comm.recv(source=MPI.ANY_SOURCE)
+                tmp=len(data)
+                for i in range(tmp-tam_elite):                    
+                    poblacion.append(IndividuoGramatica(tam_cromosoma=None, filas=None, columnas=None, cromosoma=None,  
+                                                        ind=data[i]))
+                for i in range(tam_elite):
+                    poblacion.append(selec_elite[i])
+
+                
+
+                generaciones-=1
         
-    tam_poblacion=500
-    generaciones=250
+        
+        
+        
+        totalTimeEnd = MPI.Wtime()
+        #print("Valor Optimo: {}\n".format(progreso[-1]))
+        print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
 
-    # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
-    #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=0
-    
-    # 0: Basica | 1: Uniforme | 
-    # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
-    # 7: Intercambio
-    cruce_idx=0
-    prob_cruce=0.6
-    
-    # 0: Basica    |     
-    # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
-    # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
-    #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-    mut_idx=0
-    prob_mut=0.05 # Binario: 0.05 | Real: 0.3
+        #GUI(progreso)
 
-    precision=0.001
+        
+        
+    else: # WORKER
+        
 
-    # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
-    # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
-    # 7: Arbol        | 8: Gramatica
-    funcion_idx=0
-    d=2
-    elitismo=0
+        if funcion_idx<4: 
+            selec=[]
+            poblacion=[]
 
-    # 0: Completa | 1: Creciente | 2: Ramped & Half 
-    modo=0
-    profundidad=4
+            # 1 FASE
 
-    long_cromosoma=100
-
-    filas=8
-    columnas=8
-    # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
-    bloating_idx=0
-    ticks=100
-
-    ejecuciones=5
-
-    tiempo=0
-    cont=1
-    contador=2
-   
-    AG.set_valores( tam_poblacion, 
-                            generaciones, 
-                            seleccion_idx,
-                            cruce_idx, 
-                            prob_cruce,
-                            mut_idx, 
-                            prob_mut,
-                            precision, 
-                            funcion_idx, 
-                            d, 
-                            elitismo,
-                            
-                            modo,
-                            profundidad,
-                            long_cromosoma,
-                            filas,
-                            columnas,
-                            bloating_idx,
-                            ticks)  
-
-    print("Pruebas Binario, ejecuciones = {}".format(ejecuciones))      
-    tam_ind=AG.tamGenes(precision)    
-    
-    print("\nTam. Poblacion = {} \tNum. Generaciones = {}".format(tam_poblacion,generaciones))
-    print("-- Funcion: {} (L. Genes = {}, Precision = {}, Mutacion = Basica) -- \n\t-- Cruce: {} --".format(funcion_opt[funcion_idx],
-                                                                                        tam_ind,
-                                                                                        precision,
-                                                                                        cruce_opt[cruce_idx],))
-    
-    while(True):        
-        for _ in range(ejecuciones):
-            AG.set_valores( tam_poblacion, 
-                            generaciones, 
-                            seleccion_idx,
-                            cruce_idx, 
-                            prob_cruce,
-                            mut_idx, 
-                            prob_mut,
-                            precision, 
-                            funcion_idx, 
-                            d, 
-                            elitismo,
-                            
-                            modo,
-                            profundidad,
-                            long_cromosoma,
-                            filas,
-                            columnas,
-                            bloating_idx,
-                            ticks)  
+            #init_poblacion()              
+            poblacion=[Individuo(num=num_genes, tam_genes=tam_genes, xMax=funcion.xMax, xMin=funcion.xMin, 
+                                 ind=None) for _ in range(tam_poblacionDiv)]  
             
-            totalTimeStart = MPI.Wtime()
-            AG.ejecuta()
-            totalTimeEnd = MPI.Wtime()
+            # evaluacion()
+            fitness_total=0            
+            prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+            prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
+
             
-            tiempo+=(totalTimeEnd-totalTimeStart)
+            if funcion.opt==True: 
+                mejor_generacion = float('-inf')
+                peor_generacion = float('+inf')
+            else: 
+                mejor_generacion = float('+inf')
+                peor_generacion = float('-inf')
 
-        tiempo/=ejecuciones
-        print("\t\t\t-- Seleccion por {} Tiempo={}".format(seleccion_opt[seleccion_idx],tiempo))
+            for i in range(tam_poblacionDiv):            
+                poblacion[i].calcular_fenotipo()
+            
+            fit=0.0
+            indexMG=0        
+            for i in range(tam_poblacionDiv):
+                fit=funcion.fitness(poblacion[i].fenotipo)
+                poblacion[i].fitness=fit
+                fitness_total+=fit
+                       
+                peor_generacion=funcion.cmpPeor(peor_generacion, fit)
+                
+                        
+            
+            acum=0.0
+            if peor_generacion<0: peor_generacion*=-1
+            if funcion.opt==False:
+                fitness_total=tam_poblacionDiv*1.05*peor_generacion-fitness_total
+                for i in range(tam_poblacionDiv):
+                    prob_seleccion[i]=1.05*peor_generacion-poblacion[i].fitness
+                    prob_seleccion[i]/=fitness_total
+                    acum+=prob_seleccion[i]
+                    prob_seleccionAcum[i]=acum
+            else:
+                fitness_total=tam_poblacionDiv*1.05*peor_generacion+fitness_total
+                for i in range(tam_poblacionDiv):
+                    prob_seleccion[i]=1.05*peor_generacion+poblacion[i].fitness
+                    prob_seleccion[i]/=fitness_total
+                    acum+=prob_seleccion[i]
+                    prob_seleccionAcum[i]=acum
 
-        seleccion_idx+=1
-        if seleccion_idx==7:
-            seleccion_idx=0
-            cruce_idx+=1            
-            """print("-- Funcion (L. Genes = {}, Precision = {}): {} -- \n\t-- Cruce: {} --\n".format(funcion_opt[funcion_idx],
-                                                                                                          precision,
-                                                                                                          cruce_opt[cruce_idx],))"""
-            if cruce_idx>=2:                
-                cruce_idx=0
-                cont+=1
-                precision/=(10**cont)
-                tam_ind=AG.tamGenes(precision)
-                if cont==4:
-                    precision=0.001
+            
+            
+            
+            comm.send(poblacion, dest=MASTER)
+            if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                comm.send(prob_seleccionAcum, dest=MASTER)
+            if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                comm.send(prob_seleccion, dest=MASTER)
+
+
+            # 2 FASE
+            while generaciones>0:
+                # RECIBE
+                selec=[]
+                data=comm.recv(source=MASTER)
+                
+                for x in data:
+                    selec.append(Individuo(num=None, tam_genes=None, xMax=None, xMin=None, 
+                                           ind=x))
+                
+                
+                #cruce_poblacion(selec)
+                if cruce_idx==0: poblacion=cruce.cruce_monopuntoBin(selec)                 
+                else: poblacion=cruce.cruce_uniformeBin(selec)
+
+
+                # mutacion_poblacion(poblacion)
+                poblacion=mutacion.mut_basicaBin(poblacion) 
+                
+                
+                
+                #evaluacion_poblacion()
+                fitness_total=0            
+                prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+                prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
+
+                
+                if funcion.opt==True: 
+                    mejor_generacion = float('-inf')
+                    peor_generacion = float('+inf')
+                else: 
+                    mejor_generacion = float('+inf')
+                    peor_generacion = float('-inf')
+
+                for i in range(tam_poblacionDiv):            
+                    poblacion[i].calcular_fenotipo()
+                
+                fit=0.0
+                indexMG=0        
+                for i in range(tam_poblacionDiv):
+                    fit=funcion.fitness(poblacion[i].fenotipo)
+                    poblacion[i].fitness=fit
+                    fitness_total+=fit
+                        
+                    peor_generacion=funcion.cmpPeor(peor_generacion, fit)
                     
-                    cont=0
-                    if funcion_idx==3:
-                        if d==2: d=5
-                        elif d==5: d=10
-                        else: 
-                            funcion_idx=0
-                            d=2
-                            contador+=1
-                            if contador==1:
-                                tam_poblacion=100
-                                generaciones=100
-                            elif contador==2:
-                                tam_poblacion=500
-                                generaciones=250
-                            elif contador==3:
-                                tam_poblacion=1000
-                                generaciones=500
-                            else: break
-                            print("\nTam. Poblacion = {} \tNum. Generaciones = {}".format(tam_poblacion,generaciones))
+                            
+                
+                acum=0.0
+                if peor_generacion<0: peor_generacion*=-1
+                if funcion.opt==False:
+                    fitness_total=tam_poblacionDiv*1.05*peor_generacion-fitness_total
+                    for i in range(tam_poblacionDiv):
+                        prob_seleccion[i]=1.05*peor_generacion-poblacion[i].fitness
+                        prob_seleccion[i]/=fitness_total
+                        acum += prob_seleccion[i]
+                        prob_seleccionAcum[i]=acum			
+                else:
+                    fitness_total = tam_poblacionDiv*1.05*peor_generacion+fitness_total
+                    for i in range(tam_poblacionDiv):
+                        prob_seleccion[i]=1.05*peor_generacion+poblacion[i].fitness
+                        prob_seleccion[i]/=fitness_total
+                        acum+=prob_seleccion[i]
+                        prob_seleccionAcum[i]=acum
+                
+                
+                # ENVIA 
+                comm.send(poblacion, dest=MASTER)                       
+                
+                generaciones-=1          
+        elif funcion_idx<7:   
+            selec=[]
+            poblacion=[]
 
-                    funcion_idx=3
-                    print("-- Funcion: {} (L. Genes = {}, Precision = {}, Mutacion = Basica) --".format(funcion_opt[funcion_idx],
-                                                                                    tam_ind,
-                                                                                    precision))
-                else: print("-- Funcion: {} (L. Genes = {}, Precision = {}, Mutacion = Basica) --".format(funcion_opt[funcion_idx],
-                                                                                    tam_ind,
-                                                                                    precision))
+            # 1 FASE
 
-                print("\t-- Cruce: {} --".format(cruce_opt[cruce_idx]))
-            else: print("\t-- Cruce: {} --".format(cruce_opt[cruce_idx]))
+            #init_poblacion()  
+            poblacion=[IndividuoReal(aviones=aviones,vInd=None) for _ in range(tam_poblacionDiv)]  
+            
+            # evaluacion()
+            fitness_total=0            
+            prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+            prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
 
+            
+            mejor_generacion=float('+inf')
+            peor_generacion=float('-inf')
+
+            
+            fit=0.0
+            indexMG=0        
+            for i in range(tam_poblacionDiv):
+                fit=funcion.fitness(poblacion[i].v)
+                poblacion[i].fitness=fit
+                fitness_total+=fit
+                       
+                peor_generacion=funcion.cmpPeor(peor_generacion, fit)
+                
+                        
+            
+            acum=0.0
+            if peor_generacion<0: peor_generacion*=-1
+
+            fitness_total=tam_poblacionDiv*1.05*peor_generacion-fitness_total
+            for i in range(tam_poblacionDiv):
+                prob_seleccion[i]=1.05*peor_generacion-poblacion[i].fitness
+                prob_seleccion[i]/=fitness_total
+                acum += prob_seleccion[i]
+                prob_seleccionAcum[i]=acum	
+            
+            
+            
+            comm.send(poblacion, dest=MASTER)
+            if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                comm.send(prob_seleccionAcum, dest=MASTER)
+            if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                comm.send(prob_seleccion, dest=MASTER)
+
+
+            # 2 FASE
+            while generaciones>0:
+                # RECIBE
+                selec=[]
+                data=comm.recv(source=MASTER)
+                
+                for x in data:
+                    selec.append(IndividuoReal(aviones=None,vInd=x))
+                
+                
+                #cruce_poblacion(selec)
+                if cruce_idx==2: poblacion=cruce.PMX(selec) 
+                elif cruce_idx==3: poblacion=cruce.OX(selec) 
+                elif cruce_idx==4: poblacion=cruce.OX_PP(selec,3)
+                elif cruce_idx==5: poblacion=cruce.CX(selec)
+                else: poblacion=cruce.CO(selec)
+
+
+                # mutacion_poblacion(poblacion)
+                if mut_idx==1: poblacion= mutacion.insercion(poblacion) # Insercion
+                elif mut_idx==2: poblacion= mutacion.intercambio(poblacion) # Intercambio
+                elif mut_idx==3: poblacion= mutacion.inversion(poblacion) # Inversion
+                else: poblacion= mutacion.heuristica(poblacion) # Heuristica
+                
+                
+                #evaluacion_poblacion()
+                fitness_total=0            
+                prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+                prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
+                
+                mejor_generacion=float('+inf')
+                peor_generacion=float('-inf')
+                
+                fit=0.0
+                indexMG=0        
+                for i in range(tam_poblacionDiv):
+                    fit=funcion.fitness(poblacion[i].v)
+                    poblacion[i].fitness=fit
+                    fitness_total+=fit
+                    
+                    peor_generacion=funcion.cmpPeor(peor_generacion, fit)
+                    
+
+                acum=0.0
+                if peor_generacion<0: peor_generacion*=-1
+
+                fitness_total=tam_poblacionDiv*1.05*peor_generacion-fitness_total
+                for i in range(tam_poblacionDiv):
+                    prob_seleccion[i]=1.05*peor_generacion-poblacion[i].fitness
+                    prob_seleccion[i]/=fitness_total
+                    acum += prob_seleccion[i]
+                    prob_seleccionAcum[i]=acum	
+                
+                
+                # ENVIA 
+                comm.send(poblacion, dest=MASTER)                       
+                
+                generaciones-=1      
+        elif funcion_idx==7:
+            selec=[]
+            poblacion=[]
+
+            # 1 FASE
+
+            #init_poblacion()  
+            poblacion=[IndividuoArbol(modo=modo, profundidad=profundidad, 
+                                      filas=filas, columnas=columnas, 
+                                      ind=None) for _ in range(tam_poblacionDiv)]  
+            
+            # evaluacion()
+            fitness_total=0            
+            prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+            prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
+
+            
+            mejor_generacion=float('-inf')
+            peor_generacion=float('+inf')
+
+            
+            fit=0.0
+            indexMG=0        
+            for i in range(tam_poblacionDiv):
+                fit=funcion.fitness(poblacion[i])
+                poblacion[i].fitness=fit
+                fitness_total+=fit
+                       
+                peor_generacion=funcion.cmpPeor(peor_generacion, fit)
+                
+                        
+            
+            acum=0.0
+            if peor_generacion<0: peor_generacion*=-1
+
+            fitness_total=tam_poblacionDiv*1.05*peor_generacion+fitness_total
+            for i in range(tam_poblacionDiv):
+                prob_seleccion[i]=1.05*peor_generacion+poblacion[i].fitness
+                prob_seleccion[i]/=fitness_total
+                acum+=prob_seleccion[i]
+                prob_seleccionAcum[i]=acum	
+            
+            
+            
+            comm.send(poblacion, dest=MASTER)
+            if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                comm.send(prob_seleccionAcum, dest=MASTER)
+            if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                comm.send(prob_seleccion, dest=MASTER)
+
+
+            # 2 FASE
+            while generaciones>0:
+                # RECIBE
+                selec=[]
+                data=comm.recv(source=MASTER)
+                
+                for x in data:
+                    selec.append(IndividuoArbol(modo=None, profundidad=None, filas=None, columnas=None, 
+                                                ind=x))
+                
+                
+                #cruce_poblacion(selec)
+                poblacion=cruce.intercambioArbol(selec)                
+
+                # mutacion_poblacion(poblacion)
+                if mut_idx==5: poblacion=mutacion.terminal(poblacion) 
+                elif mut_idx==6: poblacion=mutacion.funcional(poblacion) 
+                elif mut_idx==7: poblacion=mutacion.arbol(poblacion) 
+                elif mut_idx==8: poblacion=mutacion.permutacion(poblacion) 
+                elif mut_idx==9: poblacion=mutacion.hoistn(poblacion) 
+                elif mut_idx==10: poblacion=mutacion.contraccion(poblacion)
+                else: poblacion=mutacion.expansion(poblacion)
+                
+                
+                #evaluacion_poblacion()
+                fitness_total=0            
+                prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+                prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
+                
+                mejor_generacion=float('-inf')
+                peor_generacion=float('+inf')
+                
+                fit=0.0
+                indexMG=0        
+                for i in range(tam_poblacionDiv):
+                    fit=funcion.fitness(poblacion[i])
+                    poblacion[i].fitness=fit
+                    fitness_total+=fit
+                    
+                    peor_generacion=funcion.cmpPeor(peor_generacion, fit)
+                    
+
+                acum=0.0
+                if peor_generacion<0: peor_generacion*=-1
+
+                fitness_total=tam_poblacionDiv*1.05*peor_generacion+fitness_total
+                for i in range(tam_poblacionDiv):
+                    prob_seleccion[i]=1.05*peor_generacion-poblacion[i].fitness
+                    prob_seleccion[i]/=fitness_total
+                    acum += prob_seleccion[i]
+                    prob_seleccionAcum[i]=acum	
+                
+                
+                # ENVIA 
+                comm.send(poblacion, dest=MASTER)                       
+                
+                generaciones-=1
+        else:
+            selec=[]
+            poblacion=[]
+
+            # 1 FASE
+
+            #init_poblacion()  
+            poblacion=[IndividuoGramatica(tam_cromosoma=long_cromosoma, filas=filas, columnas=columnas, 
+                                          cromosoma=None, ind=None) for _ in range(tam_poblacionDiv)]  
+            
+            # evaluacion()
+            fitness_total=0            
+            prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+            prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
+
+            
+            mejor_generacion=float('-inf')
+            peor_generacion=float('+inf')
+
+            
+            fit=0.0
+            indexMG=0        
+            for i in range(tam_poblacionDiv):
+                fit=funcion.fitness(poblacion[i])
+                poblacion[i].fitness=fit
+                fitness_total+=fit
+                       
+                peor_generacion=funcion.cmpPeor(peor_generacion, fit)
+                
+                        
+            
+            acum=0.0
+            if peor_generacion<0: peor_generacion*=-1
+
+            fitness_total=tam_poblacionDiv*1.05*peor_generacion+fitness_total
+            for i in range(tam_poblacionDiv):
+                prob_seleccion[i]=1.05*peor_generacion+poblacion[i].fitness
+                prob_seleccion[i]/=fitness_total
+                acum+=prob_seleccion[i]
+                prob_seleccionAcum[i]=acum	
+            
+            
+            
+            comm.send(poblacion, dest=MASTER)
+            if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
+                comm.send(prob_seleccionAcum, dest=MASTER)
+            if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
+                comm.send(prob_seleccion, dest=MASTER)
+
+
+            # 2 FASE
+            while generaciones>0:
+                # RECIBE
+                selec=[]
+                data=comm.recv(source=MASTER)
+                
+                for x in data:
+                    selec.append(IndividuoGramatica(tam_cromosoma=None, filas=None, columnas=None, 
+                                                    cromosoma=None, ind=x))
+                
+                
+                #cruce_poblacion(selec)
+                poblacion=cruce.cruce_poblacionGramatica(selec, long_cromosoma)                
+
+                # mutacion_poblacion(poblacion)
+                poblacion=mutacion.mutacion_poblacionGramatica(poblacion) 
+                
+                
+                #evaluacion_poblacion()
+                fitness_total=0            
+                prob_seleccion=[0 for _ in range(tam_poblacionDiv)]
+                prob_seleccionAcum=[0 for _ in range(tam_poblacionDiv)]
+                
+                mejor_generacion=float('-inf')
+                peor_generacion=float('+inf')
+                
+                fit=0.0
+                indexMG=0        
+                for i in range(tam_poblacionDiv):
+                    fit=funcion.fitness(poblacion[i])
+                    poblacion[i].fitness=fit
+                    fitness_total+=fit
+                    
+                    peor_generacion=funcion.cmpPeor(peor_generacion, fit)
+                    
+
+                acum=0.0
+                if peor_generacion<0: peor_generacion*=-1
+
+                fitness_total=tam_poblacionDiv*1.05*peor_generacion+fitness_total
+                for i in range(tam_poblacionDiv):
+                    prob_seleccion[i]=1.05*peor_generacion-poblacion[i].fitness
+                    prob_seleccion[i]/=fitness_total
+                    acum += prob_seleccion[i]
+                    prob_seleccionAcum[i]=acum	
+                
+                
+                # ENVIA 
+                comm.send(poblacion, dest=MASTER)                       
+                
+                generaciones-=1
+            
+    
 
 main()
-#pruebas()

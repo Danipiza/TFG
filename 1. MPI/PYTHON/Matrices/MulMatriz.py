@@ -1,4 +1,4 @@
-#from mpi4py import MPI
+from mpi4py import MPI
 import time
 import sys
 import os
@@ -28,16 +28,16 @@ def main():
     else:
         matrizC = [[0 for _ in range(cB)] for _ in range(fA)]
     
-    #timeStart = MPI.Wtime()
-    timeStart = time.process_time()
+    timeStart = MPI.Wtime()
+    #timeStart = time.process_time()
     
     for i in range(fA):
         for j in range(cB):
             for k in range(cA):
                 matrizC[i][j]+=matrizA[i][k]*matrizB[k][j]
     
-    #timeEnd = MPI.Wtime()
-    timeEnd = time.process_time()
+    timeEnd = MPI.Wtime()
+    #timeEnd = time.process_time()
     print("Tiempo de ejecucion: {}s".format(timeEnd-timeStart))
     
     if PRINT: print(matrizC)

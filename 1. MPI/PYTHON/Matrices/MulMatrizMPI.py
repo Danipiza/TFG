@@ -3,8 +3,14 @@ import numpy as np
 import sys
 import os
 
+# EJECUTAR
+# mpiexec -np 5 python MulMatrizMPI.py
 
-# Generate a matrix with random int values
+"""
+MASTER ENVIA FILAS CONFORME LOS WORKERS TERMINAN 
+"""
+
+# Generar matriz aleatoria
 def genera_matriz(valor_maximo, n, m):
     return np.random.randint(0, valor_maximo, size=(n, m))
 
@@ -14,7 +20,45 @@ def print_matriz(matriz):
         print("Fila {}: {}".format(i, x))
         i+=1
 
+def leeArchivo(archivo):
+    """
+    return:
+    array: int[].   Array con los enteros leidos
+    tam: int.       Tamaño del array leido
+    """
+        
+    dir=os.getcwd()
+    n=len(dir)
 
+    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+        dir=os.path.dirname(dir)
+        n=len(dir)
+
+    if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
+    path=os.path.join(dir, ".Otros","ficheros","Matrices", archivo+".txt")
+    #print(path)
+       
+    filas=0
+    columnas=0 
+    M=[]
+    
+    try:        
+        with open(path, 'r') as archivo: # modo lectura
+            for linea in archivo:                                
+                filas+=1
+                columnas=0
+                array = [] 
+                numeros_en_linea = linea.split() # Divide por espacios                                              
+                for numero in numeros_en_linea:
+                    array.append(int(numero))
+                    columnas+=1
+                M.append(array)
+                
+    
+    except FileNotFoundError:
+        print("El archivo '{}' no existe.".format(archivo+".txt"))
+    
+    return M, filas, columnas
 
 def main():    
     MASTER = 0              # int.      Master 
@@ -22,7 +66,7 @@ def main():
     END_OF_PROCESSING = -1  # End of processing
     
 
-    filas,columnas=1000,1000
+    filas,columnas=0,0
     valor_maximo = 10  # Maximum number value for generating each matrix
 
 
@@ -39,8 +83,10 @@ def main():
     if myrank == MASTER:
 
         # Generate matrix A			
-        print("Generando matriz A ({}x{})".format(filas,columnas))        
-        matrizA=genera_matriz(valor_maximo,filas,columnas)
+        #print("Generando matriz A ({}x{})".format(filas,columnas))        
+        #matrizA=genera_matriz(valor_maximo,filas,columnas)
+        print("Leyendo matriz A ({}x{})".format(filas,columnas))
+        matrizA,filas,columnas=leeArchivo("M1000X1000")
         if PRINT:
             print("Matriz A:\n")
             #print_matriz(matrizA)
@@ -50,8 +96,10 @@ def main():
         m=len(matrizA[0])
 
         # Generate matrix B
-        print("Generando matriz B ({}x{})".format(filas,columnas))        
-        matrizB = genera_matriz(valor_maximo,filas,columnas)
+        #print("Generando matriz B ({}x{})".format(filas,columnas))        
+        #matrizB = genera_matriz(valor_maximo,filas,columnas)
+        print("Leyendo matriz B ({}x{})".format(filas,columnas))        
+        matrizB,_,_=leeArchivo("M1000X1000")
         if PRINT:
             print("Matriz B:")
             #print_matriz(matrizB)
@@ -145,45 +193,7 @@ def main():
     MPI.Finalize()
 
     
-def leeArchivo():
-    """
-    return:
-    array: int[].   Array con los enteros leidos
-    tam: int.       Tamaño del array leido
-    """
-        
-    dir=os.getcwd()
-    n=len(dir)
 
-    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
-        dir=os.path.dirname(dir)
-        n=len(dir)
-
-    nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Matrices", nombre_fichero+".txt")
-    
-       
-    filas=0
-    columnas=0 
-    M=[[]]
-    array = [] 
-    try:        
-        with open(path, 'r') as archivo: # modo lectura
-            for linea in archivo:                                
-                filas+=1
-                columnas=0
-
-                numeros_en_linea = linea.split() # Divide por espacios                                              
-                for numero in numeros_en_linea:
-                    array.append(int(numero))
-                    columnas+=1
-                M.append(array)
-                
-    
-    except FileNotFoundError:
-        print("El archivo '{}' no existe.".format(nombre_fichero+".txt"))
-    
-    return M, filas, columnas
 
     
 

@@ -10,7 +10,15 @@ from abc import ABC, abstractmethod
 from collections import deque
 from typing import List, Tuple
 
-#mpiexec -np 6 python MPI0.py
+# mpiexec -np 5 python 1DividirPob_0.py
+
+"""
+Metodo 1. Dividir la poblacion MUY LENTO.
+
+El MASTER recibe las poblaciones de los WORKERS, las junta y calcula los probabilidades.
+    Se las manda a los WORKERS para continuar
+Los WORKERS hacen todo el trabajo
+"""
 
 
 # --------------------------------------------------------------------------------------------------------------
@@ -1891,8 +1899,9 @@ def main():
                 
 
         totalTimeEnd = MPI.Wtime()
-        print("Valor Optimo: {}\n".format(mejor_total))
+        #print("Valor Optimo: {}\n".format(mejor_total))
         print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
+        
     else: # WORKERs
 
         # CALCULA Init + Evalua

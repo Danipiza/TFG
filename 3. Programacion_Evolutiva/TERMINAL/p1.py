@@ -1,4 +1,4 @@
-import random
+"""import random
 
 ind1=[1,2,3,5,6,4]
 ind2=[4,3,2,1,5,6]
@@ -36,4 +36,16 @@ for j in range(corte1,corte2):
     ind1[j]=ind2[j]
     ind2[j]=temp
 
-print(ind1)
+print(ind1)"""
+
+
+"""
+precision=0.01
+print(precision)
+precision/=10
+print(precision)
+"""
+i=1
+while True:
+    print(i)
+    i+=1

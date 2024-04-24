@@ -1,0 +1,710 @@
+PS C:\Users\Usuario\Desktop\GITHUB\TFG\3. Programacion_Evolutiva\TERMINAL> py .\main.py
+Pruebas Binario, ejecuciones = 20
+
+Tam. Poblacion = 50     Num. Generaciones = 25
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [15, 15], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.04783517999894684
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.052320208999371974
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.052549345445844664
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.04990291227430698
+                        -- Seleccion por Truncamiento:           Tiempo=0.049369490610183045
+                        -- Seleccion por Restos:                 Tiempo=0.05371948453499838
+                        -- Seleccion por Ranking:                Tiempo=0.0516245142264035
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.05055217071377312
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.05321674353568191
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.053416437179378384
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.0506009918579863
+                        -- Seleccion por Truncamiento:           Tiempo=0.050351479591920656
+                        -- Seleccion por Restos:                 Tiempo=0.053726053984748556
+                        -- Seleccion por Ranking:                Tiempo=0.051772902698519474
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [21, 21], Precision = 1e-05, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.059862960136194375
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.06280021800661584
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.06363470089878055
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.06001373004547791
+                        -- Seleccion por Truncamiento:           Tiempo=0.060183576500058414
+                        -- Seleccion por Restos:                 Tiempo=0.0633407088238055
+                        -- Seleccion por Ranking:                Tiempo=0.06068090043879002
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.06005608002162114
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.06282519399967071
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.0630624896974005
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.0601293094846731
+                        -- Seleccion por Truncamiento:           Tiempo=0.060472035472254895
+                        -- Seleccion por Restos:                 Tiempo=0.06461601677933808
+                        -- Seleccion por Ranking:                Tiempo=0.06133418583765212
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [31, 31], Precision = 1e-08, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.07821047928940392
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.08147906396482693
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.0819928931993505
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.07899270965916375
+                        -- Seleccion por Truncamiento:           Tiempo=0.07820465048552179
+                        -- Seleccion por Restos:                 Tiempo=0.0827444275198554
+                        -- Seleccion por Ranking:                Tiempo=0.07919784637341534
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.0784147823195957
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.08118375911244217
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.08176731295655809
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.07894809064344985
+                        -- Seleccion por Truncamiento:           Tiempo=0.0788949545300596
+                        -- Seleccion por Restos:                 Tiempo=0.0838534177225783
+                        -- Seleccion por Ranking:                Tiempo=0.07985240588635556
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.04920709029438224
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.05024418451119785
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.05034893422899517
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.04717448671321604
+                        -- Seleccion por Truncamiento:           Tiempo=0.046899009333153364
+                        -- Seleccion por Restos:                 Tiempo=0.05044573046675292
+                        -- Seleccion por Ranking:                Tiempo=0.048369011519564485
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.04747171557236436
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.0502829607749977
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.051074703040063216
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.04752767515118447
+                        -- Seleccion por Truncamiento:           Tiempo=0.04702217875228088
+                        -- Seleccion por Restos:                 Tiempo=0.051278728939973664
+                        -- Seleccion por Ranking:                Tiempo=0.04890338144646533
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.052863449073354496
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.05548709746128668
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.05605151487480838
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.05254763074514409
+                        -- Seleccion por Truncamiento:           Tiempo=0.05218288653742846
+                        -- Seleccion por Restos:                 Tiempo=0.05594659932789083
+                        -- Seleccion por Ranking:                Tiempo=0.054046339965841114
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.05241868699518713
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.05524744934773294
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.05538125747129006
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.05223318287346683
+                        -- Seleccion por Truncamiento:           Tiempo=0.05203075914710675
+                        -- Seleccion por Restos:                 Tiempo=0.05589382295930847
+                        -- Seleccion por Ranking:                Tiempo=0.05327700114760832
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.0629443750563419
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.0671191187497944
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.06723177593773821
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.06427783879806037
+                        -- Seleccion por Truncamiento:           Tiempo=0.06413627193536645
+                        -- Seleccion por Restos:                 Tiempo=0.06773231859929815
+                        -- Seleccion por Ranking:                Tiempo=0.06466603092868159
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.06369404654397877
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.06639021732531594
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.06675518086630111
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.0633593340408328
+                        -- Seleccion por Truncamiento:           Tiempo=0.06347868670391288
+                        -- Seleccion por Restos:                 Tiempo=0.06738202933642705
+                        -- Seleccion por Ranking:                Tiempo=0.06425820646357103
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.08182123032178093
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.08714114651637539
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.08630838231822449
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.08337151911461771
+                        -- Seleccion por Truncamiento:           Tiempo=0.08254119095672063
+                        -- Seleccion por Restos:                 Tiempo=0.08854460954150425
+                        -- Seleccion por Ranking:                Tiempo=0.08387262547293037
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.08286521127372855
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.08679661056401435
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.08639926553181244
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.08291721827533974
+                        -- Seleccion por Truncamiento:           Tiempo=0.08275228091099855
+                        -- Seleccion por Restos:                 Tiempo=0.08898105904875724
+                        -- Seleccion por Ranking:                Tiempo=0.08511161795704227
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.10307270089845573
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.10645451504206585
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.10746988575401731
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.1031441592872534
+                        -- Seleccion por Truncamiento:           Tiempo=0.10288531296580528
+                        -- Seleccion por Restos:                 Tiempo=0.11485994564778938
+                        -- Seleccion por Ranking:                Tiempo=0.10474641728130626
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.10368815585792042
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.10828795279250851
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.10688069763761732
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.10430812488254429
+                        -- Seleccion por Truncamiento:           Tiempo=0.10338867624467951
+                        -- Seleccion por Restos:                 Tiempo=0.11472587381137571
+                        -- Seleccion por Ranking:                Tiempo=0.10559064869186703
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15, 15, 15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.11555292743310557
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.11903371137051436
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.11974914557018623
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.11694462228127397
+                        -- Seleccion por Truncamiento:           Tiempo=0.11594444111415818
+                        -- Seleccion por Restos:                 Tiempo=0.12894901705426523
+                        -- Seleccion por Ranking:                Tiempo=0.118313495849427
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.11642582979808469
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.11891868149125293
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.12024962907759906
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.11701741145509784
+                        -- Seleccion por Truncamiento:           Tiempo=0.11649772057294869
+                        -- Seleccion por Restos:                 Tiempo=0.1286423210292631
+                        -- Seleccion por Ranking:                Tiempo=0.1173243860533952
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22, 22, 22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.14207929930414087
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.14669942496489827
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.14690615124641038
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.14368839756276647
+                        -- Seleccion por Truncamiento:           Tiempo=0.14434285488063153
+                        -- Seleccion por Restos:                 Tiempo=0.15752438274210537
+                        -- Seleccion por Ranking:                Tiempo=0.1455788591332376
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.14441271295906333
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.14697163564747678
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.1481337767812719
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.14477639883650148
+                        -- Seleccion por Truncamiento:           Tiempo=0.14417314494477382
+                        -- Seleccion por Restos:                 Tiempo=0.1577532472438094
+                        -- Seleccion por Ranking:                Tiempo=0.14623296236095443
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32, 32, 32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.18857404812079037
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.19413073740932305
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.19584720186914092
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.1914635550919463
+                        -- Seleccion por Truncamiento:           Tiempo=0.19071463775903458
+                        -- Seleccion por Restos:                 Tiempo=0.21002023688830135
+                        -- Seleccion por Ranking:                Tiempo=0.1965076068481247
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.20172832034095095
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.20092367601221656
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.19934843380137543
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.1956997666864275
+                        -- Seleccion por Truncamiento:           Tiempo=0.19718268333093772
+                        -- Seleccion por Restos:                 Tiempo=0.21708271416711974
+                        -- Seleccion por Ranking:                Tiempo=0.1991062157074303
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45, 45, 45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.2124634757916645
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.21780713878973254
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.22426277194244593
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.21915069359911268
+                        -- Seleccion por Truncamiento:           Tiempo=0.21970759468128565
+                        -- Seleccion por Restos:                 Tiempo=0.2400782497333589
+                        -- Seleccion por Ranking:                Tiempo=0.2239166624810395
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.22223910312471604
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.21951245015444032
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.22148168750401992
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.22128182936858684
+                        -- Seleccion por Truncamiento:           Tiempo=0.2175871264679839
+                        -- Seleccion por Restos:                 Tiempo=0.23899473132432444
+                        -- Seleccion por Ranking:                Tiempo=0.2168466115641557
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15, 15, 15, 15, 15, 15, 15, 15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.23468452057907668
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.239481106032496
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.2382601303024506
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.2345872715140544
+                        -- Seleccion por Truncamiento:           Tiempo=0.23419158357673714
+                        -- Seleccion por Restos:                 Tiempo=0.25465701917955347
+                        -- Seleccion por Ranking:                Tiempo=0.23624183096047524
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.2362337915465166
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.2392892595718425
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.23887513297546095
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.23422835164479044
+                        -- Seleccion por Truncamiento:           Tiempo=0.2363339775822284
+                        -- Seleccion por Restos:                 Tiempo=0.25560988387907
+                        -- Seleccion por Ranking:                Tiempo=0.23706502919428707
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22, 22, 22, 22, 22, 22, 22, 22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.2863598964589153
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.2942489898231228
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.2944862994938314
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.2900399299739635
+                        -- Seleccion por Truncamiento:           Tiempo=0.29153590149679576
+                        -- Seleccion por Restos:                 Tiempo=0.31489854007567764
+                        -- Seleccion por Ranking:                Tiempo=0.2916035020046772
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.29232824510119576
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.2945082872600377
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.29509231936312086
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.2925368009684071
+                        -- Seleccion por Truncamiento:           Tiempo=0.2912837650470991
+                        -- Seleccion por Restos:                 Tiempo=0.3146489782518828
+                        -- Seleccion por Ranking:                Tiempo=0.29361666890980737
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32, 32, 32, 32, 32, 32, 32, 32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.3813481534485249
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.3879852126696078
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.3907098606344961
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.38546483802958253
+                        -- Seleccion por Truncamiento:           Tiempo=0.38704969689680724
+                        -- Seleccion por Restos:                 Tiempo=0.41707061984458116
+                        -- Seleccion por Ranking:                Tiempo=0.38857681098865493
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.3878763205509196
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.39208889602635766
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.3934200798022555
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.3886505289886891
+                        -- Seleccion por Truncamiento:           Tiempo=0.38858818645186866
+                        -- Seleccion por Restos:                 Tiempo=0.4192809143225631
+                        -- Seleccion por Ranking:                Tiempo=0.392532315716117
+
+Tam. Poblacion = 100    Num. Generaciones = 100
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [15, 15], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.37444632999395255
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.4119875415002025
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.4220623270765973
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.3981407263524905
+                        -- Seleccion por Truncamiento:           Tiempo=0.405493671317697
+                        -- Seleccion por Restos:                 Tiempo=0.43163659856852005
+                        -- Seleccion por Ranking:                Tiempo=0.4248898949268446
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.39897910974962486
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.4184721304850168
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.4128337365222466
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.3979827818306341
+                        -- Seleccion por Truncamiento:           Tiempo=0.40534509909436667
+                        -- Seleccion por Restos:                 Tiempo=0.4332977149484701
+                        -- Seleccion por Ranking:                Tiempo=0.4193806857497572
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [21, 21], Precision = 1e-05, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.46999302428878453
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.48694836121481455
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.4983856430598351
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.4729139471483408
+                        -- Seleccion por Truncamiento:           Tiempo=0.48140139235415724
+                        -- Seleccion por Restos:                 Tiempo=0.5124288046154539
+                        -- Seleccion por Ranking:                Tiempo=0.49198220522785263
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.4738853652617264
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.4912880732631558
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.4947762486665173
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.4727809674337653
+                        -- Seleccion por Truncamiento:           Tiempo=0.48296119337522264
+                        -- Seleccion por Restos:                 Tiempo=0.5124875796686242
+                        -- Seleccion por Ranking:                Tiempo=0.49391432398590185
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [31, 31], Precision = 1e-08, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.6130012661966076
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.633247103313287
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.6388743451652967
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.6117845772575048
+                        -- Seleccion por Truncamiento:           Tiempo=0.6254086388626389
+                        -- Seleccion por Restos:                 Tiempo=0.6650476369416098
+                        -- Seleccion por Ranking:                Tiempo=0.641407751845793
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.6186717675935194
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.6308613533797054
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.64780758766808
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.6177882843826671
+                        -- Seleccion por Truncamiento:           Tiempo=0.626008559220942
+                        -- Seleccion por Restos:                 Tiempo=0.6783474629627892
+                        -- Seleccion por Ranking:                Tiempo=0.6516908381483489
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.3879354869038797
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.39678420434601136
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.39586956021795633
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.37258829301418767
+                        -- Seleccion por Truncamiento:           Tiempo=0.3857800596509292
+                        -- Seleccion por Restos:                 Tiempo=0.41412154797900785
+                        -- Seleccion por Ranking:                Tiempo=0.39813181240185785
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.3768455956205515
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.3954076497839637
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.39643301248620666
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.3710295406293359
+                        -- Seleccion por Truncamiento:           Tiempo=0.38533084702914233
+                        -- Seleccion por Restos:                 Tiempo=0.4153418423477577
+                        -- Seleccion por Ranking:                Tiempo=0.39729279212239205
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.40860898960791764
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.4328019044780243
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.43413383521989024
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.4100259817625219
+                        -- Seleccion por Truncamiento:           Tiempo=0.4254077040873273
+                        -- Seleccion por Restos:                 Tiempo=0.4549051902012028
+                        -- Seleccion por Ranking:                Tiempo=0.44556412950705065
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.41346175647344785
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.43282550282252685
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.43586601514395457
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.41449597575388764
+                        -- Seleccion por Truncamiento:           Tiempo=0.42401707378811615
+                        -- Seleccion por Restos:                 Tiempo=0.4572769736942786
+                        -- Seleccion por Ranking:                Tiempo=0.43954199368286384
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.49367710968463846
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.5191276404832528
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.5195433820242786
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.4964369141019125
+                        -- Seleccion por Truncamiento:           Tiempo=0.5142428557050284
+                        -- Seleccion por Restos:                 Tiempo=0.5549247527853556
+                        -- Seleccion por Ranking:                Tiempo=0.5343572026360662
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.5023242851306445
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.5293709542514721
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.5368680977098107
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.5056209798835842
+                        -- Seleccion por Truncamiento:           Tiempo=0.519513803992845
+                        -- Seleccion por Restos:                 Tiempo=0.5589864552032066
+                        -- Seleccion por Ranking:                Tiempo=0.53127514776139
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.6507359323841256
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.6746184216250187
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.676952366080177
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.6484856283017338
+                        -- Seleccion por Truncamiento:           Tiempo=0.6630486614141492
+                        -- Seleccion por Restos:                 Tiempo=0.7155311130735831
+                        -- Seleccion por Ranking:                Tiempo=0.6916252756525822
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.6664032087808571
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.6777136704379604
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.6762694335159398
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.651449181676265
+                        -- Seleccion por Truncamiento:           Tiempo=0.6751321040813406
+                        -- Seleccion por Restos:                 Tiempo=0.7227704552032406
+                        -- Seleccion por Ranking:                Tiempo=0.6917107827581692
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.8867579941403457
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.9206892647073179
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.9207460432321672
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.9080424321623701
+                        -- Seleccion por Truncamiento:           Tiempo=0.8947619566113882
+                        -- Seleccion por Restos:                 Tiempo=0.9785795278320542
+                        -- Seleccion por Ranking:                Tiempo=0.902105946392971
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.8943357973203522
+                        -- Seleccion por Torneo Determinista:    Tiempo=0.9110569748620968
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=0.9310713037406142
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.9040826101838032
+                        -- Seleccion por Truncamiento:           Tiempo=0.8846801505132665
+                        -- Seleccion por Restos:                 Tiempo=0.9852871025301265
+                        -- Seleccion por Ranking:                Tiempo=0.9042608801294408
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15, 15, 15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=0.9901911040079213
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.007375640200965
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.0220893670085958
+                        -- Seleccion por Estocástico Universal:  Tiempo=1.0069686383505616
+                        -- Seleccion por Truncamiento:           Tiempo=0.9859826019099367
+                        -- Seleccion por Restos:                 Tiempo=1.0944494050927829
+                        -- Seleccion por Ranking:                Tiempo=1.00644393025723
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=0.9897374565126666
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.0119202178215856
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.014060535891097
+                        -- Seleccion por Estocástico Universal:  Tiempo=0.9878068017941143
+                        -- Seleccion por Truncamiento:           Tiempo=0.9848576650878773
+                        -- Seleccion por Restos:                 Tiempo=1.0770031782538554
+                        -- Seleccion por Ranking:                Tiempo=1.0029894539159532
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22, 22, 22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=1.1958257076962258
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.227640820385089
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.2326056860173538
+                        -- Seleccion por Estocástico Universal:  Tiempo=1.204642144297345
+                        -- Seleccion por Truncamiento:           Tiempo=1.2018589722125372
+                        -- Seleccion por Restos:                 Tiempo=1.3102009486064434
+                        -- Seleccion por Ranking:                Tiempo=1.2205354274245077
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=1.2141642363700975
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.2349433418151734
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.2358921020845781
+                        -- Seleccion por Estocástico Universal:  Tiempo=1.2101358901006514
+                        -- Seleccion por Truncamiento:           Tiempo=1.2080993745062518
+                        -- Seleccion por Restos:                 Tiempo=1.3140629887298263
+                        -- Seleccion por Ranking:                Tiempo=1.2250660894377927
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32, 32, 32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=1.567247629470645
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.6080281514710506
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.609182217574451
+                        -- Seleccion por Estocástico Universal:  Tiempo=1.5862986108787243
+                        -- Seleccion por Truncamiento:           Tiempo=1.5829133605429013
+                        -- Seleccion por Restos:                 Tiempo=1.7151153780250254
+                        -- Seleccion por Ranking:                Tiempo=1.600402293896875
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=1.5967565346972603
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.618137586736109
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.620731169337057
+                        -- Seleccion por Estocástico Universal:  Tiempo=1.5940825134694516
+                        -- Seleccion por Truncamiento:           Tiempo=1.5879295306743213
+                        -- Seleccion por Restos:                 Tiempo=1.7305998415319348
+                        -- Seleccion por Ranking:                Tiempo=1.609771007070579
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45, 45, 45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=1.7789993453513844
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.8114802022699101
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.8163929501138132
+                        -- Seleccion por Estocástico Universal:  Tiempo=1.7949761925067143
+                        -- Seleccion por Truncamiento:           Tiempo=1.789934449622989
+                        -- Seleccion por Restos:                 Tiempo=1.9386555074814766
+                        -- Seleccion por Ranking:                Tiempo=1.8119614953739014
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=1.8058289247709578
+                        -- Seleccion por Torneo Determinista:    Tiempo=1.8268220512349171
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=1.830416522561172
+                        -- Seleccion por Estocástico Universal:  Tiempo=1.8051668661234235
+                        -- Seleccion por Truncamiento:           Tiempo=1.8005317833021155
+                        -- Seleccion por Restos:                 Tiempo=1.9489293291634084
+                        -- Seleccion por Ranking:                Tiempo=1.8183794314591453
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15, 15, 15, 15, 15, 15, 15, 15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=1.9954267615680714
+                        -- Seleccion por Torneo Determinista:    Tiempo=2.02665184807845
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=2.0373625224048726
+                        -- Seleccion por Estocástico Universal:  Tiempo=2.0103905861187377
+                        -- Seleccion por Truncamiento:           Tiempo=2.0010769693043113
+                        -- Seleccion por Restos:                 Tiempo=2.1844386484656226
+                        -- Seleccion por Ranking:                Tiempo=2.0310671374205067
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=2.0188172968695453
+                        -- Seleccion por Torneo Determinista:    Tiempo=2.0510980748458394
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=2.0482641787411
+                        -- Seleccion por Estocástico Universal:  Tiempo=2.0190221189333397
+                        -- Seleccion por Truncamiento:           Tiempo=2.0193452459436294
+                        -- Seleccion por Restos:                 Tiempo=2.186549697298742
+                        -- Seleccion por Ranking:                Tiempo=2.0407619798669687
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22, 22, 22, 22, 22, 22, 22, 22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=2.434965698996662
+                        -- Seleccion por Torneo Determinista:    Tiempo=2.4789876099495154
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=2.486078010495663
+                        -- Seleccion por Estocástico Universal:  Tiempo=2.4532791205173545
+                        -- Seleccion por Truncamiento:           Tiempo=2.450796301019223
+                        -- Seleccion por Restos:                 Tiempo=2.6462131950513617
+                        -- Seleccion por Ranking:                Tiempo=2.4730636247548885
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=2.474297981234843
+                        -- Seleccion por Torneo Determinista:    Tiempo=2.4971855940598466
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=2.4998548147068282
+                        -- Seleccion por Estocástico Universal:  Tiempo=2.4701882107362496
+                        -- Seleccion por Truncamiento:           Tiempo=2.4683138755377376
+                        -- Seleccion por Restos:                 Tiempo=2.6659655337754242
+                        -- Seleccion por Ranking:                Tiempo=2.493653506693414
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32, 32, 32, 32, 32, 32, 32, 32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=3.175637625334539
+                        -- Seleccion por Torneo Determinista:    Tiempo=3.2421902762639676
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=3.244163248812698
+                        -- Seleccion por Estocástico Universal:  Tiempo=3.2159613624364796
+                        -- Seleccion por Truncamiento:           Tiempo=3.2109475981195486
+                        -- Seleccion por Restos:                 Tiempo=3.464293234902646
+                        -- Seleccion por Ranking:                Tiempo=3.2437374967503816
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=3.241443929838445
+                        -- Seleccion por Torneo Determinista:    Tiempo=3.2681260564899874
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=3.267842827822663
+                        -- Seleccion por Estocástico Universal:  Tiempo=3.2379796263903438
+                        -- Seleccion por Truncamiento:           Tiempo=3.2368359963215867
+                        -- Seleccion por Restos:                 Tiempo=3.4851032848145906
+                        -- Seleccion por Ranking:                Tiempo=3.2651964342391677
+
+Tam. Poblacion = 500    Num. Generaciones = 250
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [15, 15], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=5.108237899997039
+                        -- Seleccion por Torneo Determinista:    Tiempo=6.378753299990203
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=6.696697460002499
+                        -- Seleccion por Estocástico Universal:  Tiempo=6.455694051996898
+                        -- Seleccion por Truncamiento:           Tiempo=6.378678930408014
+                        -- Seleccion por Restos:                 Tiempo=6.682159706084602
+                        -- Seleccion por Ranking:                Tiempo=6.573735921220265
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=6.478762024242033
+                        -- Seleccion por Torneo Determinista:    Tiempo=6.576868824849896
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=6.681165224974381
+                        -- Seleccion por Estocástico Universal:  Tiempo=6.483295224994069
+                        -- Seleccion por Truncamiento:           Tiempo=6.365935945000382
+                        -- Seleccion por Restos:                 Tiempo=6.707677929008263
+                        -- Seleccion por Ranking:                Tiempo=6.613874285793467
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [21, 21], Precision = 1e-05, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=7.382563637160385
+                        -- Seleccion por Torneo Determinista:    Tiempo=7.7378884874339064
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=7.840750997484361
+                        -- Seleccion por Estocástico Universal:  Tiempo=7.6283043594926
+                        -- Seleccion por Truncamiento:           Tiempo=7.538583051905965
+                        -- Seleccion por Restos:                 Tiempo=7.904239630372776
+                        -- Seleccion por Ranking:                Tiempo=8.035276846073018
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=7.826557509219955
+                        -- Seleccion por Torneo Determinista:    Tiempo=8.021397841837626
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=8.02589660837071
+                        -- Seleccion por Estocástico Universal:  Tiempo=7.712920461677923
+                        -- Seleccion por Truncamiento:           Tiempo=7.586651732338635
+                        -- Seleccion por Restos:                 Tiempo=7.981630806463594
+                        -- Seleccion por Ranking:                Tiempo=7.819856121292442
+-- Funcion: F1: Calibracion y Prueba (L. Genes = [31, 31], Precision = 1e-08, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=9.434982184256729
+                        -- Seleccion por Torneo Determinista:    Tiempo=9.819525316851227
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=10.180563943373041
+                        -- Seleccion por Estocástico Universal:  Tiempo=9.872291168675247
+                        -- Seleccion por Truncamiento:           Tiempo=9.775952933742655
+                        -- Seleccion por Restos:                 Tiempo=10.219792186749865
+                        -- Seleccion por Ranking:                Tiempo=10.009920937352906
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=9.880403227468552
+                        -- Seleccion por Torneo Determinista:    Tiempo=10.274984365487251
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=10.267350273098753
+                        -- Seleccion por Estocástico Universal:  Tiempo=9.890848194617352
+                        -- Seleccion por Truncamiento:           Tiempo=9.797314098923568
+                        -- Seleccion por Restos:                 Tiempo=10.320812179789247
+                        -- Seleccion por Ranking:                Tiempo=10.114041975954468
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=7.0093351751901505
+                        -- Seleccion por Torneo Determinista:    Tiempo=6.616822915036191
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=6.514185683004504
+                        -- Seleccion por Estocástico Universal:  Tiempo=6.270167956603727
+                        -- Seleccion por Truncamiento:           Tiempo=6.173404191319838
+                        -- Seleccion por Restos:                 Tiempo=6.519354038264511
+                        -- Seleccion por Ranking:                Tiempo=6.371185747657046
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=6.224544829528467
+                        -- Seleccion por Torneo Determinista:    Tiempo=6.5176191259087375
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=6.502470605183026
+                        -- Seleccion por Estocástico Universal:  Tiempo=6.254239601040605
+                        -- Seleccion por Truncamiento:           Tiempo=6.1579480202026895
+                        -- Seleccion por Restos:                 Tiempo=6.534594024042063
+                        -- Seleccion por Ranking:                Tiempo=6.385932284810008
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=6.740576716959689
+                        -- Seleccion por Torneo Determinista:    Tiempo=7.042792543391506
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=7.117794448690451
+                        -- Seleccion por Estocástico Universal:  Tiempo=6.852145469748686
+                        -- Seleccion por Truncamiento:           Tiempo=6.76789413394314
+                        -- Seleccion por Restos:                 Tiempo=7.180570506791168
+                        -- Seleccion por Ranking:                Tiempo=7.007427941363548
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=6.866911288280181
+                        -- Seleccion por Torneo Determinista:    Tiempo=7.062444637655122
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=7.1689243275283046
+                        -- Seleccion por Estocástico Universal:  Tiempo=7.157837345508526
+                        -- Seleccion por Truncamiento:           Tiempo=6.997609389098201
+                        -- Seleccion por Restos:                 Tiempo=7.2199089578229145
+                        -- Seleccion por Ranking:                Tiempo=7.038137311561586
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=7.908383542306924
+                        -- Seleccion por Torneo Determinista:    Tiempo=8.402066988465743
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=8.458222917689083
+                        -- Seleccion por Estocástico Universal:  Tiempo=8.188561243534895
+                        -- Seleccion por Truncamiento:           Tiempo=8.105151568709427
+                        -- Seleccion por Restos:                 Tiempo=8.54405073373253
+                        -- Seleccion por Ranking:                Tiempo=8.319867186754525
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=8.175649517346136
+                        -- Seleccion por Torneo Determinista:    Tiempo=8.41865268347598
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=8.516681876704656
+                        -- Seleccion por Estocástico Universal:  Tiempo=8.206156455341604
+                        -- Seleccion por Truncamiento:           Tiempo=8.112293171064298
+                        -- Seleccion por Restos:                 Tiempo=8.605185534207163
+                        -- Seleccion por Ranking:                Tiempo=8.498329746848068
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=10.16054666936218
+                        -- Seleccion por Torneo Determinista:    Tiempo=10.714477293875174
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=11.235854458776464
+                        -- Seleccion por Estocástico Universal:  Tiempo=10.553347651750581
+                        -- Seleccion por Truncamiento:           Tiempo=10.350315790353909
+                        -- Seleccion por Restos:                 Tiempo=10.929491478069334
+                        -- Seleccion por Ranking:                Tiempo=10.61150319562147
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=10.44688657912047
+                        -- Seleccion por Torneo Determinista:    Tiempo=10.752452875817834
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=10.819756075165643
+                        -- Seleccion por Estocástico Universal:  Tiempo=10.510818895035598
+                        -- Seleccion por Truncamiento:           Tiempo=10.422485419012688
+                        -- Seleccion por Restos:                 Tiempo=11.010418543804965
+                        -- Seleccion por Ranking:                Tiempo=10.715113628750633
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=13.23189388575418
+                        -- Seleccion por Torneo Determinista:    Tiempo=13.971745597167478
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=14.147746699436862
+                        -- Seleccion por Estocástico Universal:  Tiempo=13.890817699880492
+                        -- Seleccion por Truncamiento:           Tiempo=13.758475079978103
+                        -- Seleccion por Restos:                 Tiempo=14.680273335995707
+                        -- Seleccion por Ranking:                Tiempo=14.12633230720844
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=13.972963641439028
+                        -- Seleccion por Torneo Determinista:    Tiempo=14.224216228289425
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=14.281237065657532
+                        -- Seleccion por Estocástico Universal:  Tiempo=13.996391633131873
+                        -- Seleccion por Truncamiento:           Tiempo=13.898584666635582
+                        -- Seleccion por Restos:                 Tiempo=14.808010113321334
+                        -- Seleccion por Ranking:                Tiempo=14.245650722665124
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [15, 15, 15, 15, 15], Precision = 0.0001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=15.265517764530864
+                        -- Seleccion por Torneo Determinista:    Tiempo=16.01981935290583
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=16.313192090581097
+                        -- Seleccion por Estocástico Universal:  Tiempo=16.06961147811551
+                        -- Seleccion por Truncamiento:           Tiempo=15.791689475628425
+                        -- Seleccion por Restos:                 Tiempo=16.581477155124837
+                        -- Seleccion por Ranking:                Tiempo=15.876078111020956
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=15.655919322212062
+                        -- Seleccion por Torneo Determinista:    Tiempo=16.375609344446115
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=16.183050348887598
+                        -- Seleccion por Estocástico Universal:  Tiempo=15.688471349765019
+                        -- Seleccion por Truncamiento:           Tiempo=15.944921149952512
+                        -- Seleccion por Restos:                 Tiempo=16.68469252998334
+                        -- Seleccion por Ranking:                Tiempo=16.20501368599217
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [22, 22, 22, 22, 22], Precision = 1e-06, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=18.237293457196504
+                        -- Seleccion por Torneo Determinista:    Tiempo=18.889417231442117
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=19.021775046295613
+                        -- Seleccion por Estocástico Universal:  Tiempo=18.72566254926303
+                        -- Seleccion por Truncamiento:           Tiempo=18.616223189858335
+                        -- Seleccion por Restos:                 Tiempo=19.82922329797192
+                        -- Seleccion por Ranking:                Tiempo=19.01761311959688
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=18.865124903923096
+                        -- Seleccion por Torneo Determinista:    Tiempo=19.104408980792147
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=19.14111763615678
+                        -- Seleccion por Estocástico Universal:  Tiempo=18.83402118723291
+                        -- Seleccion por Truncamiento:           Tiempo=18.69237591745152
+                        -- Seleccion por Restos:                 Tiempo=19.965049043489493
+                        -- Seleccion por Ranking:                Tiempo=19.14276562870706
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [32, 32, 32, 32, 32], Precision = 9.999999999999999e-10, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=23.3975577457419
+                        -- Seleccion por Torneo Determinista:    Tiempo=24.52820694914474
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=24.762409089836133
+                        -- Seleccion por Estocástico Universal:  Tiempo=24.484498657968096
+                        -- Seleccion por Truncamiento:           Tiempo=24.334343451584168
+                        -- Seleccion por Restos:                 Tiempo=25.90628485032058
+                        -- Seleccion por Ranking:                Tiempo=24.80255625006334
+        -- Cruce: Uniforme --
+                        -- Seleccion por Ruleta:                 Tiempo=24.635069990017097
+                        -- Seleccion por Torneo Determinista:    Tiempo=24.886041198003547
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=24.97162977959769
+                        -- Seleccion por Estocástico Universal:  Tiempo=24.633078015918926
+                        -- Seleccion por Truncamiento:           Tiempo=24.483715043173326
+                        -- Seleccion por Restos:                 Tiempo=26.08086824863626
+                        -- Seleccion por Ranking:                Tiempo=24.943377549721745
+-- Funcion: F4: Michalewicz (Binaria) (L. Genes = [45, 45, 45, 45, 45], Precision = 0.001, Mutacion = Basica) --
+        -- Cruce: Básica --
+                        -- Seleccion por Ruleta:                 Tiempo=26.389990829942302
+                        -- Seleccion por Torneo Determinista:    Tiempo=27.052545965979437						
+						

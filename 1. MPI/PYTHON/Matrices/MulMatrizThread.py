@@ -1,4 +1,4 @@
-#from mpi4py import MPI
+from mpi4py import MPI
 
 import sys
 import os
@@ -6,27 +6,38 @@ import time
 
 """
 Normal:
-M100X100    =    0.15625s
-M1000X1000  =    196.84375s
+M100X100    =    0.078700400001253s
+M1000X1000  =    88.15625s
 """
+
+
+"""
+MPI:
+4 WORKERS (MASTER NO HACE MAS QUE DIRIGIR)
+M100X100    =   0.0141010994149s    speed-up=5.582
+M1000X1000  =   16.120811400373s    speed-up=5.46
+"""
+
 
 import threading
-"""
-medido por time
-
-M100X100   =    0.125s
-M1000X1000 =    125.84375s
+""" TARDA MUCHO MAS
+4 HILOS:
+M100X100   =    0.05932909683034s   speed-up=1.32
+M1000X1000 =    65.99578289999045s  speed-up=1.335
 """
 
 import multiprocessing
 """
-medido por time
+4 HILOS:
+M100X100   =    0.015625s           speed-up=5.04
+M1000X1000 =    18.770753199991304s speed-up=4.69
 
-M100X100   =    0.046875s
-M1000X1000 =    56.25875s
 """
 
 from concurrent.futures import ThreadPoolExecutor
+"""
+OTRA POSIBLE LIBRERIA
+"""
 
 
 
@@ -66,15 +77,20 @@ def create_threads(numThreads, matrizA, matrizB, matrizC):
         asig.append([izq,izq+tam])
         izq+=tam
 
+    
+
+    
+    
+
     for i in range(numThreads):
         # print("MASTER",i)
-        """thread = threading.Thread(target=multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))
+        thread = threading.Thread(target=multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))
         threads.append(thread)
-        thread.start()"""
+        thread.start()
 
-        process = multiprocessing.Process(target=multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))
+        """process = multiprocessing.Process(target=multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))
         threads.append(process)
-        process.start()
+        process.start()"""
 
     """with ThreadPoolExecutor(max_workers=5) as executor:
         for i in range(5):
@@ -83,15 +99,16 @@ def create_threads(numThreads, matrizA, matrizB, matrizC):
     # Espera a que todos terminen 
     for thread in threads:
         thread.join()
+    
 
 
 def main():       
     PRINT = False           # boolean.  Imprimir matrices
 
-    matrizA,fA,cA=leeArchivo("M100X100")
+    matrizA,fA,cA=leeArchivo("M1000X1000")
     print("Matriz A({}x{}), generada.".format(fA,cA))
     if PRINT: print(matrizA)
-    matrizB,fB,cB=leeArchivo("M100X100")
+    matrizB,fB,cB=leeArchivo("M1000X1000")
     print("Matriz B({}x{}), generada.".format(fB,cB))
     if PRINT: print(matrizB)
 
@@ -102,13 +119,13 @@ def main():
     
     
     
-    timeStart = time.process_time()
-    #timeStart = MPI.Wtime()
+    #timeStart = time.process_time()
+    timeStart = MPI.Wtime()
 
     create_threads(4,matrizA, matrizB, matrizC)
     
-    timeEnd = time.process_time()
-    #timeEnd = MPI.Wtime()
+    #timeEnd = time.process_time()
+    timeEnd = MPI.Wtime()
 
     print("Tiempo de ejecucion: {}s".format(timeEnd-timeStart))
     
