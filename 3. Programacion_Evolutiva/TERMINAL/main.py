@@ -1515,22 +1515,23 @@ class Seleccion:
                 seleccionados.append(IndividuoReal(aviones=None,
                                                    vInd=poblacion[i].v))
                 x+=1
-				
-			
-        resto=[]
-        func=random.randint(0,4) # Cambiar
-        # SE SUMA LA PARTE DE elitismo PORQUE SINO SE RESTA 2 VECES, 
-        # EN LA PARTE DE restos() Y LA FUNCION RANDOM
-        if func==0: resto=self.ruletaReal(poblacion, prob_acumulada, tam_seleccionados-x)
-        elif func==1: resto=self.torneoDeterministicoReal(poblacion, 3, tam_seleccionados-x)	
-        elif func==2: resto=self.torneoProbabilisticoReal(poblacion, 3, 0.9, tam_seleccionados-x)
-        elif func==3: resto=self.estocasticoUniversalReal(poblacion, prob_acumulada, tam_seleccionados-x)
-        elif func==4: resto=self.truncamientoReal(poblacion, prob_acumulada, 0.5, tam_seleccionados-x) 
-        else: resto=self.rankingReal(poblacion, prob_seleccion, 2, tam_seleccionados-x)
-        
-        for ind in resto:
-            seleccionados.append(IndividuoReal(aviones=None,
-                                               vInd=ind.v))
+
+        if x<tam_seleccionados:		
+                
+            resto=[]
+            func=random.randint(0,4) # Cambiar
+            # SE SUMA LA PARTE DE elitismo PORQUE SINO SE RESTA 2 VECES, 
+            # EN LA PARTE DE restos() Y LA FUNCION RANDOM
+            if func==0: resto=self.ruletaReal(poblacion, prob_acumulada, tam_seleccionados-x)
+            elif func==1: resto=self.torneoDeterministicoReal(poblacion, 3, tam_seleccionados-x)	
+            elif func==2: resto=self.torneoProbabilisticoReal(poblacion, 3, 0.9, tam_seleccionados-x)
+            elif func==3: resto=self.estocasticoUniversalReal(poblacion, prob_acumulada, tam_seleccionados-x)
+            elif func==4: resto=self.truncamientoReal(poblacion, prob_acumulada, 0.5, tam_seleccionados-x) 
+            else: resto=self.rankingReal(poblacion, prob_seleccion, 2, tam_seleccionados-x)
+            
+            for ind in resto:
+                seleccionados.append(IndividuoReal(aviones=None,
+                                                vInd=ind.v))
 		
 
         return seleccionados
@@ -2855,8 +2856,9 @@ class AlgoritmoGenetico():
         selec=[]
 
         self.init_poblacion()    
-        self.evaluacion_poblacionBin()                
         
+        self.evaluacion_poblacionBin()
+
         while self.generaciones > 0:
             selec=self.seleccion_poblacionBin(5)
             
@@ -2877,8 +2879,9 @@ class AlgoritmoGenetico():
     def ejecutaReal(self):
         selec=[]
 
-        self.init_poblacion()    
-        self.evaluacion_poblacionReal()                
+        
+        self.init_poblacion()            
+        self.evaluacion_poblacionReal()    
         
         while self.generaciones > 0:
             selec=self.seleccion_poblacionReal(5)
@@ -2900,8 +2903,9 @@ class AlgoritmoGenetico():
     def ejecutaArbol(self):
         selec=[]
 
-        self.init_poblacionArbol(0)            
-        self.evaluacion_poblacionArbol()                
+        self.init_poblacionArbol(0)       
+        self.evaluacion_poblacionArbol() 
+                      
         
         while self.generaciones > 0:
             selec=self.seleccion_poblacionArbol(5)           
@@ -2924,10 +2928,31 @@ class AlgoritmoGenetico():
     def ejecutaGramatica(self):
         selec=[]
         
-        self.init_poblacionGramatica(0)       
-        """for x in self.poblacion:
-            print(x)   """  
-        self.evaluacion_poblacionGramatica()                
+        totalTimeStart = MPI.Wtime()
+        self.init_poblacionGramatica(0)    
+        totalTimeEnd = MPI.Wtime()
+        print("I Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
+        
+        totalTimeStart = MPI.Wtime()        
+        self.evaluacion_poblacionGramatica()      
+        totalTimeEnd = MPI.Wtime()
+        print("E Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))  
+        
+
+        totalTimeStart = MPI.Wtime()      
+        selec=self.seleccion_poblacionGramatica(5)
+        totalTimeEnd = MPI.Wtime()
+        print("S Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart)) 
+
+        totalTimeStart = MPI.Wtime()      
+        self.poblacion=self.cruce_poblacionGramatica(selec,self.long_cromosoma)
+        totalTimeEnd = MPI.Wtime()
+        print("C Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart)) 
+
+        totalTimeStart = MPI.Wtime()      
+        self.poblacion=self.mutacion_poblacionGramatica(self.poblacion)
+        totalTimeEnd = MPI.Wtime()
+        print("M Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))              
         
         while self.generaciones > 0:
             selec=self.seleccion_poblacionGramatica(5)           
@@ -3545,7 +3570,7 @@ def main():
     # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
     # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
     # 7: Arbol        | 8: Gramatica
-    funcion_idx=4
+    funcion_idx=6
     d=2
     elitismo=0
 
@@ -3652,24 +3677,24 @@ def pruebas():
                    "Arbol",
                    "Gramatica"]
         
-    tam_poblacion=500
-    generaciones=250
+    tam_poblacion=100
+    generaciones=100
 
     # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
     #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=0
+    seleccion_idx=4
     
     # 0: Basica | 1: Uniforme | 
     # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
     # 7: Intercambio
-    cruce_idx=0
+    cruce_idx=7
     prob_cruce=0.6
     
     # 0: Basica    |     
     # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
     # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
     #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-    mut_idx=0
+    mut_idx=11
     prob_mut=0.05 # Binario: 0.05 | Real: 0.3
 
     precision=0.001
@@ -3677,7 +3702,7 @@ def pruebas():
     # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
     # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
     # 7: Arbol        | 8: Gramatica
-    funcion_idx=0
+    funcion_idx=7
     d=2
     elitismo=0
 
@@ -3693,11 +3718,12 @@ def pruebas():
     bloating_idx=0
     ticks=100
 
-    ejecuciones=5
+    ejecuciones=3
 
     tiempo=0
-    cont=1
-    contador=2
+    cont=0
+    contador=1
+    
    
     AG.set_valores( tam_poblacion, 
                             generaciones, 
@@ -3719,7 +3745,7 @@ def pruebas():
                             bloating_idx,
                             ticks)  
 
-    print("Pruebas Binario, ejecuciones = {}".format(ejecuciones))      
+    """print("Pruebas Binario, ejecuciones = {}".format(ejecuciones))      
     tam_ind=AG.tamGenes(precision)    
     
     print("\nTam. Poblacion = {} \tNum. Generaciones = {}".format(tam_poblacion,generaciones))
@@ -3763,9 +3789,7 @@ def pruebas():
         if seleccion_idx==7:
             seleccion_idx=0
             cruce_idx+=1            
-            """print("-- Funcion (L. Genes = {}, Precision = {}): {} -- \n\t-- Cruce: {} --\n".format(funcion_opt[funcion_idx],
-                                                                                                          precision,
-                                                                                                          cruce_opt[cruce_idx],))"""
+            
             if cruce_idx>=2:                
                 cruce_idx=0
                 cont+=1
@@ -3803,8 +3827,165 @@ def pruebas():
                                                                                     precision))
 
                 print("\t-- Cruce: {} --".format(cruce_opt[cruce_idx]))
-            else: print("\t-- Cruce: {} --".format(cruce_opt[cruce_idx]))
+            else: print("\t-- Cruce: {} --".format(cruce_opt[cruce_idx]))"""
 
+    """print("Pruebas Reales, ejecuciones = {}".format(ejecuciones))      
+        
+    
+    print("\nTam. Poblacion = {} \tNum. Generaciones = {}".format(tam_poblacion,generaciones))
+    print("-- Funcion: {} --\n\t-- Cruce: {} --\n\t\t -- Mutacion --".format(funcion_opt[funcion_idx],
+                                                         cruce_opt[cruce_idx],
+                                                         mutacion_opt[mut_idx]))
+    
+    while(True):     
+        for _ in range(ejecuciones):
+            AG.set_valores( tam_poblacion, 
+                            generaciones, 
+                            seleccion_idx,
+                            cruce_idx, 
+                            prob_cruce,
+                            mut_idx, 
+                            prob_mut,
+                            precision, 
+                            funcion_idx, 
+                            d, 
+                            elitismo,
+                            
+                            modo,
+                            profundidad,
+                            long_cromosoma,
+                            filas,
+                            columnas,
+                            bloating_idx,
+                            ticks)  
+            
+            totalTimeStart = MPI.Wtime()
+            AG.ejecuta()
+            totalTimeEnd = MPI.Wtime()
+            
+            tiempo+=(totalTimeEnd-totalTimeStart)
 
-main()
-#pruebas()
+        tiempo/=ejecuciones
+        print("\t\t\t-- Seleccion por {} Tiempo={}".format(seleccion_opt[seleccion_idx],tiempo))
+
+        seleccion_idx+=1
+        if seleccion_idx==7:
+            seleccion_idx=0
+            mut_idx+=1            
+            
+            if mut_idx>=4:                
+                mut_idx=1
+                cruce_idx+=1
+                if cruce_idx==7:
+                    cruce_idx=2
+                    funcion_idx+=1
+                    if funcion_idx==7:                        
+                        funcion_idx=4
+                        contador+=1
+                        if contador==1:
+                            tam_poblacion=100
+                            generaciones=100
+                        elif contador==2:
+                            tam_poblacion=500
+                            generaciones=250
+                        elif contador==3:
+                            tam_poblacion=1000
+                            generaciones=500
+                        else: break
+                        print("Tam. Poblacion = {} \tNum. Generaciones = {}".format(tam_poblacion,generaciones))                
+                    print("-- Funcion: {} --".format(funcion_opt[funcion_idx]))                
+
+                print("\t-- Cruce: {} --".format(cruce_opt[cruce_idx]))
+            
+            print("\t\t-- Mutacion: {} --".format(mutacion_opt[mut_idx]))"""
+
+    print("Pruebas Arbol, ejecuciones = {}".format(ejecuciones))      
+        
+    
+    print("Tam. Poblacion = {} \tNum. Generaciones = {}".format(tam_poblacion,generaciones))
+    print("-- Matriz{}x{} --\n\t-- Cruce: {} --\n\t\t-- Mutacion --".format(filas,columnas,cruce_opt[cruce_idx], mutacion_opt[mut_idx]))
+    
+    while(True):     
+        for i in range(ejecuciones):
+            AG.set_valores( tam_poblacion, 
+                            generaciones, 
+                            seleccion_idx,
+                            cruce_idx, 
+                            prob_cruce,
+                            mut_idx, 
+                            prob_mut,
+                            precision, 
+                            funcion_idx, 
+                            d, 
+                            elitismo,
+                            
+                            modo,
+                            profundidad,
+                            long_cromosoma,
+                            filas,
+                            columnas,
+                            bloating_idx,
+                            ticks)  
+            
+            try :
+                totalTimeStart = MPI.Wtime()
+                AG.ejecuta()
+                totalTimeEnd = MPI.Wtime() 
+                tiempo+=(totalTimeEnd-totalTimeStart) 
+            except Exception:
+                print("Exception")
+                i-=1
+                
+            
+            
+
+        tiempo/=ejecuciones
+        print("\t\t\t-- Seleccion por {} Tiempo={}".format(seleccion_opt[seleccion_idx],tiempo))
+
+        seleccion_idx+=1
+        if seleccion_idx==7:
+            seleccion_idx=0
+            mut_idx+=1            
+            
+            if mut_idx>=12:                
+                mut_idx=5
+                
+                cont+=1
+                if cont==1:
+                    filas=15
+                    columnas=15
+                    ticks=200
+                elif cont==2:
+                    filas=30
+                    columnas=30
+                    ticks=400
+                elif cont==3:
+                    filas=100
+                    columnas=100
+                    ticks=2000
+                else: 
+                    filas=8
+                    columnas=8
+                    ticks=100
+                    cont=0
+
+                    contador+=1
+                    if contador==1:
+                        tam_poblacion=100
+                        generaciones=100
+                    elif contador==2:
+                        tam_poblacion=500
+                        generaciones=250
+                    elif contador==3:
+                        tam_poblacion=1000
+                        generaciones=500
+                    else: break
+                    print("Tam. Poblacion = {} \tNum. Generaciones = {}".format(tam_poblacion,generaciones))                
+                                   
+
+                print("-- Matriz{}x{} --\n\t-- Cruce: {} --".format(filas, columnas, cruce_opt[cruce_idx]))
+            
+            print("\t\t-- Mutacion: {} --".format(mutacion_opt[mut_idx]))
+
+#main()
+pruebas()
