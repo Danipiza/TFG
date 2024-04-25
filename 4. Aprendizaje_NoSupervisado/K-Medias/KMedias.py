@@ -10,7 +10,7 @@ El algoritmo de clustering, KMeans, tiene como objetivo dividir unos datos
 en un numero determindo de clusters (con su respectivo centroide).
 """
 
-# TODO SILHOUETTE (Tarda mucho)
+# TODO SILHOUETTE Ya esta hecho pero no implementado
 
 # TIEMPO: (datos=100000.txt, k=3)
 # Manhattan:

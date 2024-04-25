@@ -1,4 +1,4 @@
-from mpi4py import MPI
+"""from mpi4py import MPI"""
 
 import sys
 import os
@@ -26,7 +26,12 @@ M100X100   =    0.05932909683034s   speed-up=1.32
 M1000X1000 =    65.99578289999045s  speed-up=1.335
 """
 
-import multiprocessing
+import multiprocessing 
+# TODO 
+# NO TIENEN MEMORIA COMPARTIDA por defecto
+# This is because each process in multiprocessing has its own memory space, 
+# so changes made by one process aren't reflected in the memory of other processes.
+
 """
 4 HILOS:
 M100X100   =    0.015625s           speed-up=5.04
@@ -41,20 +46,17 @@ OTRA POSIBLE LIBRERIA
 
 
 
-def print_matriz(matriz):
-    i=0
-    for x in matriz:
-        print("Fila {}: {}".format(i, x))
-        i+=1
-
 # Funcion para cada thread
 def multiply_row(id, matrizA, matrizB, matrizC, n,m, rows):    
+
     for row in range(rows[0],rows[1]):
         for col in range(m):
             tmp=0
             for k in range(n):
                 tmp+=matrizA[row][k]*matrizB[k][col]
             matrizC[row][col] = tmp
+
+
     print("Termina",id)
 
 
@@ -79,22 +81,18 @@ def create_threads(numThreads, matrizA, matrizB, matrizC):
 
     
 
-    
+    #barrier = multiprocessing.Barrier(numThreads)
     
 
     for i in range(numThreads):
         # print("MASTER",i)
-        thread = threading.Thread(target=multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))
+        """thread = threading.Thread(target=multiply_row, args=(i, barrier, matrizA, matrizB, matrizC, n,m, asig[i]))
         threads.append(thread)
-        thread.start()
+        thread.start()"""
 
-        """process = multiprocessing.Process(target=multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))
+        process = multiprocessing.Process(target=multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))
         threads.append(process)
-        process.start()"""
-
-    """with ThreadPoolExecutor(max_workers=5) as executor:
-        for i in range(5):
-            executor.submit(multiply_row, args=(i, matrizA, matrizB, matrizC, n,m, asig[i]))"""
+        process.start()
 
     # Espera a que todos terminen 
     for thread in threads:
@@ -103,37 +101,95 @@ def create_threads(numThreads, matrizA, matrizB, matrizC):
 
 
 def main():       
-    PRINT = False           # boolean.  Imprimir matrices
+    PRINT = True           # boolean.  Imprimir matrices
 
-    matrizA,fA,cA=leeArchivo("M1000X1000")
+    matrizA,fA,cA=leeArchivo("M10X10")
     print("Matriz A({}x{}), generada.".format(fA,cA))
     if PRINT: print(matrizA)
-    matrizB,fB,cB=leeArchivo("M1000X1000")
+    matrizB,fB,cB=leeArchivo("M10X10")
     print("Matriz B({}x{}), generada.".format(fB,cB))
     if PRINT: print(matrizB)
 
     if cA != fB:
         print("No se pueden multiplicar las matrices. cA ({}) != fB ({})".format(cA,fB))
     else:
-        matrizC = [[0 for _ in range(cB)] for _ in range(fA)]
+        matrizC=[]
+        for _ in range(fA):
+            matrizC.append(multiprocessing.Array('f', [0.0 for _ in range(cB)]))
+        """matrizC = multiprocessing.Array('f', [0.0 for _ in range(cB*fA)])"""
+        #matrizC = [[0.0 for _ in range(cB)] for _ in range(fA)]
+
     
     
     
-    #timeStart = time.process_time()
-    timeStart = MPI.Wtime()
+    timeStart = time.process_time()
+    """timeStart = MPI.Wtime()"""
 
     create_threads(4,matrizA, matrizB, matrizC)
     
-    #timeEnd = time.process_time()
-    timeEnd = MPI.Wtime()
+    timeEnd = time.process_time()
+    #timeEnd = MPI.Wtime()
 
     print("Tiempo de ejecucion: {}s".format(timeEnd-timeStart))
     
     if PRINT: 
         for f in matrizC:
-            print(f)
+            for val in f:
+                print(val, end=" ")
+            print()
+
+        """print(matrizC)"""
         
+
+import concurrent.futures
+
+def multiply_row2(id, row, matrix):
+    #print(id)
+    result_row = []
+    for col in range(len(matrix[0])):
+        result = 0
+        for i in range(len(row)):
+            result += row[i] * matrix[i][col]
+        result_row.append(result)
+    return result_row
+
+def multiplicar_matrices(numThreads, matrix1, matrix2):
     
+    id=0
+    result = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=numThreads) as executor:
+        futures = []
+        for row in matrix1:
+            futures.append(executor.submit(multiply_row2, id, row, matrix2))
+        
+        for future in concurrent.futures.as_completed(futures):
+            result.append(future.result())
+        id+=1
+    
+    return result
+
+def main2():
+    print("Usando concurrent.futures import ThreadPoolExecutor\n")
+    PRINT = False           # boolean.  Imprimir matrices
+
+    matrizA,fA,cA=leeArchivo("M10X10")
+    print("Matriz A({}x{}), generada.".format(fA,cA))
+    if PRINT: print(matrizA)
+    matrizB,fB,cB=leeArchivo("M10X10")
+    print("Matriz B({}x{}), generada.".format(fB,cB))
+    if PRINT: print(matrizB)
+
+    if cA != fB:
+        print("No se pueden multiplicar las matrices. cA ({}) != fB ({})".format(cA,fB))
+    else:
+        matrizC = [[0.0 for _ in range(cB)] for _ in range(fA)]
+
+
+    result = multiplicar_matrices(4, matrizA, matrizB)
+    for row in result:
+        print(row)
+
+
 
     
 
@@ -179,4 +235,5 @@ def leeArchivo(archivo):
     return M, filas, columnas
     
 if __name__ == "__main__":
-    main()
+    #main()
+    main2()
