@@ -386,3 +386,145 @@ Tam. Poblacion = 100    Num. Generaciones = 100
                         -- Seleccion por Torneo Probabilístico:  Tiempo=5.195602401379211
                         -- Seleccion por Estocástico Universal:  Tiempo=20.308055867126118
                         -- Seleccion por Truncamiento:           Tiempo=16.936235789046435
+						
+PS C:\Users\Usuario\Desktop\GITHUB\TFG\3. Programacion_Evolutiva\TERMINAL> py .\main.py
+Pruebas Arbol, ejecuciones = 3
+Tam. Poblacion = 100    Num. Generaciones = 100
+-- Matriz15x15 --
+        -- Cruce: Intercambio --
+                -- Mutacion --
+                        -- Seleccion por Restos:                 Tiempo=15.013298700000936
+                        -- Seleccion por Ranking:                Tiempo=13.871917900005228
+-- Matriz30x30 --
+        -- Cruce: Intercambio --
+                -- Mutacion: Terminal --
+                        -- Seleccion por Ruleta:                 Tiempo=18.52805886665549
+                        -- Seleccion por Torneo Determinista:    Tiempo=11.179625155551525
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=9.056212018506502
+                        -- Seleccion por Estocástico Universal:  Tiempo=28.716437672827748
+                        -- Seleccion por Truncamiento:           Tiempo=51.575008957601575
+                        -- Seleccion por Restos:                 Tiempo=40.176288752529906
+                        -- Seleccion por Ranking:                Tiempo=25.1263483508388
+                -- Mutacion: Funcional --
+                        -- Seleccion por Ruleta:                 Tiempo=20.601912950282465
+                        -- Seleccion por Torneo Determinista:    Tiempo=23.229502716771254
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=12.650420305590819
+                        -- Seleccion por Estocástico Universal:  Tiempo=20.93224056851211
+                        -- Seleccion por Truncamiento:           Tiempo=33.962062022853566
+                        -- Seleccion por Restos:                 Tiempo=24.18673570762657
+                        -- Seleccion por Ranking:                Tiempo=20.490219002550898
+                -- Mutacion: Arbol --
+                        -- Seleccion por Ruleta:                 Tiempo=26.870375534176816
+                        -- Seleccion por Torneo Determinista:    Tiempo=14.320927944734999
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=9.262342881567257
+                        -- Seleccion por Estocástico Universal:  Tiempo=20.75536572718176
+                        -- Seleccion por Truncamiento:           Tiempo=33.98469897571213
+                        -- Seleccion por Restos:                 Tiempo=52.19392105857168
+                        -- Seleccion por Ranking:                Tiempo=30.698839719519487
+                -- Mutacion: Permutacion --
+                        -- Seleccion por Ruleta:                 Tiempo=21.60860870650364
+                        -- Seleccion por Torneo Determinista:    Tiempo=11.591269702165079
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=8.38654246739381
+                        -- Seleccion por Estocástico Universal:  Tiempo=25.615541489142657
+                        -- Seleccion por Truncamiento:           Tiempo=35.98949432971219
+                        -- Seleccion por Restos:                 Tiempo=26.150836843235982
+                        -- Seleccion por Ranking:                Tiempo=25.18337034774443
+                -- Mutacion: Hoist --
+                        -- Seleccion por Ruleta:                 Tiempo=18.009163749248525
+                        -- Seleccion por Torneo Determinista:    Tiempo=10.294048849742095
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=8.191716283244991
+                        -- Seleccion por Estocástico Universal:  Tiempo=14.207283761092144
+Exception
+                        -- Seleccion por Truncamiento:           Tiempo=12.704755887021127
+                        -- Seleccion por Restos:                 Tiempo=28.358120562337508
+                        -- Seleccion por Ranking:                Tiempo=18.916349520781832
+                -- Mutacion: Contraccion --
+                        -- Seleccion por Ruleta:                 Tiempo=18.275410240270684
+                        -- Seleccion por Torneo Determinista:    Tiempo=11.809209046755072
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=8.940254282250175
+                        -- Seleccion por Estocástico Universal:  Tiempo=21.331065560744488
+Exception
+                        -- Seleccion por Truncamiento:           Tiempo=20.840981053584603
+                        -- Seleccion por Restos:                 Tiempo=25.957986717855594
+                        -- Seleccion por Ranking:                Tiempo=24.54168230595472
+                -- Mutacion: Expansion --
+                        -- Seleccion por Ruleta:                 Tiempo=24.602730168642584
+                        -- Seleccion por Torneo Determinista:    Tiempo=13.105069356204666
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=9.469235718732298
+                        -- Seleccion por Estocástico Universal:  Tiempo=24.88745200623877
+                        -- Seleccion por Truncamiento:           Tiempo=37.57511206873965
+                        -- Seleccion por Restos:                 Tiempo=34.376151789573235
+                        -- Seleccion por Ranking:                Tiempo=22.73053366319695
+-- Matriz100x100 --
+        -- Cruce: Intercambio --
+                -- Mutacion: Terminal --
+                        -- Seleccion por Ruleta:                 Tiempo=35.97005148774735
+                        -- Seleccion por Torneo Determinista:    Tiempo=36.99179049592434
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=28.08001259864569
+                        -- Seleccion por Estocástico Universal:  Tiempo=34.450984199546994
+Exception
+                        -- Seleccion por Truncamiento:           Tiempo=28.784640999845934
+                        -- Seleccion por Restos:                 Tiempo=48.12470666662083
+                        -- Seleccion por Ranking:                Tiempo=34.681389288868495
+                -- Mutacion: Funcional --
+                        -- Seleccion por Ruleta:                 Tiempo=33.99312382962942
+                        -- Seleccion por Torneo Determinista:    Tiempo=25.94261774319935
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=23.30847961440415
+                        -- Seleccion por Estocástico Universal:  Tiempo=41.04736793813245
+                        -- Seleccion por Truncamiento:           Tiempo=46.49330877936894
+                        -- Seleccion por Restos:                 Tiempo=55.18717725978305
+                        -- Seleccion por Ranking:                Tiempo=42.757840853258045
+                -- Mutacion: Arbol --
+                        -- Seleccion por Ruleta:                 Tiempo=38.495492417748785
+                        -- Seleccion por Torneo Determinista:    Tiempo=28.189657105901045
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=23.528342535296222
+                        -- Seleccion por Estocástico Universal:  Tiempo=36.750753278431404
+                        -- Seleccion por Truncamiento:           Tiempo=49.01834202612926
+                        -- Seleccion por Restos:                 Tiempo=45.236970408712324
+                        -- Seleccion por Ranking:                Tiempo=32.889851669570525
+                -- Mutacion: Permutacion --
+                        -- Seleccion por Ruleta:                 Tiempo=34.03855708985329
+                        -- Seleccion por Torneo Determinista:    Tiempo=26.45093569661637
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=22.29549979886632
+                        -- Seleccion por Estocástico Universal:  Tiempo=33.65590103295441
+                        -- Seleccion por Truncamiento:           Tiempo=41.39378861098874
+                        -- Seleccion por Restos:                 Tiempo=45.27559987033476
+                        -- Seleccion por Ranking:                Tiempo=35.43376765678556
+                -- Mutacion: Hoist --
+                        -- Seleccion por Ruleta:                 Tiempo=36.734727652255025
+                        -- Seleccion por Torneo Determinista:    Tiempo=27.15100571741367
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=24.366554772475556
+                        -- Seleccion por Estocástico Universal:  Tiempo=33.07761912415349
+                        -- Seleccion por Truncamiento:           Tiempo=32.89086117471518
+                        -- Seleccion por Restos:                 Tiempo=39.753378224902775
+                        -- Seleccion por Ranking:                Tiempo=33.496893974969936
+                -- Mutacion: Contraccion --
+                        -- Seleccion por Ruleta:                 Tiempo=33.38441769164252
+                        -- Seleccion por Torneo Determinista:    Tiempo=26.579087997213037
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=22.9813757990806
+                        -- Seleccion por Estocástico Universal:  Tiempo=34.705684333021985
+                        -- Seleccion por Truncamiento:           Tiempo=37.72356907767275
+                        -- Seleccion por Restos:                 Tiempo=57.93982909256021
+                        -- Seleccion por Ranking:                Tiempo=40.9732541975294
+                -- Mutacion: Expansion --
+                        -- Seleccion por Ruleta:                 Tiempo=42.874861565842174
+                        -- Seleccion por Torneo Determinista:    Tiempo=30.473060288627124
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=25.46742342953336
+                        -- Seleccion por Estocástico Universal:  Tiempo=39.95156714317117
+                        -- Seleccion por Truncamiento:           Tiempo=49.17879988104635
+                        -- Seleccion por Restos:                 Tiempo=53.96192406034468
+                        -- Seleccion por Ranking:                Tiempo=39.93791795345729
+Tam. Poblacion = 500    Num. Generaciones = 250
+-- Matriz8x8 --
+        -- Cruce: Intercambio --
+                -- Mutacion: Terminal --
+                        -- Seleccion por Ruleta:                 Tiempo=902.4128585178254
+                        -- Seleccion por Torneo Determinista:    Tiempo=329.89560593927047
+                        -- Seleccion por Torneo Probabilístico:  Tiempo=137.5589719797539
+Exception
+Exception
+                        -- Seleccion por Estocástico Universal:  Tiempo=293.0456172932501
+                        -- Seleccion por Truncamiento:           Tiempo=359.97051109774355
+                        -- Seleccion por Restos:                 Tiempo=1476.4360041992495
+                        -- Seleccion por Ranking:                Tiempo=1215.607525799749
+                -- Mutacion: Funcional --						

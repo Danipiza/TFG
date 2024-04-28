@@ -3682,7 +3682,7 @@ def pruebas():
 
     # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
     #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=4
+    seleccion_idx=5
     
     # 0: Basica | 1: Uniforme | 
     # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
@@ -3712,16 +3712,18 @@ def pruebas():
 
     long_cromosoma=100
 
-    filas=8
-    columnas=8
-    # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
+    filas=15
+    columnas=15    
+    ticks=200
+    
+    # 0: Sin | 
+    # 1: Tarpeian | 2: Poli and McPhee
     bloating_idx=0
-    ticks=100
 
     ejecuciones=3
 
     tiempo=0
-    cont=0
+    cont=1
     contador=1
     
    
@@ -3987,5 +3989,307 @@ def pruebas():
             
             print("\t\t-- Mutacion: {} --".format(mutacion_opt[mut_idx]))
 
-#main()
-pruebas()
+
+def pruebas2():
+    
+
+    AG=AlgoritmoGenetico(None)
+    
+    seleccion_opt = ["Ruleta", 
+                     "Torneo_Det", 
+                     "Torneo_Prob", 
+                     "Estocástico_Uni",
+                     "Truncamiento",
+                     "Restos",
+                     "Ranking"]
+        
+    cruce_opt = ["Básica", 
+                 "Uniforme",
+                 
+                 "PMX",
+                 "OX",
+                 "OX-PP",
+                 "CX",
+                 "CO",
+                 
+                 "Intercambio"]
+    
+    mutacion_opt = ["Básica",
+                    
+                    "Insercion",
+                    "Intercambio",
+                    "Inversion",
+                    "Heuristica",
+                    
+                    "Terminal",
+                    "Funcional",
+                    "Arbol",
+                    "Permutacion",
+                    "Hoist",
+                    "Contraccion",
+                    "Expansion"]
+
+    funcion_opt = ["F1",
+                   "F2",
+                   "F3",
+                   "F4",
+                   "Aer1",
+                   "Aer2",
+                   "Aer3",
+                   "Arbol",
+                   "Gramatica"]
+    
+    """
+    Bin:
+    (Selecciones)
+    Cruce: Monopunto
+    Mutacion: Basica
+    (Precision): P[2,3,5,7,10]
+    (funcion)= F1, F4
+    d=2
+    """
+
+    repeticiones=4
+    """procesar_poblaciones=[25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500,550, 600, 650, 700, 750, 800, 850, 900, 950, 1000,1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000, 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000, 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000, 6100, 6200, 6300, 6400, 6500, 6600, 6700, 6800, 6900, 7000, 7100, 7200, 7300, 7400, 7500, 7600, 7700, 7800, 7900, 8000, 8100, 8200, 8300, 8400, 8500, 8600, 8700, 8800, 8900, 9000, 9100, 9200, 9300, 9400, 9500, 9600, 9700, 9800, 9900, 10000]
+    procesar_generaciones=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100,125, 150, 175, 200, 225, 250,300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000,1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500]"""
+    
+    """procesar_poblaciones=[2,2,2,2,2,2,2]
+    procesar_generaciones=[1,1,1,1,1,1,1]"""
+
+    # 25 ya esta "Hecho"
+    procesar_poblaciones=[50,100,200,500,1000,2000]
+    procesar_generaciones=[5,10,50,100,200,500,1000,2000]
+    
+    procesar_seleccion=[0,1]
+    #procesar_cruce=[[0],[2],[7]]
+    procesar_mutacion=[[0],[1],[5,7]]
+    
+    prob_cruce=0.6
+    prob_mutaBin=0.05
+    prob_mutaOtros=0.3
+
+    procesar_precision=[0.001,0.00001,0.0000000001]
+    precision_opt=["P2","P5","P10"]
+    mapP={}    
+    for i in range(len(procesar_precision)):
+        mapP[procesar_precision[i]]=i
+    procesar_funcion=[[0,3],[4,5,6],[7]]
+    
+    modo=0
+    profundidad=4
+    procesar_filas=[8,12,15,30,100]
+    procesar_columnas=[8,12,15,30,100]
+    procesar_ticks=[100,165,200,400,1000]
+    matriz_opt=["M8x8","M12x12","M15x15","M30x30","M100x100"]
+    bloating_idx=0
+    
+
+
+    directorio_script = os.path.dirname(os.path.abspath(__file__))
+    
+    ruta_Pruebas=os.path.join(directorio_script, 'Pruebas')
+    ruta_Bin = os.path.join(ruta_Pruebas,'1.Binario')
+    ruta_Real = os.path.join(ruta_Pruebas, '2.Real')
+    ruta_Arbol = os.path.join(ruta_Pruebas, '3.Arbol')
+    cont=0
+    for generaciones in procesar_generaciones:
+        for tam_poblacion in procesar_poblaciones:
+
+            for seleccion_idx in procesar_seleccion:
+                
+                for funcion_idx in procesar_funcion[0]:
+                    for precision in procesar_precision:
+                        tiempo=0
+                        for i in range(repeticiones):
+                            AG.set_valores( tam_poblacion, 
+                                        generaciones, 
+                                        seleccion_idx,
+                                        0, 
+                                        prob_cruce,
+                                        0, 
+                                        prob_mutaBin,
+                                        precision, 
+                                        funcion_idx, 
+                                        2, 
+                                        0,
+                                        
+                                        modo,
+                                        profundidad,
+                                        100,
+                                        0,
+                                        0,
+                                        bloating_idx,
+                                        0)   
+                            
+                            try :
+                                totalTimeStart = MPI.Wtime()
+                                AG.ejecuta()
+                                totalTimeEnd = MPI.Wtime() 
+                                tiempo+=(totalTimeEnd-totalTimeStart) 
+                            except Exception:
+                                print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
+                                i-=1
+                        ruta=os.path.join(ruta_Bin,'Bin{}_{}_{}.txt'.format(seleccion_opt[seleccion_idx],
+                                                                funcion_opt[funcion_idx],                                                                
+                                                                precision_opt[mapP[precision]]))    
+                        with open(ruta, 'a') as archivo:
+                            # Escribir un número flotante en el archivo                                
+                            archivo.write(str(tiempo/repeticiones) + ', ')
+
+                for funcion_idx in procesar_funcion[1]:
+                    
+                    tiempo=0
+                    for i in range(repeticiones):
+                        AG.set_valores( tam_poblacion, 
+                                                        generaciones, 
+                                                        seleccion_idx,
+                                                        2, 
+                                                        prob_cruce,
+                                                        1, 
+                                                        prob_mutaOtros,
+                                                        0, 
+                                                        funcion_idx, 
+                                                        2, 
+                                                        0,
+                                                        
+                                                        modo,
+                                                        profundidad,
+                                                        100,
+                                                        0,
+                                                        0,
+                                                        bloating_idx,
+                                                        0)   
+                            
+                        try :
+                            totalTimeStart = MPI.Wtime()
+                            AG.ejecuta()
+                            totalTimeEnd = MPI.Wtime() 
+                            tiempo+=(totalTimeEnd-totalTimeStart) 
+                        except Exception:
+                            print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
+                            i-=1
+                    ruta=os.path.join(ruta_Real,'Real{}_{}.txt'.format(seleccion_opt[seleccion_idx],
+                                                            funcion_opt[funcion_idx]))    
+                    with open(ruta, 'a') as archivo:
+                        # Escribir un número flotante en el archivo                                
+                        archivo.write(str(tiempo/repeticiones) + ', ')
+                
+                for funcion_idx in procesar_funcion[2]:
+                    for fila_ind in range(len(procesar_filas)):
+                        tiempo=0
+                        for i in range(repeticiones):
+                            AG.set_valores( tam_poblacion, 
+                                        generaciones, 
+                                        seleccion_idx,
+                                        7, 
+                                        prob_cruce,
+                                        5, # TODO CAMBIAR
+                                        prob_mutaBin,
+                                        precision, 
+                                        funcion_idx, 
+                                        2, 
+                                        0,
+                                        
+                                        modo,
+                                        profundidad,
+                                        100,
+                                        procesar_filas[fila_ind],
+                                        procesar_columnas[fila_ind],
+                                        bloating_idx,
+                                        procesar_ticks[fila_ind])   
+                            
+                            try :
+                                totalTimeStart = MPI.Wtime()
+                                AG.ejecuta()
+                                totalTimeEnd = MPI.Wtime() 
+                                tiempo+=(totalTimeEnd-totalTimeStart) 
+                            except Exception:
+                                print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
+                                i-=1
+                        ruta=os.path.join(ruta_Arbol,'Arb{}_{}_{}.txt'.format(seleccion_opt[seleccion_idx],
+                                                                funcion_opt[funcion_idx],                                                                
+                                                                matriz_opt[fila_ind]))    
+                        with open(ruta, 'a') as archivo:
+                            # Escribir un número flotante en el archivo                                
+                            archivo.write(str(tiempo/repeticiones) + ', ')
+                """for funcion_idx in procesar_funcion[0]:
+
+                    AG.set_valores( tam_poblacion, 
+                            generaciones, 
+                            seleccion_idx,
+                            2, 
+                            prob_cruce,
+                            1, 
+                            prob_mutaOtros,
+                            0, 
+                            funcion_idx, 
+                            2, 
+                            0,
+                            
+                            modo,
+                            profundidad,
+                            100,
+                            filas,
+                            columnas,
+                            bloating_idx,
+                            ticks) 
+                
+                for funcion_idx in procesar_funcion[0]:
+
+                    AG.set_valores( tam_poblacion, 
+                            generaciones, 
+                            seleccion_idx,
+                            7, 
+                            prob_cruce,
+                            mut_idx, 
+                            prob_mutaOtros,
+                            0, 
+                            funcion_idx, 
+                            2, 
+                            0,
+                            
+                            modo,
+                            profundidad,
+                            100,
+                            filas,
+                            columnas,
+                            bloating_idx,
+                            ticks) """
+
+    
+        archivos = os.listdir(ruta_Bin)
+        for arch in archivos:
+            if arch!="Extra":
+                with open(os.path.join(ruta_Bin,arch), 'a') as archivo:        
+                    archivo.write('\n') 
+        
+        archivos = os.listdir(ruta_Real)        
+        for arch in archivos:
+            if arch!="Extra":
+                with open(os.path.join(ruta_Real,arch), 'a') as archivo:        
+                    archivo.write('\n') 
+        
+        archivos = os.listdir(ruta_Arbol)
+        for arch in archivos:
+            if arch!="Extra":
+                with open(os.path.join(ruta_Arbol,arch), 'a') as archivo:        
+                    archivo.write('\n') 
+        if cont==0:
+            ruta_Bin = os.path.join(ruta_Bin,'Extra')
+            ruta_Real = os.path.join(ruta_Real, 'Extra')
+            ruta_Arbol = os.path.join(ruta_Arbol, 'Extra')
+        cont+=1
+        
+
+    
+
+    
+    
+
+   
+     
+
+
+main()
+#pruebas()
+#pruebas2()

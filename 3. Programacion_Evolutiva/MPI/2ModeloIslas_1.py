@@ -14,7 +14,7 @@ from matplotlib.gridspec import GridSpec
 
 import re
 
-#mpiexec -np 5 python 2ModeloIslas_1.py
+# mpiexec -np 5 python 2ModeloIslas_1.py
 
 
 """
@@ -24,33 +24,6 @@ El MASTER envia los parametros a los WORKERS.
 Cada WORKER se encarga de su poblacion.
 """
 
-
-
-def GUI(fits):    
-    # Create figure and axes
-    #fig, axs = plt.subplots(2, 2, figsize=(18, 12), gridspec_kw={'width_ratios': [1, 2]})
-    n=len(fits)
-    # Define data for the first plot
-    x1 = [i for i in range(1, n + 1)]  
-    # Define data for the second plot       
-
-    # Crear la figura y GridSpec
-    fig = plt.figure(figsize=(10, 6))
-    gs = GridSpec(1, 1, figure=fig)
-
-    # Grafico 1 (arriba a la izquierda)
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax1.plot(x1, fits, color='b', linestyle='-')    
-    ax1.set_xlabel('Generaciones Master')
-    ax1.set_ylabel('Fitness')
-    ax1.set_title('2D-Plot"')
-    ax1.grid(True)
-
-    
-    
-    
-    plt.tight_layout() # Ajustar la disposición de los subplots    
-    plt.show() # Mostrar los gráficos
 
 # -----------------------------------------------------------------------------------------------
 # --- INDIVIDUO ---------------------------------------------------------------------------------
@@ -2877,8 +2850,6 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
         return self.mejor_total
 
     def ejecutaReal(self):
@@ -2900,8 +2871,6 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
         return self.mejor_total
 
     def ejecutaArbol(self):
@@ -2924,8 +2893,7 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
+       
         return self.mejor_total
     
     def ejecutaGramatica(self):
@@ -2950,8 +2918,7 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
+       
         return self.mejor_total
 
 
@@ -3576,20 +3543,20 @@ def main():
         # 0: Basica | 1: Uniforme | 
         # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
         # 7: Intercambio
-        cruce_idx=0
+        cruce_idx=7
         prob_cruce=0.6
         # 0: Basica    |     
         # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
         # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
         #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-        mut_idx=0
+        mut_idx=6
         # Binario: 0.05 | Real: 0.3
         prob_mut=0.3 
         precision=0.01
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
-        funcion_idx=0
+        funcion_idx=7
         num_genes=2
         elitismo=0
 
@@ -3654,11 +3621,10 @@ def main():
             progreso.append(mejor_total)            
             generaciones-=1
         totalTimeEnd = MPI.Wtime()
-        print("Valor Optimo: {}\n".format(progreso[-1]))
+        #print("Valor Optimo: {}\n".format(progreso[-1]))
         print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
 
-        GUI(progreso)
-
+      
         
         
     else: # WORKER
@@ -3705,7 +3671,7 @@ def main():
                           
                 
                 generaciones-=1
-        else:     
+        elif funcion_idx<7:     
             selec=[]
             poblacion=[]
 
@@ -3722,6 +3688,30 @@ def main():
                     AG.poblacion.append(AG.selec_elite[i])
                 
                 AG.evaluacion_poblacionReal()
+
+                # ENVIA EL MEJOR
+                comm.send(AG.mejor_total, dest=MASTER)  
+
+                          
+                
+                generaciones-=1
+        else:
+            selec=[]
+            poblacion=[]
+
+            AG.init_poblacionArbol(0)    
+            AG.evaluacion_poblacionArbol()                
+            
+            while generaciones>0:
+                selec=AG.seleccion_poblacionArbol(5)
+                
+                AG.poblacion=AG.cruce_poblacionArbol(selec)
+                AG.poblacion=AG.mutacion_poblacionArbol(AG.poblacion)
+
+                for i in range(AG.tam_elite):
+                    AG.poblacion.append(AG.selec_elite[i])
+                
+                AG.evaluacion_poblacionArbol()
 
                 # ENVIA EL MEJOR
                 comm.send(AG.mejor_total, dest=MASTER)  
