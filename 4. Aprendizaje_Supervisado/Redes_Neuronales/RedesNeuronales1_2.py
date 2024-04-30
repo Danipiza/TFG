@@ -8,7 +8,11 @@ import math
 # py RedesNeuronales1_2.py
 
 """
-Codigo generalizado del apartad anterior
+Red Neuronal multicapa.
+
+1 Capa de entrada, 2 variables = 2 nodos. Altura y Peso, para predecir el IMC
+1 Capa de salida, 1 variable = 1 nodo. IMC
+X Capas ocultas con Y nodos cada una.
 """
 
 # MEJORAR CADA WORKER SE ENCARGA DE VARIAS CAPAS DE LA CAPA OCULTA
@@ -25,7 +29,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -185,7 +189,7 @@ def main():
     # ----------------------------------------------------------------------------------------
 
     tam_entrada=2               # Entrada: Altura y peso
-    tam_capas_ocultas=[10 for _ in range(8)]   # Tamaño de las capas ocultas (ejemplo)
+    tam_capas_ocultas=[10 for _ in range(2)]   # Tamaño de las capas ocultas (ejemplo)
     tam_salida=1                # Salida: IMC
 
     # Mejor => lr=0.05 rep=1000

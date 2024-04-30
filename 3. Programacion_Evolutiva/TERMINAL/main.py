@@ -4,6 +4,7 @@ import os
 import random
 import math
 import queue
+import time
 
 from abc import ABC, abstractmethod 
 from collections import deque
@@ -13,34 +14,6 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 
 import re
-
-def GUI(mejor_total, mejor_generacion, media):    
-    # Create figure and axes
-    #fig, axs = plt.subplots(2, 2, figsize=(18, 12), gridspec_kw={'width_ratios': [1, 2]})
-    n=len(mejor_total)
-    # Define data for the first plot
-    x1 = [i for i in range(1, n + 1)]  
-    # Define data for the second plot       
-
-    # Crear la figura y GridSpec
-    fig = plt.figure(figsize=(10, 6))
-    gs = GridSpec(1, 1, figure=fig)
-
-    # Grafico 1 (arriba a la izquierda)
-    ax1 = fig.add_subplot(gs[0, 0])
-    ax1.plot(x1, mejor_total, color='b', linestyle='-')    
-    ax1.plot(x1, mejor_generacion, color='r', linestyle='-') 
-    ax1.plot(x1, media, color='g', linestyle='-') 
-    ax1.set_xlabel('Generaciones')
-    ax1.set_ylabel('Fitness')
-    ax1.set_title('2D-Plot"')
-    ax1.grid(True)
-
-    
-    
-    
-    plt.tight_layout() # Ajustar la disposición de los subplots    
-    plt.show() # Mostrar los gráficos
 
 # -----------------------------------------------------------------------------------------------
 # --- INDIVIDUO ---------------------------------------------------------------------------------
@@ -2872,8 +2845,6 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
         return self.mejor_total
 
     def ejecutaReal(self):
@@ -2896,8 +2867,6 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
         return self.mejor_total
 
     def ejecutaArbol(self):
@@ -2921,8 +2890,6 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
         return self.mejor_total
     
     def ejecutaGramatica(self):
@@ -2968,8 +2935,6 @@ class AlgoritmoGenetico():
             
             self.generaciones-=1
 		
-        #GUI(self.progreso_generaciones[0],self.progreso_generaciones[1],self.progreso_generaciones[2])
-
         return self.mejor_total
 
 
@@ -3545,32 +3510,32 @@ def main():
                    "Arbol",
                    "Gramatica"]
         
-    tam_poblacion=500
-    generaciones=250
+    tam_poblacion=50
+    generaciones=25
 
     # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
     #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=1
+    seleccion_idx=0
     
     # 0: Basica | 1: Uniforme | 
     # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
     # 7: Intercambio
-    cruce_idx=2
+    cruce_idx=0
     prob_cruce=0.6
     
     # 0: Basica    |     
     # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
     # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
     #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-    mut_idx=1
-    prob_mut=0.3 # Binario: 0.05 | Real: 0.3
+    mut_idx=0
+    prob_mut=0.05 # Binario: 0.05 | Real: 0.3
 
     precision=0.001
 
     # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
     # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
     # 7: Arbol        | 8: Gramatica
-    funcion_idx=6
+    funcion_idx=0
     d=2
     elitismo=0
 
@@ -4049,16 +4014,17 @@ def pruebas2():
     d=2
     """
 
-    repeticiones=4
+    
     """procesar_poblaciones=[25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275, 300, 325, 350, 375, 400, 425, 450, 475, 500,550, 600, 650, 700, 750, 800, 850, 900, 950, 1000,1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000, 4100, 4200, 4300, 4400, 4500, 4600, 4700, 4800, 4900, 5000, 5100, 5200, 5300, 5400, 5500, 5600, 5700, 5800, 5900, 6000, 6100, 6200, 6300, 6400, 6500, 6600, 6700, 6800, 6900, 7000, 7100, 7200, 7300, 7400, 7500, 7600, 7700, 7800, 7900, 8000, 8100, 8200, 8300, 8400, 8500, 8600, 8700, 8800, 8900, 9000, 9100, 9200, 9300, 9400, 9500, 9600, 9700, 9800, 9900, 10000]
     procesar_generaciones=[10, 20, 30, 40, 50, 60, 70, 80, 90, 100,125, 150, 175, 200, 225, 250,300, 350, 400, 450, 500, 550, 600, 650, 700, 750, 800, 850, 900, 950, 1000,1100, 1200, 1300, 1400, 1500, 1600, 1700, 1800, 1900, 2000, 2100, 2200, 2300, 2400, 2500]"""
     
     """procesar_poblaciones=[2,2,2,2,2,2,2]
     procesar_generaciones=[1,1,1,1,1,1,1]"""
 
-    # 25 ya esta "Hecho"
-    procesar_poblaciones=[50,100,200,500,1000,2000]
-    procesar_generaciones=[5,10,50,100,200,500,1000,2000]
+    repeticiones=2
+    procesar_poblaciones=[25,50,100,200,500,1000,2000]
+    procesar_generaciones=[25,50,100,200,500,1000,2000]
+    
     
     procesar_seleccion=[0,1]
     #procesar_cruce=[[0],[2],[7]]
@@ -4091,10 +4057,13 @@ def pruebas2():
     ruta_Bin = os.path.join(ruta_Pruebas,'1.Binario')
     ruta_Real = os.path.join(ruta_Pruebas, '2.Real')
     ruta_Arbol = os.path.join(ruta_Pruebas, '3.Arbol')
-    cont=0
+    
+    contador=0
+
+
     for generaciones in procesar_generaciones:
         for tam_poblacion in procesar_poblaciones:
-
+            
             for seleccion_idx in procesar_seleccion:
                 
                 for funcion_idx in procesar_funcion[0]:
@@ -4212,73 +4181,24 @@ def pruebas2():
                         with open(ruta, 'a') as archivo:
                             # Escribir un número flotante en el archivo                                
                             archivo.write(str(tiempo/repeticiones) + ', ')
-                """for funcion_idx in procesar_funcion[0]:
-
-                    AG.set_valores( tam_poblacion, 
-                            generaciones, 
-                            seleccion_idx,
-                            2, 
-                            prob_cruce,
-                            1, 
-                            prob_mutaOtros,
-                            0, 
-                            funcion_idx, 
-                            2, 
-                            0,
-                            
-                            modo,
-                            profundidad,
-                            100,
-                            filas,
-                            columnas,
-                            bloating_idx,
-                            ticks) 
                 
-                for funcion_idx in procesar_funcion[0]:
-
-                    AG.set_valores( tam_poblacion, 
-                            generaciones, 
-                            seleccion_idx,
-                            7, 
-                            prob_cruce,
-                            mut_idx, 
-                            prob_mutaOtros,
-                            0, 
-                            funcion_idx, 
-                            2, 
-                            0,
-                            
-                            modo,
-                            profundidad,
-                            100,
-                            filas,
-                            columnas,
-                            bloating_idx,
-                            ticks) """
-
+        
     
         archivos = os.listdir(ruta_Bin)
-        for arch in archivos:
-            if arch!="Extra":
-                with open(os.path.join(ruta_Bin,arch), 'a') as archivo:        
-                    archivo.write('\n') 
+        for arch in archivos:           
+            with open(os.path.join(ruta_Bin,arch), 'a') as archivo:        
+                archivo.write('\n') 
         
         archivos = os.listdir(ruta_Real)        
         for arch in archivos:
-            if arch!="Extra":
-                with open(os.path.join(ruta_Real,arch), 'a') as archivo:        
-                    archivo.write('\n') 
+            with open(os.path.join(ruta_Real,arch), 'a') as archivo:        
+                archivo.write('\n') 
         
         archivos = os.listdir(ruta_Arbol)
-        for arch in archivos:
-            if arch!="Extra":
-                with open(os.path.join(ruta_Arbol,arch), 'a') as archivo:        
-                    archivo.write('\n') 
-        if cont==0:
-            ruta_Bin = os.path.join(ruta_Bin,'Extra')
-            ruta_Real = os.path.join(ruta_Real, 'Extra')
-            ruta_Arbol = os.path.join(ruta_Arbol, 'Extra')
-        cont+=1
+        for arch in archivos:            
+            with open(os.path.join(ruta_Arbol,arch), 'a') as archivo:        
+                archivo.write('\n') 
+        
         
 
     

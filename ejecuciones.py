@@ -25,7 +25,10 @@ def GUI(x, funciones, labels):
     funciones: float[][]    Lista de Funciones. 
     labels:                 Lista de Etiquetas 
     """
-    colores = ['black','blue', 'green', 'red', 'yellow','cyan', 'magenta', 'white']
+    #colores = ['black','blue', 'green', 'red', 'yellow','cyan', 'magenta', 'white']
+    colores = ['blue', 'red', 'green', 'black',  'magenta', 'brown', 'darkgreen', 'pink', 'yellow','gray', 'fuchsia',
+            'violet', 'salmon', 'darkturquoise', 'forestgreen', 'firebrick', 'darkblue', 'lavender', 'palegoldenrod',
+            'navy']
 
     fig, ax = plt.subplots()
 
@@ -42,13 +45,47 @@ def GUI(x, funciones, labels):
     plt.show()
 
 def main():
-    labels = ["BubbleSort", "InsertionSort", "SelectionSort", "SequentialSort", "MergeSort"]
+    # Aglomerativo
+    #labels = ["Aglomerative_C_E", "Aglomerative_C_E_MPI4", "Aglomerative_C_E_MPI10", "Aglomerative_C_E_MPI15", "Aglomerative_C_E_MPI20"]
     
-    x=leeArchivo("TamArray")
+    # KMedias
+    
+    #labels = ["KMedias3M", "KMedias3M_MPI4", "KMedias3M_MPI10"]#,"KMedias3M_MPI15"]
+    #labels = ["KMedias3E", "KMedias3E_MPI4", "KMedias3E_MPI10"]#,"KMedias3E_MPI15"]
+    
+    # KNN
+    # act
+    #labels = ["KNN_Act_k2_E", "KNN_1MPI4_Act_k2_E", "KNN_2MPI4_Act_k2_E"]
+    #labels = ["KNN_Act_k2_M", "KNN_1MPI4_Act_k2_M", "KNN_2MPI4_Act_k2_M"]
+    # no act
+    #labels = ["KNN_NoAct_k2_E", "KNN_1MPI4_NoAct_k2_E", "KNN_2MPI4_NoAct_k2_E"]
+    #labels = ["KNN_NoAct_k2_M", "KNN_1MPI4_NoAct_k2_M", "KNN_2MPI4_NoAct_k2_M"]
+
+
+    # REDES NEURONALES
+    # 1x5
+    labels = ["RedNeuronal1x5", "RedNeuronal_MPI2_1x5", "RedNeuronal_MPI4_1x5","RedNeuronal_MPI10_1x5"]
+    # 2x10
+    #labels = ["RedNeuronal2x10", "RedNeuronal_MPI2_2x10", "RedNeuronal_MPI4_2x10","RedNeuronal_MPI10_2x10"]
+    # 10x10
+    #labels = ["RedNeuronal10x10", "RedNeuronal_MPI2_10x10", "RedNeuronal_MPI4_10x10","RedNeuronal_MPI10_10x10"]
+
+
     funciones=[leeArchivo(labels[i]) for i in range(len(labels))]  
-    funciones[4]=funciones[4][0:len(x)]
-    funciones.append([1 for _ in range(len(x))])
-    labels.append("")
+    tam=float("inf")
+    for f in funciones:
+        tam=min(tam,len(f))
+    
+    x=leeArchivo("TamDatos")    
+    if tam>len(x): tam=len(x)
+    x=x[0:tam]  
+
+    for i in range(len(labels)):
+        funciones[i]=funciones[i][0:tam]
+    
+    
+    #funciones.append([1 for _ in range(len(x))])
+    #labels.append("") 
 
     GUI(x, funciones, labels)
 

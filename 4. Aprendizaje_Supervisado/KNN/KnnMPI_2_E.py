@@ -6,7 +6,14 @@ import math
 
 import queue
 
+
+# Ejecutar (DISTANCIA Euclidea, SIN ACTUALIZAR)
 # mpiexec -np 5 python KnnMPI_2_E.py
+
+"""
+Se divide la poblacion a probar entre los workers. Al finalizar una iteracion, los
+    workers envian al master el individuo y su asignacion.
+"""
 
 class MaxPriorityQueue(queue.PriorityQueue):
     def __init__(self):
@@ -41,7 +48,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","KNN", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -75,7 +82,7 @@ def leeAsig(archivo):
         n=len(dir)
         
     if archivo==None: nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","KNN","Asig", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","2.Cluster","Asig", archivo+".txt")
     
         
     array = [] 
@@ -178,7 +185,8 @@ def main():
         asignacionIni=leeAsig("1000_1_2D") 
         n=len(poblacionIni)    
 
-        poblacionProbar=lee("10000_1_2D")
+        poblacionProbar=lee("100000_2D")
+        poblacionProbar=poblacionProbar[0:1000]
         m=len(poblacionProbar)
 
         clusters=7

@@ -17,7 +17,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -179,7 +179,7 @@ def main():
         tam_salida=1
         learning_rate=0.1
         tam_entrenamiento=len(poblacion)
-        repeticiones=100
+        repeticiones=10
 
         """ Reparte capas TODO cambiar 
         tam_capas_ocultas=[10 for _ in range(2)] # 2 capas con 10 nodos

@@ -5,7 +5,7 @@ import os
 import math
 
 # EJECUTAR
-# py RedesNeuronales1.py
+# py RedesNeuronales1_1.py
 
 """
 Codigo con 1 capa de entrada, oculta y salida
@@ -21,7 +21,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -198,7 +198,7 @@ def main():
     
     # Mejor => lr=0.05 rep=1000
     learning_rate=0.1     # Aprendizaje 
-    repeticiones=1000      # Numero de repeticiones en el entrenamiento
+    repeticiones=10      # Numero de repeticiones en el entrenamiento
     
     RedN=RedNeuronal(tam_entrada,tam_oculta,tam_salida)
     

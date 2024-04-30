@@ -6,7 +6,19 @@ import math
 
 import queue
 
+# Ejecutar (DISTANCIA Manhattan)
 # mpiexec -np 5 python KnnMPI_1_act_M.py
+
+
+"""
+Se divide la poblacion inicial entre los workers, por lo que cada worker compara
+    el que se esta prediciendo con n/numWorkers. Al finalizar una iteracion, los
+    workers envian al master sus k vecinos mas cercanos y este se encarga de predecir.
+
+Codigo que se actualiza la poblacion:
+    Se puede mejorar haciendo que los workers trabajen y al final reciban el valor predicho
+    de la iteracion pasada.
+"""
 
 class MaxPriorityQueue(queue.PriorityQueue):
     def __init__(self):
@@ -41,7 +53,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","KNN", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -75,7 +87,7 @@ def leeAsig(archivo):
         n=len(dir)
         
     if archivo==None: nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","KNN","Asig", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","2.Cluster","Asig", archivo+".txt")
     
         
     array = [] 
@@ -178,10 +190,13 @@ def main():
         asignacionIni=leeAsig("1000_1_2D") 
         n=len(poblacionIni)    
 
-        poblacionProbar=lee("10000_1_2D")
+        poblacionProbar=lee("100000_2D")
+        poblacionProbar=poblacionProbar[0:1000]
         m=len(poblacionProbar)
+        
+        
 
-        clusters=7
+        clusters=4
         k=10
 
         d=len(poblacionIni[0])
@@ -280,8 +295,8 @@ def main():
                             
             asignacionProbar.append(ret)
 
-            
-            comm.send(ret,dest=i)            
+            for i in range(1,numWorkers+1):
+                comm.send(ret,dest=i)            
                     
             
             cont+=1
@@ -295,23 +310,28 @@ def main():
         asignacionIni=comm.recv(source=MASTER)
         n=len(poblacionIni)
         
+        
+
         for x in range(m):  
             pq = MaxPriorityQueue()   
 
+            
 
             a=comm.recv(source=MASTER)
             if a!=None:
                 poblacionIni.append(poblacionProbar[x-1])
                 asignacionIni.append(a)
                 n+=1
-                
+
+             
                    
             
             # Calcula todas las distancias y coge las k mas cercanas
             for i in range(n):
                 distancia=0
                 for j in range(d):
-                    distancia+=abs(poblacionIni[i][j]-poblacionProbar[x][j])        
+                    distancia+=abs(poblacionIni[i][j]-poblacionProbar[x][j])
+                
                 
                 # Si la cola de prioridad no es k, añadir la distancia
                 if pq.size()<k: pq.push(asignacionIni[i],distancia)

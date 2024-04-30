@@ -1,5 +1,13 @@
 # K-Nearest Neighbours (KNN)
 
+
+## MPI 1: DIVIDE LA POBLACION INICIAL
+
+ERROR, COMO SE DIVIDE LA POBLACION INICIAL, NO SE PUEDE PONER K=100 VECINOS CON MAS DE 10 WORKERS PORQUE, ASI CADA WORKER TIENE MENOS POBLACION INICIAL QUE LOS 100 VECINOS MAS CERCANOS Y DA FALLO DE COLA DE PRIORIDAD
+
+
+
+
 Se trata de una técnica aplicable en problemas de regresión y de clasificación
 
 Es simple pero potente. Se basa en la idea de que **los puntos de datos similares tienden a agruparse en el espacio de características**.

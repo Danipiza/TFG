@@ -2344,7 +2344,7 @@ class Mutacion:
         act=None
         for i in range(tam_poblacion):                                
             act=IndividuoReal(aviones=None,
-                              vInd=poblacion[i].v);	
+                              vInd=poblacion[i]);	
             
             if random.random()<self.p:
                 antiguaPosicion=int(random.random()*(len(act.v)-1))
@@ -3174,18 +3174,20 @@ class AlgoritmoGenetico():
 		
 
 
-        self.progreso_generaciones[0].append(self.mejor_total)
+        """self.progreso_generaciones[0].append(self.mejor_total)
         self.progreso_generaciones[1].append(mejor_generacion)
-        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))
+        self.progreso_generaciones[2].append((self.fitness_total/self.tam_poblacion))"""
         
         
         
         acum=0.0
         if peor_generacion<0: peor_generacion*=-1
 
-        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
+        
+        self.fitness_total=self.tam_poblacion*1.05*peor_generacion+self.fitness_total
+        
         for i in range(self.tam_poblacion):
-            self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
+            self.prob_seleccion[i]=1.05*peor_generacion+self.poblacion[i].fitness
             self.prob_seleccion[i]/=self.fitness_total
             acum += self.prob_seleccion[i]
             self.prob_seleccionAcum[i]=acum	
@@ -3572,17 +3574,7 @@ def main():
     bloating_idx=0
     ticks=100"""
 
-    if myrank==0:
-        print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
-                                                                        seleccion_opt[seleccion_idx],
-                                                                        cruce_opt[cruce_idx],
-                                                                        prob_cruce,
-                                                                        mutacion_opt[mut_idx],
-                                                                        prob_mut))
-
-        print("Tam. Poblacion: {}\t Num. Generaciones: {}\t Elitismo: {}%".format(tam_poblacion*numWorkers,
-                                                                                generaciones,
-                                                                                elitismo))
+    
     
     modo=0
     profundidad=4
@@ -3594,12 +3586,11 @@ def main():
     ticks=100
     
 
-    repeticiones=4
-    """procesar_poblaciones=[50,100,200,500,1000,2000]
-    procesar_generaciones=[5,10,50,100,200,500,1000,2000]"""
+    repeticiones=2
+    procesar_poblaciones=[25,50,100,200,500,1000,2000]
+    procesar_generaciones=[25,50,100,200,500,1000,2000]
 
-    procesar_poblaciones=[4,4,4,4,4,4]
-    procesar_generaciones=[1,1,1,1,1,1]
+
 
     procesar_seleccion=[0,1]
     
@@ -3631,7 +3622,10 @@ def main():
     ruta_Arbol = os.path.join(ruta_Pruebas, '3.Arbol')
     cont=0
     for generaciones in procesar_generaciones:
+        gens=generaciones
         for tam_poblacion in procesar_poblaciones:
+            tam_poblacion//=numWorkers
+            
             for seleccion_idx in procesar_seleccion:
                 
                 # BINARIO
@@ -3644,23 +3638,139 @@ def main():
                 for funcion_idx in procesar_funcion[0]:
                     for precision in procesar_precision:
                         tiempo=0
-                        for i in range(repeticiones):                                                       
+                        for i in range(repeticiones): 
+                            #generaciones=25#gens
                             try :
                                 totalTimeStart = MPI.Wtime()
                                 
-                                ejecuta(comm,myrank,numWorkers,
-                                    tam_poblacion,generaciones,seleccion_idx,cruce_idx,prob_cruce,mut_idx,prob_mut,
-                                    precision, funcion_idx, num_genes, elitismo, 
-                                    modo, profundidad, long_cromosoma, filas, columnas, bloating_idx, ticks)
+                                if myrank==MASTER:
+                                    mejor_total=float("inf")
+                                    progreso=[]
+                                    contG=0
+                                    #while generaciones>0:
+                                    while contG!=generaciones:
+                                        
+                                        
+                                        for _ in range(numWorkers):
+                                            # ENVIA EL MEJOR
+                                            data=comm.recv(source=MPI.ANY_SOURCE) 
+                                            if mejor_total>data: mejor_total=data 
+
+                                        progreso.append(mejor_total)            
+                                        #generaciones-=1
+                                        contG+=1
+                                else: # WORKER
+                                    AG=AlgoritmoGenetico(None)
+                                    AG.set_valores( tam_poblacion, 
+                                                    generaciones, 
+                                                    seleccion_idx,
+                                                    cruce_idx, 
+                                                    prob_cruce,
+                                                    mut_idx, 
+                                                    prob_mut,
+                                                    precision, 
+                                                    funcion_idx, 
+                                                    num_genes, 
+                                                    elitismo,
+                                                    modo,
+                                                    profundidad,
+                                                    long_cromosoma,
+                                                    filas,
+                                                    columnas,
+                                                    bloating_idx,
+                                                    ticks) 
+                                    contG=0
+                                    if AG.funcion_idx<4: 
+                                        selec=[]
+
+                                        AG.init_poblacion()    
+                                        AG.evaluacion_poblacionBin()                
+                                        
+                                        #while generaciones>0:
+                                        while contG!=generaciones:
+                                            selec=AG.seleccion_poblacionBin(5)
+                                            
+                                            AG.poblacion=AG.cruce_poblacionBin(selec)
+                                            AG.poblacion=AG.mutacion_poblacionBin(AG.poblacion)
+
+                                            for i in range(AG.tam_elite):
+                                                AG.poblacion.append(AG.selec_elite[i])
+                                            
+                                            AG.evaluacion_poblacionBin()
+
+                                            # ENVIA EL MEJOR
+                                            comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                    
+                                            
+                                            #generaciones-=1
+                                            contG+=1
+                                    elif funcion_idx<7:     
+                                        selec=[]
+                                        poblacion=[]
+
+                                        AG.init_poblacion()    
+                                        AG.evaluacion_poblacionReal()                
+                                        
+                                        while generaciones>0:
+                                            selec=AG.seleccion_poblacionReal(5)
+                                            
+                                            AG.poblacion=AG.cruce_poblacionReal(selec)
+                                            AG.poblacion=AG.mutacion_poblacionReal(AG.poblacion)
+
+                                            for i in range(AG.tam_elite):
+                                                AG.poblacion.append(AG.selec_elite[i])
+                                            
+                                            AG.evaluacion_poblacionReal()
+
+                                            # ENVIA EL MEJOR
+                                            comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                    
+                                            
+                                            generaciones-=1
+                                    else:
+                                        selec=[]
+                                        poblacion=[]
+
+                                        AG.init_poblacionArbol(0)    
+                                        AG.evaluacion_poblacionArbol()                
+                                        
+                                        while generaciones>0:
+                                            selec=AG.seleccion_poblacionArbol(5)
+                                            
+                                            AG.poblacion=AG.cruce_poblacionArbol(selec)
+                                            AG.poblacion=AG.mutacion_poblacionArbol(AG.poblacion)
+
+                                            for i in range(AG.tam_elite):
+                                                AG.poblacion.append(AG.selec_elite[i])
+                                            
+                                            AG.evaluacion_poblacionArbol()
+
+                                            # ENVIA EL MEJOR
+                                            comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                    
+                                            
+                                            generaciones-=1
+                                        
+                                        
+
+                                        #return self.mejor_total
+
+        
                                 
                                 totalTimeEnd = MPI.Wtime() 
+                                print(totalTimeEnd-totalTimeStart)
+                                tam_poblacion[100000]=1
                                 tiempo+=(totalTimeEnd-totalTimeStart) 
                             except Exception:
                                 print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
                                 i-=1
                           
                         if myrank==MASTER: 
-                            ruta=os.path.join(ruta_Bin,'Bin{}_{}_{}.txt'.format(seleccion_opt[seleccion_idx],
+                            ruta=os.path.join(ruta_Bin,'Bin_2MPI{}_{}_{}_{}.txt'.format(numWorkers,
+                                                                seleccion_opt[seleccion_idx],
                                                                 funcion_opt[funcion_idx],                                                                
                                                                 precision_opt[mapP[precision]]))  
                             #print("{}: {}s\n".format(tiempo))
@@ -3681,24 +3791,131 @@ def main():
                         try :
                             totalTimeStart = MPI.Wtime()
                             
-                            ejecuta(comm,myrank,numWorkers,
-                                tam_poblacion,generaciones,seleccion_idx,cruce_idx,prob_cruce,mut_idx,prob_mut,
-                                precision, funcion_idx, num_genes, elitismo, 
-                                modo, profundidad, long_cromosoma, filas, columnas, bloating_idx, ticks)
+                            if myrank==MASTER:
+                                mejor_total=float("inf")
+                                progreso=[]
+                                while generaciones>0:
+                                    
+                                    
+                                    for _ in range(numWorkers):
+                                        # ENVIA EL MEJOR
+                                        data=comm.recv(source=MPI.ANY_SOURCE) 
+                                        if mejor_total>data: mejor_total=data 
+
+                                    progreso.append(mejor_total)            
+                                    generaciones-=1                                        
+                            else: # WORKER
+                                AG=AlgoritmoGenetico(None)
+                                AG.set_valores( tam_poblacion, 
+                                                generaciones, 
+                                                seleccion_idx,
+                                                cruce_idx, 
+                                                prob_cruce,
+                                                mut_idx, 
+                                                prob_mut,
+                                                precision, 
+                                                funcion_idx, 
+                                                num_genes, 
+                                                elitismo,
+                                                modo,
+                                                profundidad,
+                                                long_cromosoma,
+                                                filas,
+                                                columnas,
+                                                bloating_idx,
+                                                ticks) 
+
+                                if AG.funcion_idx<4: 
+                                    selec=[]
+
+                                    AG.init_poblacion()    
+                                    AG.evaluacion_poblacionBin()                
+                                    
+                                    while generaciones>0:
+                                        selec=AG.seleccion_poblacionBin(5)
+                                        
+                                        AG.poblacion=AG.cruce_poblacionBin(selec)
+                                        AG.poblacion=AG.mutacion_poblacionBin(AG.poblacion)
+
+                                        for i in range(AG.tam_elite):
+                                            AG.poblacion.append(AG.selec_elite[i])
+                                        
+                                        AG.evaluacion_poblacionBin()
+
+                                        # ENVIA EL MEJOR
+                                        comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                
+                                        
+                                        generaciones-=1
+                                elif funcion_idx<7:     
+                                    selec=[]
+                                    poblacion=[]
+
+                                    AG.init_poblacion()    
+                                    AG.evaluacion_poblacionReal()                
+                                    
+                                    while generaciones>0:
+                                        selec=AG.seleccion_poblacionReal(5)
+                                        
+                                        AG.poblacion=AG.cruce_poblacionReal(selec)
+                                        AG.poblacion=AG.mutacion_poblacionReal(AG.poblacion)
+
+                                        for i in range(AG.tam_elite):
+                                            AG.poblacion.append(AG.selec_elite[i])
+                                        
+                                        AG.evaluacion_poblacionReal()
+
+                                        # ENVIA EL MEJOR
+                                        comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                
+                                        
+                                        generaciones-=1
+                                else:
+                                    selec=[]
+                                    poblacion=[]
+
+                                    AG.init_poblacionArbol(0)    
+                                    AG.evaluacion_poblacionArbol()                
+                                    
+                                    while generaciones>0:
+                                        selec=AG.seleccion_poblacionArbol(5)
+                                        
+                                        AG.poblacion=AG.cruce_poblacionArbol(selec)
+                                        AG.poblacion=AG.mutacion_poblacionArbol(AG.poblacion)
+
+                                        for i in range(AG.tam_elite):
+                                            AG.poblacion.append(AG.selec_elite[i])
+                                        
+                                        AG.evaluacion_poblacionArbol()
+
+                                        # ENVIA EL MEJOR
+                                        comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                
+                                        
+                                        generaciones-=1
+                                    
+                                    
+
+                                    #return self.mejor_total
+
+    
                             
                             totalTimeEnd = MPI.Wtime() 
                             tiempo+=(totalTimeEnd-totalTimeStart) 
-                        except Exception:
-                            print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
+                        except Exception as e:
+                            print(e,"Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
                             i-=1
                         
                     if myrank==MASTER: 
-                        uta=os.path.join(ruta_Real,'Real{}_{}.txt'.format(seleccion_opt[seleccion_idx],
+                        ruta=os.path.join(ruta_Real,'Real_2MPI{}_{}_{}.txt'.format(numWorkers,seleccion_opt[seleccion_idx],
                                                             funcion_opt[funcion_idx]))  
-                        print("{}: {}s\n".format(ruta,tiempo))
+                       
                         with open(ruta, 'a') as archivo:
                             # Escribir un número flotante en el archivo                                
-                            archivo.write(str(tiempo/repeticiones) + ', ')"""
+                            archivo.write(str(tiempo/repeticiones) + ', ')
                 
 
                 # ARBOL
@@ -3713,27 +3930,134 @@ def main():
                             try :
                                 totalTimeStart = MPI.Wtime()
                                 
-                                ejecuta(comm,myrank,numWorkers,
-                                    tam_poblacion,generaciones,seleccion_idx,cruce_idx,prob_cruce,mut_idx,prob_mut,
-                                    precision, funcion_idx, num_genes, elitismo, 
-                                    modo, profundidad, long_cromosoma, procesar_filas[fila_ind], procesar_columnas[fila_ind], 
-                                    bloating_idx, procesar_ticks[fila_ind])
+                                if myrank==MASTER:
+                                    mejor_total=float("inf")
+                                    progreso=[]
+                                    while generaciones>0:
+                                        
+                                        
+                                        for _ in range(numWorkers):
+                                            # ENVIA EL MEJOR
+                                            data=comm.recv(source=MPI.ANY_SOURCE) 
+                                            if mejor_total>data: mejor_total=data 
+
+                                        progreso.append(mejor_total)            
+                                        generaciones-=1
+                                else: # WORKER
+                                    AG=AlgoritmoGenetico(None)
+                                    AG.set_valores( tam_poblacion, 
+                                                    generaciones, 
+                                                    seleccion_idx,
+                                                    cruce_idx, 
+                                                    prob_cruce,
+                                                    mut_idx, 
+                                                    prob_mut,
+                                                    precision, 
+                                                    funcion_idx, 
+                                                    num_genes, 
+                                                    elitismo,
+                                                    modo,
+                                                    profundidad,
+                                                    long_cromosoma,
+                                                    filas,
+                                                    columnas,
+                                                    bloating_idx,
+                                                    ticks) 
+
+                                    if AG.funcion_idx<4: 
+                                        selec=[]
+
+                                        AG.init_poblacion()    
+                                        AG.evaluacion_poblacionBin()                
+                                        
+                                        while generaciones>0:
+                                            selec=AG.seleccion_poblacionBin(5)
+                                            
+                                            AG.poblacion=AG.cruce_poblacionBin(selec)
+                                            AG.poblacion=AG.mutacion_poblacionBin(AG.poblacion)
+
+                                            for i in range(AG.tam_elite):
+                                                AG.poblacion.append(AG.selec_elite[i])
+                                            
+                                            AG.evaluacion_poblacionBin()
+
+                                            # ENVIA EL MEJOR
+                                            comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                    
+                                            
+                                            generaciones-=1
+                                    elif funcion_idx<7:     
+                                        selec=[]
+                                        poblacion=[]
+
+                                        AG.init_poblacion()    
+                                        AG.evaluacion_poblacionReal()                
+                                        
+                                        while generaciones>0:
+                                            selec=AG.seleccion_poblacionReal(5)
+                                            
+                                            AG.poblacion=AG.cruce_poblacionReal(selec)
+                                            AG.poblacion=AG.mutacion_poblacionReal(AG.poblacion)
+
+                                            for i in range(AG.tam_elite):
+                                                AG.poblacion.append(AG.selec_elite[i])
+                                            
+                                            AG.evaluacion_poblacionReal()
+
+                                            # ENVIA EL MEJOR
+                                            comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                    
+                                            
+                                            generaciones-=1
+                                    else:
+                                        selec=[]
+                                        poblacion=[]
+
+                                        AG.init_poblacionArbol(0)    
+                                        AG.evaluacion_poblacionArbol()                
+                                        
+                                        while generaciones>0:
+                                            selec=AG.seleccion_poblacionArbol(5)
+                                            
+                                            AG.poblacion=AG.cruce_poblacionArbol(selec)
+                                            AG.poblacion=AG.mutacion_poblacionArbol(AG.poblacion)
+
+                                            for i in range(AG.tam_elite):
+                                                AG.poblacion.append(AG.selec_elite[i])
+                                            
+                                            AG.evaluacion_poblacionArbol()
+
+                                            # ENVIA EL MEJOR
+                                            comm.send(AG.mejor_total, dest=MASTER)  
+
+                                                    
+                                            
+                                            generaciones-=1
+                                        
+                                        
+
+                                        #return self.mejor_total
+
+                                    
                                 
                                 totalTimeEnd = MPI.Wtime() 
                                 tiempo+=(totalTimeEnd-totalTimeStart) 
-                            except Exception:
-                                print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
+                            except Exception as e:
+                                print(e,"Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
                                 i-=1
                           
                         if myrank==MASTER: 
-                            ruta=os.path.join(ruta_Arbol,'Arb{}_{}_{}.txt'.format(seleccion_opt[seleccion_idx],
+                            ruta=os.path.join(ruta_Arbol,'Arb_2MPI{}_{}_{}_{}.txt'.format(numWorkers,
+                                                                seleccion_opt[seleccion_idx],
                                                                 funcion_opt[funcion_idx],                                                                
                                                                 matriz_opt[fila_ind]))    
                             
                             with open(ruta, 'a') as archivo:
                                 # Escribir un número flotante en el archivo                                
                                 archivo.write(str(tiempo/repeticiones) + ', ')
-                
+                """
 
 
         if myrank==0:
@@ -3741,6 +4065,16 @@ def main():
             for arch in archivos:
                     with open(os.path.join(ruta_Bin,arch), 'a') as archivo:        
                         archivo.write('\n') 
+
+            """archivos = os.listdir(ruta_Real)
+            for arch in archivos:
+                    with open(os.path.join(ruta_Real,arch), 'a') as archivo:        
+                        archivo.write('\n') 
+            
+            archivos = os.listdir(ruta_Arbol)
+            for arch in archivos:
+                    with open(os.path.join(ruta_Arbol,arch), 'a') as archivo:        
+                        archivo.write('\n')"""
                
                 
 
@@ -3752,134 +4086,7 @@ def main():
     
 
     
-        
-def ejecuta(comm,myrank,numWorkers,
-            tam_poblacion,generaciones,seleccion_idx,cruce_idx,prob_cruce,mut_idx,prob_mut,
-            precision, funcion_idx, num_genes, elitismo, 
-            modo, profundidad, long_cromosoma, filas, columnas, bloating_idx, ticks):
-    
-    MASTER=0
-    
-    
-    if myrank==0:
-        mejor_total=float("inf")
-        progreso=[]
-        while generaciones>0:
-            
-            
-            for _ in range(numWorkers):
-                # ENVIA EL MEJOR
-                data=comm.recv(source=MPI.ANY_SOURCE) 
-                if mejor_total>data: mejor_total=data 
-
-            progreso.append(mejor_total)            
-            generaciones-=1
-        
-
       
-        
-        
-    else: # WORKER
-        AG=AlgoritmoGenetico(None)
-        AG.set_valores( tam_poblacion, 
-                        generaciones, 
-                        seleccion_idx,
-                        cruce_idx, 
-                        prob_cruce,
-                        mut_idx, 
-                        prob_mut,
-                        precision, 
-                        funcion_idx, 
-                        num_genes, 
-                        elitismo,
-                        modo,
-                        profundidad,
-                        long_cromosoma,
-                        filas,
-                        columnas,
-                        bloating_idx,
-                        ticks) 
-
-        if AG.funcion_idx<4: 
-            selec=[]
-
-            AG.init_poblacion()    
-            AG.evaluacion_poblacionBin()                
-            
-            while generaciones>0:
-                selec=AG.seleccion_poblacionBin(5)
-                
-                AG.poblacion=AG.cruce_poblacionBin(selec)
-                AG.poblacion=AG.mutacion_poblacionBin(AG.poblacion)
-
-                for i in range(AG.tam_elite):
-                    AG.poblacion.append(AG.selec_elite[i])
-                
-                AG.evaluacion_poblacionBin()
-
-                # ENVIA EL MEJOR
-                comm.send(AG.mejor_total, dest=MASTER)  
-
-                          
-                
-                generaciones-=1
-        elif funcion_idx<7:     
-            selec=[]
-            poblacion=[]
-
-            AG.init_poblacion()    
-            AG.evaluacion_poblacionReal()                
-            
-            while generaciones>0:
-                selec=AG.seleccion_poblacionReal(5)
-                
-                AG.poblacion=AG.cruce_poblacionReal(selec)
-                AG.poblacion=AG.mutacion_poblacionReal(AG.poblacion)
-
-                for i in range(AG.tam_elite):
-                    AG.poblacion.append(AG.selec_elite[i])
-                
-                AG.evaluacion_poblacionReal()
-
-                # ENVIA EL MEJOR
-                comm.send(AG.mejor_total, dest=MASTER)  
-
-                          
-                
-                generaciones-=1
-        else:
-            selec=[]
-            poblacion=[]
-
-            AG.init_poblacionArbol(0)    
-            AG.evaluacion_poblacionArbol()                
-            
-            while generaciones>0:
-                selec=AG.seleccion_poblacionArbol(5)
-                
-                AG.poblacion=AG.cruce_poblacionArbol(selec)
-                AG.poblacion=AG.mutacion_poblacionArbol(AG.poblacion)
-
-                for i in range(AG.tam_elite):
-                    AG.poblacion.append(AG.selec_elite[i])
-                
-                AG.evaluacion_poblacionArbol()
-
-                # ENVIA EL MEJOR
-                comm.send(AG.mejor_total, dest=MASTER)  
-
-                          
-                
-                generaciones-=1
-            
-            
-
-            #return self.mejor_total
-
-    
-    
-    
-    
 
 
 main()

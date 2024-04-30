@@ -20,7 +20,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -165,7 +165,7 @@ def main():
         tam_oculta=10
         tam_salida=1
         learning_rate=0.1
-        repeticiones=100
+        repeticiones=10
         tam_entrenamiento=len(poblacion)
         tam_poblacion=tam_entrenamiento
         tam_entrenamiento*=repeticiones

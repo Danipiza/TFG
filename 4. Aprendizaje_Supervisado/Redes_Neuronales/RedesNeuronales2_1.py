@@ -64,7 +64,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -240,7 +240,7 @@ def main():
         learning_rate.append(izq/100)
         izq+=precision  
 
-    repeticiones_maximas=100              # Numero de repeticiones en el entrenamiento
+    repeticiones_maximas=10              # Numero de repeticiones en el entrenamiento
 
     print("Tamaños de las capas ocultas: {}, numero de repeticiones: {}".format(tam_capas_ocultas, repeticiones_maximas))
     

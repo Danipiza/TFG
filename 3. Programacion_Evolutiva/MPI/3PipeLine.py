@@ -3237,7 +3237,7 @@ class AlgoritmoGenetico():
         acum=0.0
         if peor_generacion<0: peor_generacion*=-1
 
-        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
+        self.fitness_total=self.tam_poblacion*1.05*peor_generacion+self.fitness_total
         for i in range(self.tam_poblacion):
             self.prob_seleccion[i]=1.05*peor_generacion+self.poblacion[i].fitness
             self.prob_seleccion[i]/=self.fitness_total

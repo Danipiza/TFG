@@ -2344,7 +2344,7 @@ class Mutacion:
         act=None
         for i in range(tam_poblacion):                                
             act=IndividuoReal(aviones=None,
-                              vInd=poblacion[i].v);	
+                              vInd=poblacion[i]);	
             
             if random.random()<self.p:
                 antiguaPosicion=int(random.random()*(len(act.v)-1))
@@ -3183,9 +3183,9 @@ class AlgoritmoGenetico():
         acum=0.0
         if peor_generacion<0: peor_generacion*=-1
 
-        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
+        self.fitness_total=self.tam_poblacion*1.05*peor_generacion+self.fitness_total
         for i in range(self.tam_poblacion):
-            self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
+            self.prob_seleccion[i]=1.05*peor_generacion+self.poblacion[i].fitness
             self.prob_seleccion[i]/=self.fitness_total
             acum += self.prob_seleccion[i]
             self.prob_seleccionAcum[i]=acum	
@@ -3247,9 +3247,9 @@ class AlgoritmoGenetico():
         acum=0.0
         if peor_generacion<0: peor_generacion*=-1
 
-        self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
+        self.fitness_total=self.tam_poblacion*1.05*peor_generacion+self.fitness_total
         for i in range(self.tam_poblacion):
-            self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
+            self.prob_seleccion[i]=1.05*peor_generacion+self.poblacion[i].fitness
             self.prob_seleccion[i]/=self.fitness_total
             acum += self.prob_seleccion[i]
             self.prob_seleccionAcum[i]=acum	
@@ -3534,8 +3534,8 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=100
-        generaciones=10
+        tam_poblacion=25//numWorkers
+        generaciones=25
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
@@ -3543,20 +3543,20 @@ def main():
         # 0: Basica | 1: Uniforme | 
         # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
         # 7: Intercambio
-        cruce_idx=7
+        cruce_idx=0
         prob_cruce=0.6
         # 0: Basica    |     
         # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
         # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
         #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-        mut_idx=6
+        mut_idx=0
         # Binario: 0.05 | Real: 0.3
         prob_mut=0.3 
         precision=0.01
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
-        funcion_idx=7
+        funcion_idx=0
         num_genes=2
         elitismo=0
 
@@ -3622,11 +3622,7 @@ def main():
             generaciones-=1
         totalTimeEnd = MPI.Wtime()
         #print("Valor Optimo: {}\n".format(progreso[-1]))
-        print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
-
-      
-        
-        
+        print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))          
     else: # WORKER
         AG=AlgoritmoGenetico(None)
         AG.set_valores( tam_poblacion, 

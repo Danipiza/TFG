@@ -90,7 +90,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -232,7 +232,7 @@ def main():
         datos_prueba_tam=len(datos_prueba)
         # peso[Kg]/altura^2[m]
         datos_prueba_IMC=[(datos_prueba[i][1]/datos_prueba[i][0]**2) for i in range(datos_prueba_tam)]
-
+        
         
         
         # --- Normalizar los datos -----------------------------------------------------------       
@@ -263,14 +263,13 @@ def main():
     
         # --- Definir la red neuronal --------------------------------------------------------
         tam_entrada=2               # Entrada: Altura y peso
-        tam_capas_ocultas=[5 for _ in range(1)]   # Tamaño de las capas ocultas (ejemplo)
+        tam_capas_ocultas=[10 for _ in range(3)]   # Tamaño de las capas ocultas (ejemplo)
         tam_salida=1                # Salida: IMC
 
-        """RedN=RedNeuronal(tam_entrada,tam_capas_ocultas,tam_salida, pesos=None)
-        pesos=RedN.pesos"""
-        
-        pesos=[[[-0.8862127498365708, 0.044455804130351106, -0.24315451980692337, 0.5944257250911558, -0.8659641504083082], [-0.12964407937954947, -0.5388623969967568, 0.9305994808483475, 0.6820897761878244, 0.45941731041235445]], [[-0.6545128025905118], [-0.980373941703389], [-0.7317483501902959], [-0.9176893589970425], [0.7127493647202121]]]
-        print(pesos)
+        RedN=RedNeuronal(tam_entrada,tam_capas_ocultas,tam_salida, pesos=None)
+        pesos=RedN.pesos       
+        """pesos=[[[-0.8862127498365708, 0.044455804130351106, -0.24315451980692337, 0.5944257250911558, -0.8659641504083082], [-0.12964407937954947, -0.5388623969967568, 0.9305994808483475, 0.6820897761878244, 0.45941731041235445]], [[-0.6545128025905118], [-0.980373941703389], [-0.7317483501902959], [-0.9176893589970425], [0.7127493647202121]]]
+        print(pesos)"""
         
         learning_rate=0.1
         """learning_rate=[]
@@ -300,7 +299,7 @@ def main():
             comm.send(f,dest=i)
             learning_rate.append(f)"""
 
-        repeticiones=1000      # Numero de repeticiones en el entrenamiento
+        repeticiones=10      # Numero de repeticiones en el entrenamiento
 
         tam=tam_datos//numWorkers
         mod=tam_datos%numWorkers

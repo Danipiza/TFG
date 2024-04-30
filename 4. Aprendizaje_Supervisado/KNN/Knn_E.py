@@ -7,6 +7,11 @@ import math
 
 import queue
 
+# EJECUTA
+# py Knn_E.py
+
+
+
 # Tiempo de ejecucion total: 9.944005100056529 10000_2D, 1000_2D, k=3
 
 class MaxPriorityQueue(queue.PriorityQueue):
@@ -83,7 +88,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","KNN", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -117,7 +122,7 @@ def leeAsig(archivo):
         n=len(dir)
         
     if archivo==None: nombre_fichero=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","KNN","Asig", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","2.Cluster","Asig", archivo+".txt")
     print(path)
         
     array = [] 
@@ -184,19 +189,11 @@ def GUI(clusters, poblacionIni,asignacionIni,n, poblacionFin,asignacionFin,m):
 
 
 
-
-def distancia_euclidea(a,b):
-    ret=0.0
-    for i in range(len(a)):
-        ret+=(a[i]-b[i])**2        
-    
-    return math.sqrt(ret)
-
-
 """
 k>cluster, para que no haya posibles empates
 """
-def knn_clasificador_uno(poblacion, asignacion, clusters, individuo, k):
+def knn_clasificador_unoE(poblacion, asignacion, clusters, individuo, k):
+    
     n=len(poblacion)
     d=len(poblacion[0])
     pq = MaxPriorityQueue()
@@ -238,7 +235,8 @@ def knn_clasificador_uno(poblacion, asignacion, clusters, individuo, k):
 	
     return ret
 
-def ejecuta_actualizar(poblacion, asignacion, n, poblacionProbar, m, clusters, k):    
+def ejecuta_actualizarE(poblacion, asignacion, n, poblacionProbar, m, clusters, k):    
+    print("Si Actualiza")
     totalTimeStart = MPI.Wtime()
 
     poblacionIni=[x for x in poblacion]
@@ -293,12 +291,127 @@ def ejecuta_actualizar(poblacion, asignacion, n, poblacionProbar, m, clusters, k
 
 
 # Ejecuta sin almacenar 
-def ejecuta_sin_actualizar(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k):    
+def ejecuta_sin_actualizarE(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k):    
+    print("No Actualiza")
     totalTimeStart = MPI.Wtime()
         
     asignacionProbar=[]
     for i in range(m):           
-        asignacionProbar.append(knn_clasificador_uno(poblacionIni, asignacionIni, clusters, poblacionProbar[i],k))
+        asignacionProbar.append(knn_clasificador_unoE(poblacionIni, asignacionIni, clusters, poblacionProbar[i],k))
+    
+    totalTimeEnd = MPI.Wtime()
+    print("Tiempo de ejecucion total: {}".format(totalTimeEnd-totalTimeStart))
+    
+    
+    
+    GUI(clusters,poblacionIni,asignacionIni,n, poblacionProbar,asignacionProbar,m)
+
+"""
+k>cluster, para que no haya posibles empates
+"""
+def knn_clasificador_unoM(poblacion, asignacion, clusters, individuo, k):
+    n=len(poblacion)
+    d=len(poblacion[0])
+    pq = MaxPriorityQueue()
+
+    
+
+    #print("Asignacion=",asignacion)
+    
+    # Calcula todas las distancias y coge las k mas cercanas
+    for i in range(n):
+        distancia=0
+        for j in range(d):
+            distancia+=abs(poblacion[i][j]-individuo[j])
+        
+        
+        #print("TopD={}, TopE={}".format(pq.top_distancia(),pq.top_etiqueta()))
+        # Si la cola de prioridad no es k, añadir la distancia
+        if pq.size()<k: pq.push(asignacion[i],distancia)
+        # Si distancia actual es menor a la mayor menor, 
+        # se elimina la mayor e introduce la actual        
+        elif pq.top_distancia()>distancia:            
+            pq.pop()
+            pq.push(asignacion[i],distancia)
+
+    # Cuenta el numero de vecinos mas cercanos para cada cluster
+    etiquetas=[0 for i in range(clusters)]    
+    for i in range(k):
+        etiquetas[pq.pop()]+=1
+    
+    # Coge el que mas tenga
+    ret=0
+    cantidad=etiquetas[0]
+    for i in range(1,clusters):
+        if cantidad<etiquetas[i]:
+            cantidad=etiquetas[i]
+            ret=i
+               
+	
+    return ret
+
+def ejecuta_actualizarM(poblacion, asignacion, n, poblacionProbar, m, clusters, k):    
+    print("Si Actualiza")
+    totalTimeStart = MPI.Wtime()
+
+    poblacionIni=[x for x in poblacion]
+    asignacionIni=[x for x in asignacion]
+
+    d=len(poblacion[0])
+
+    asignacionProbar=[]    
+    for x in range(m):                          
+        pq = MaxPriorityQueue()        
+
+        
+        # Calcula todas las distancias y coge las k mas cercanas
+        for i in range(n):
+            distancia=0
+            for j in range(d):
+                distancia+=abs(poblacion[i][j]-poblacionProbar[x][j])      
+            
+            # Si la cola de prioridad no es k, añadir la distancia
+            if pq.size()<k: pq.push(asignacion[i],distancia)
+            # Si distancia actual es menor a la mayor menor, 
+            # se elimina la mayor e introduce la actual        
+            elif pq.top_distancia()>distancia:            
+                pq.pop()
+                pq.push(asignacion[i],distancia)
+
+        # Cuenta el numero de vecinos mas cercanos para cada cluster
+        etiquetas=[0 for i in range(clusters)]    
+        for i in range(k):
+            etiquetas[pq.pop()]+=1
+        
+        # Coge el que mas tenga
+        ret=0
+        cantidad=etiquetas[0]
+        for i in range(1,clusters):
+            if cantidad<etiquetas[i]:
+                cantidad=etiquetas[i]
+                ret=i                
+        
+        asignacionProbar.append(ret)
+        poblacion.append(poblacionProbar[x])
+        asignacion.append(ret)
+        n+=1
+    
+    totalTimeEnd = MPI.Wtime()
+    print("Tiempo de ejecucion total: {}".format(totalTimeEnd-totalTimeStart))
+    
+    print("len(poblacion)={}, len(asignacion)={}".format(len(poblacionIni),len(asignacionIni)))
+    
+    GUI(clusters,poblacionIni,asignacionIni,n-m, poblacionProbar,asignacionProbar,m)
+
+
+# Ejecuta sin almacenar 
+def ejecuta_sin_actualizarM(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k):    
+    print("No Actualiza")
+    totalTimeStart = MPI.Wtime()
+        
+    asignacionProbar=[]
+    for i in range(m):           
+        asignacionProbar.append(knn_clasificador_unoM(poblacionIni, asignacionIni, clusters, poblacionProbar[i],k))
     
     totalTimeEnd = MPI.Wtime()
     print("Tiempo de ejecucion total: {}".format(totalTimeEnd-totalTimeStart))
@@ -308,22 +421,36 @@ def ejecuta_sin_actualizar(poblacionIni, asignacionIni, n, poblacionProbar, m, c
     GUI(clusters,poblacionIni,asignacionIni,n, poblacionProbar,asignacionProbar,m)
 
 
-
-
 def main():
     # 100_1_2D 7
     poblacionIni=lee("1000_1_2D")
     asignacionIni=leeAsig("1000_1_2D") 
     n=len(poblacionIni)    
     
-    poblacionProbar=lee("10000_1_2D")
+    poblacionProbar=lee("100000_2D")
+    poblacionProbar=poblacionProbar[0:1000]
     m=len(poblacionProbar)
-
+    
     clusters=4
     k=10
+    distancia=1
+    distancia_opt=["Manhattan", "Euclidea"]
+    actualiza=1
     
-    ejecuta_sin_actualizar(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k)
-    #ejecuta_actualizar(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k)
+    print("Poblacion Ini: {}\tPoblacion Probar: {}\tk= {}\tDistancia {}".format(n, m, k,
+            distancia_opt[distancia]), end="\t")
+
+    if distancia==0:
+        if actualiza==0:
+            ejecuta_sin_actualizarM(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k)
+        else:
+            ejecuta_actualizarM(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k)
+    else:   
+        if actualiza==0:
+            ejecuta_sin_actualizarE(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k)
+        else:
+            ejecuta_actualizarE(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k)
+    
 
 
 
