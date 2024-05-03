@@ -14,10 +14,9 @@ import copy
 # PORQUE EL TIEMPO DE CALCULO ES MUY PEQUEÑO
 
 # EN SIMPLE Y COMPLETO SI. SE COMPARAN CON UN COSTE O(N^2) TODOS LOS INDIVIDUOS DE 1 CLUSTER CON EL OTRO
-# Y ESTE PROCESO SE REPEITE PARA CADA COLUMNA, COSTE O(N^3)?
+# Y ESTE PROCESO SE REPITE PARA CADA COLUMNA, COSTE O(N^3)
 
 """
-SOLUCIONAR IMPARES??
 NORMAL:
 - 100       0.01502120001451s
 - 1000      7.91433090000646s
@@ -825,7 +824,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()

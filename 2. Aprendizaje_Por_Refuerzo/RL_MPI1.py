@@ -211,24 +211,6 @@ class Q_Learning():
         """print("Ejecucion final:", (timeEnd-timeEndEnt))"""
         return (timeEndEnt-timeStart), cont
         
-from mpi4py import MPI  # Al importar la biblioteca en Python se genera el entorno automaticamente
-
-tag=0                   # tag para mas informacion      
-comm=MPI.COMM_WORLD     # Comunicador
-status = MPI.Status()   # Status
-myrank=comm.Get_rank()  # id de cada procesp
-numProc=comm.Get_size() # Numero de procesadores
-
-if myrank==0: 
-    # TODO
-else:
-    # TODO
-
-
-    x=1
-
-
-
 def main():
     MASTER = 0              # int.      Master     
     END_OF_PROCESSING = -1  # End of processing

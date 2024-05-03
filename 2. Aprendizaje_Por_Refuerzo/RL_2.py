@@ -272,21 +272,24 @@ def main():
     gamma=0.9
     epsilon=0.8
     episodios=1000"""
-    """alpha=0.3
+    
+    alpha=0.3
     gamma=0.9
     epsilon=0.8
-    episodios=1000"""
-    archivo="100"
+    episodios=100
+    archivo="30"
     matriz,fils,cols=leeArchivo(archivo)
 
     timeStart=MPI.Wtime()
     Q_table,A_table=procesarMatriz(matriz,fils,cols)
+    
     timeEndEnt=MPI.Wtime()
 
     QL=Q_Learning(alpha,gamma,epsilon,episodios, 
                   Q_table, A_table,
                   matriz,fils,cols)
     QL.ejecuta()
+    print(QL.Q_table)
 
 
 

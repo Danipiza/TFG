@@ -8,16 +8,14 @@ import math
 import copy
 
 # EJECUTAR
-# mpiexec -np 4 python aglomerativeMPI_E_sim.py
+# mpiexec -np 4 python aglomerativeMPI_E_sim3.py
 
-# NO HACE FALTA MEJORA DEL CALCULO DE NUEVAS DISTANCIAS EN LA FILA CON CENTROIDES
-# PORQUE EL TIEMPO DE CALCULO ES MUY PEQUEÑO
+
 
 # EN SIMPLE Y COMPLETO SI. SE COMPARAN CON UN COSTE O(N^2) TODOS LOS INDIVIDUOS DE 1 CLUSTER CON EL OTRO
-# Y ESTE PROCESO SE REPEITE PARA CADA COLUMNA, COSTE O(N^3)?
+# Y ESTE PROCESO SE REPITE PARA CADA COLUMNA, COSTE O(N^3)
 
 """
-SOLUCIONAR IMPARES??
 NORMAL:
 - 100       0.03670289996080s
 - 1000      14.3837430999847s
@@ -76,7 +74,7 @@ def main():
     # Inicializa centros
     if myrank==MASTER:       
         poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
-        archivo="100_2D"
+        archivo="1000_2D"
         C=7
         poblacion=lee(archivo)
 
@@ -665,14 +663,14 @@ def main():
             
             # ACTUALIZA FILA (SOLO EL WORKER DE c1)
             if w==myrank:                
-                """fila=[-1 for _ in range(c1+1)]
+                fila=[-1 for _ in range(c1+1)]
                 for i in range(numWorkersDist):                    
                     data=comm.recv(source=numWorkers+1+i)                    
                     for x in data:
                         fila.append(x)
-                M[filasDic[c1]]=fila"""
+                M[filasDic[c1]]=fila
                 
-                for i in range(c1+1,n):                    
+                """for i in range(c1+1,n):                    
                     aux=0.0
                     nDist=float("inf")
                     c2N=len(clustersCentros[i])
@@ -682,7 +680,7 @@ def main():
                             for a in range(d):                                
                                 distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
                             if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
-                    M[filasDic[c1]][i]=math.sqrt(nDist)
+                    M[filasDic[c1]][i]=math.sqrt(nDist)"""
                 
                 #print("Fila worker:",M[filasDic[c1]], "\n")
 
@@ -774,14 +772,14 @@ def main():
             n-=1 # REDUCE EL TAMAÑO DE LA POBLACION
 
             # ACTUALIZA FILA (SOLO EL WORKER DE c1)
-            """fila=[-1 for i in range(c1+1)]
+            fila=[-1 for i in range(c1+1)]
             for i in range(numWorkersDist):                    
                 data=comm.recv(source=numWorkers+1+i)                    
                 for x in data:
                     fila.append(x)
-            M[filasDic[c1]]=fila"""
+            M[filasDic[c1]]=fila
 
-            for i in range(c1+1,n):                    
+            """for i in range(c1+1,n):                    
                 aux=0.0
                 for x in range(c1N):            # Recorre los individuos de "c1"
                     for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
@@ -789,7 +787,7 @@ def main():
                         for a in range(d):
                             distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
                         if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
-                M[filasDic[c1]][i]=math.sqrt(nDist)
+                M[filasDic[c1]][i]=math.sqrt(nDist)"""
             
             if tam==1:comm.send(-1,dest=MASTER)
             else: comm.send(0,dest=MASTER)
@@ -974,7 +972,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()

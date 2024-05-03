@@ -5,18 +5,9 @@ import random
 import os
 import math
 
+# Para realizar copias sin punteros
 import copy
 
-# TODO IMPORTANTE:
-""" NO SE PUEDE POR QUE SON PUNTEROS, 
-    AL FINAL LA MATRIZ ESTARIA CON LA MISMA FILA
-tmpM=[0 for _ in range(self.n)]        
-M=[tmpM for _ in range(self.n-1)] 
-"""
-
-"""
-- 6000_1_2D:    2551.1138351000263s ? lo puse a las 21.30 termino a las 23.31 no tiene sentido
-"""
 
 
 # Mejor
@@ -31,7 +22,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -497,6 +488,7 @@ def ejecuta_diferentes_poblaciones(poblacion,k):
             suma=500    
 
 def ejecuta_centroide(poblacion, distancia, clusts):
+    print("Por centroide")
     n=len(poblacion)
     k=1
     timeStart=MPI.Wtime()
@@ -531,6 +523,7 @@ def ejecuta_centroide(poblacion, distancia, clusts):
     GUI(clusts, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])
 
 def ejecuta_simple(poblacion, distancia, clusts):
+    print("Por enlace simple")
     n=len(poblacion)
     d=len(poblacion[0])
     k=1
@@ -573,6 +566,8 @@ def ejecuta_simple(poblacion, distancia, clusts):
     GUI(clusts, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])
 
 def ejecuta_completa(poblacion, distancia, clusts):
+    print("Por enlace completo")
+    
     n=len(poblacion)
     d=len(poblacion[0])
     k=1
@@ -623,7 +618,7 @@ def main():
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    archivo="6000_1_2D"
+    archivo="1000_2D"
     C=7
     dists=["Manhattan","Euclidea"]
     distancia=1

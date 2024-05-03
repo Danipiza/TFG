@@ -10,14 +10,6 @@ import copy
 # EJECUTAR
 # mpiexec -np 4 python aglomerativeMPI_E_sim.py
 
-# NO HACE FALTA MEJORA DEL CALCULO DE NUEVAS DISTANCIAS EN LA FILA CON CENTROIDES
-# PORQUE EL TIEMPO DE CALCULO ES MUY PEQUEÑO
-
-# EN SIMPLE Y COMPLETO SI. SE COMPARAN CON UN COSTE O(N^2) TODOS LOS INDIVIDUOS DE 1 CLUSTER CON EL OTRO
-# Y ESTE PROCESO SE REPEITE PARA CADA COLUMNA, COSTE O(N^3)?
-
-
-
 
 """
 Divide el calculo de nuevas distancias para la fila
@@ -26,8 +18,15 @@ Divide el calculo de nuevas distancias para la fila
 mpiexec -np 6 python aglomerativeMPI_E_sim2.py 
 NO FUNCIONA line 791, in main distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
 mpiexec -np 5 python aglomerativeMPI_E_sim2.py
+"""
 
-SOLUCIONAR IMPARES??
+
+
+# EN SIMPLE Y COMPLETO SI. SE COMPARAN CON UN COSTE O(N^2) TODOS LOS INDIVIDUOS DE 1 CLUSTER CON EL OTRO
+# Y ESTE PROCESO SE REPITE PARA CADA COLUMNA, COSTE O(N^3)
+
+
+"""
 NORMAL:
 - 100       0.03670289996080s
 - 1000      14.3837430999847s
@@ -43,6 +42,10 @@ MPI: 7 Workers
 - 6000:     1410.72961850004s
 
 """
+
+
+
+
 
 
 
@@ -85,11 +88,11 @@ def main():
     # Inicializa centros
     if myrank==MASTER:       
         #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
-        archivo="100_2D"
+        archivo="100_1_2D"
         C=7
         poblacion=lee(archivo)
 
-        print("\nEjecutando archivo: {}, numero de clusters para la GUI: {}, distancia: Euclidea\n".format(archivo, C))           
+        #print("\nEjecutando archivo: {}, numero de clusters para la GUI: {}, distancia: Euclidea\n".format(archivo, C))           
         
         n=len(poblacion)        
         d=len(poblacion[0])     
@@ -951,7 +954,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()

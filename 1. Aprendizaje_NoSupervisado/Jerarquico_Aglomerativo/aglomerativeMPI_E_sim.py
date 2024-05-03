@@ -10,14 +10,17 @@ import copy
 # EJECUTAR
 # mpiexec -np 4 python aglomerativeMPI_E_sim.py
 
-# NO HACE FALTA MEJORA DEL CALCULO DE NUEVAS DISTANCIAS EN LA FILA CON CENTROIDES
-# PORQUE EL TIEMPO DE CALCULO ES MUY PEQUEÑO
+"""
+Cada worker ejecuta sus calculos. 
+El worker que actualiza la fila lo hace solo.
+
+¿Implementacion que mas tarda para enlace simple y completo?
+"""
 
 # EN SIMPLE Y COMPLETO SI. SE COMPARAN CON UN COSTE O(N^2) TODOS LOS INDIVIDUOS DE 1 CLUSTER CON EL OTRO
-# Y ESTE PROCESO SE REPEITE PARA CADA COLUMNA, COSTE O(N^3)?
+# Y ESTE PROCESO SE REPITE PARA CADA COLUMNA, COSTE O(N^3)
 
 """
-SOLUCIONAR IMPARES??
 NORMAL:
 - 100       0.03670289996080s
 - 1000      14.3837430999847s
@@ -843,7 +846,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
