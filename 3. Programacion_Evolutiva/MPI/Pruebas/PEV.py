@@ -3645,7 +3645,7 @@ def main():
             tam_poblacion=tam//numWorkers
             for seleccion_idx in procesar_seleccion:
 
-                for funcion_idx in procesar_funcion[0]:
+                """for funcion_idx in procesar_funcion[0]:
                     for precision in procesar_precision:
                         tiempo=0
                         for i in range(repeticiones):
@@ -3664,18 +3664,81 @@ def main():
                                 i-=1
                             
                         if myrank==MASTER:
-                            ruta=os.path.join(ruta_Bin,'Bin{}_{}_{}.txt'.format(seleccion_opt[seleccion_idx],
+                            ruta=os.path.join(ruta_Bin,'Bin_2MPI{}_{}_{}_{}.txt'.format(numWorkers,
+                                seleccion_opt[seleccion_idx],
                                                                 funcion_opt[funcion_idx],                                                                
                                                                 precision_opt[mapP[precision]]))    
                             with open(ruta, 'a') as archivo:
                                 # Escribir un número flotante en el archivo                                
-                                archivo.write(str(tiempo/repeticiones) + ', ')
+                                archivo.write(str(tiempo/repeticiones) + ', ')"""
+                for funcion_idx in procesar_funcion[1]:
+                    
+                    tiempo=0
+                    for i in range(repeticiones):
+                        try :
+                            totalTimeStart = MPI.Wtime()
+
+                            ejecuta2(comm, myrank, numWorkers,
+                        tam_poblacion, gen, seleccion_idx, 2, prob_cruce, 1, 0.3,
+                        precision, funcion_idx,  num_genes,  elitismo, 
+                        modo, profundidad,long_cromosoma, filas, columnas, bloating_idx,ticks)
+                            
+                            totalTimeEnd = MPI.Wtime() 
+                            tiempo+=(totalTimeEnd-totalTimeStart) 
+                        except Exception:
+                            print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
+                            i-=1
+                        
+                    if myrank==MASTER:
+                        ruta=os.path.join(ruta_Real,'Real2MPI{}_{}_{}.txt'.format(numWorkers, seleccion_opt[seleccion_idx],
+                                                            funcion_opt[funcion_idx]))    
+                        with open(ruta, 'a') as archivo:
+                            # Escribir un número flotante en el archivo                                
+                            archivo.write(str(tiempo/repeticiones) + ', ')
+
+                """for funcion_idx in procesar_funcion[2]:
+                    for filaInd in range(len(procesar_filas)):
+                        tiempo=0
+                        for i in range(repeticiones):
+                            try :
+                                totalTimeStart = MPI.Wtime()
+
+                                ejecuta2(comm, myrank, numWorkers,
+                            tam_poblacion, gen, seleccion_idx, 7, prob_cruce, 5, prob_mut,
+                            precision, funcion_idx,  num_genes,  elitismo, 
+                            modo, profundidad,long_cromosoma, procesar_filas[filaInd], procesar_columnas[filaInd], bloating_idx,
+                            procesar_ticks[filaInd])
+                                
+                                totalTimeEnd = MPI.Wtime() 
+                                tiempo+=(totalTimeEnd-totalTimeStart) 
+                            except Exception:
+                                print("Exception en S: {}, F: {}".format(seleccion_opt[seleccion_idx],funcion_opt[funcion_idx]))
+                                i-=1
+                            
+                        if myrank==MASTER:
+                            ruta=os.path.join(ruta_Arbol,'Arbol2MPI{}_{}_{}_M{}x{}.txt'.format(numWorkers,
+                                                                seleccion_opt[seleccion_idx],
+                                                                funcion_opt[funcion_idx],                                                                
+                                                                procesar_filas[filaInd],procesar_filas[filaInd]))    
+                            with open(ruta, 'a') as archivo:
+                                # Escribir un número flotante en el archivo                                
+                                archivo.write(str(tiempo/repeticiones) + ', ')"""
 
         if myrank==MASTER:
-            archivos = os.listdir(ruta_Bin)
+            """archivos = os.listdir(ruta_Bin)
             for arch in archivos:           
                 with open(os.path.join(ruta_Bin,arch), 'a') as archivo:        
+                    archivo.write('\n') """
+
+            archivos = os.listdir(ruta_Real)
+            for arch in archivos:           
+                with open(os.path.join(ruta_Real,arch), 'a') as archivo:        
                     archivo.write('\n') 
+
+            """archivos = os.listdir(ruta_Arbol)
+            for arch in archivos:           
+                with open(os.path.join(ruta_Arbol,arch), 'a') as archivo:        
+                    archivo.write('\n')"""
     
 
     """timeStart = MPI.Wtime()

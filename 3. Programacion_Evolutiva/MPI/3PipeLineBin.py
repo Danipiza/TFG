@@ -1022,8 +1022,8 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=500
-        generaciones=250
+        tam_poblacion=25
+        generaciones=25
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking

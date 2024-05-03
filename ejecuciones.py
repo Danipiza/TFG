@@ -30,7 +30,7 @@ def GUI(x, funciones, labels):
             'violet', 'salmon', 'darkturquoise', 'forestgreen', 'firebrick', 'darkblue', 'lavender', 'palegoldenrod',
             'navy']
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(12,8))
 
     # Poner las funciones  
     for i, func in enumerate(funciones):
@@ -38,47 +38,69 @@ def GUI(x, funciones, labels):
 
     
     ax.text(0.95, 0.05, "", verticalalignment='bottom', horizontalalignment='right', transform=ax.transAxes)    
-    ax.set_xlabel("Espacio (N)")    # Eje X
+    ax.set_xlabel("Tam. Población (N)")    # Eje X
     ax.set_ylabel("Tiempo (s)")     # Eje Y
     ax.legend()                     # Leyenda
     
     plt.show()
 
 def main():
+    # Ordenaciones
+    # N2
+    #labels = ["BubbleSort","InsertionSort","SelectionSort","SequentialSort","SequentialSort_MPI(5)"]
+    # NlogN
+    #labels = ["MergeSort","MergeSort_MPI(4)","MergeSort_MPI(8)","MergeSort_MPI(16)","MergeSort_MPI(32)",]
+
     # Aglomerativo
-    #labels = ["Aglomerative_C_E", "Aglomerative_C_E_MPI4", "Aglomerative_C_E_MPI10", "Aglomerative_C_E_MPI15", "Aglomerative_C_E_MPI20"]
+    #labels = ["Centroide_Euclidea","Centroide_Manhattan","ESimple_Euclidea","ESimple_Manhattan","Centroide_Euclidea_MPI(4)","Centroide_Manhattan_MPI(4)"]
+    
     
     # KMedias
+    #labels=["EuclideaK10","ManhattanK10","EuclideaK10_MPI(4)","ManhattanK10_MPI(4)"]
     
-    #labels = ["KMedias3M", "KMedias3M_MPI4", "KMedias3M_MPI10"]#,"KMedias3M_MPI15"]
-    #labels = ["KMedias3E", "KMedias3E_MPI4", "KMedias3E_MPI10"]#,"KMedias3E_MPI15"]
     
+    # PEV
+    # Bin
+    #labels = ["BinRuleta_F1_P2", "Bin1MPI4_Ruleta_F1_P2", "Bin2MPI4_Ruleta_F1_P2"]
+
+    # Real
+    # 1
+    """labels = ["RealRuleta_Aer1", "Real1MPI4_Ruleta_Aer1", "Real2MPI4_Ruleta_Aer1"]"""
+    # 2
+    #labels = ["RealRuleta_Aer2", "Real1MPI4_Ruleta_Aer2", "Real2MPI4_Ruleta_Aer2"]
+    # 3
+    #labels = ["RealRuleta_Aer3", "Real1MPI4_Ruleta_Aer3", "Real2MPI4_Ruleta_Aer3"]
+
+    # Arbol
+    #labels = ["RedNeuronal1x5", "RedNeuronal_MPI2_1x5", "RedNeuronal_MPI4_1x5",]
+
+
+
     # KNN
-    # act
-    #labels = ["KNN_Act_k2_E", "KNN_1MPI4_Act_k2_E", "KNN_2MPI4_Act_k2_E"]
-    #labels = ["KNN_Act_k2_M", "KNN_1MPI4_Act_k2_M", "KNN_2MPI4_Act_k2_M"]
-    # no act
-    #labels = ["KNN_NoAct_k2_E", "KNN_1MPI4_NoAct_k2_E", "KNN_2MPI4_NoAct_k2_E"]
-    #labels = ["KNN_NoAct_k2_M", "KNN_1MPI4_NoAct_k2_M", "KNN_2MPI4_NoAct_k2_M"]
+    # Basico
+    #labels=["Euclidea_Act","Euclidea_sinAct","Manhattan_Act","Manhattan_sinAct"]
+    # Comparacion
+    #labels=["Secuencial","1_MPI(4)","2_MPI(4)"]
 
 
     # REDES NEURONALES
-    # 1x5
-    labels = ["RedNeuronal1x5", "RedNeuronal_MPI2_1x5", "RedNeuronal_MPI4_1x5","RedNeuronal_MPI10_1x5"]
-    # 2x10
-    #labels = ["RedNeuronal2x10", "RedNeuronal_MPI2_2x10", "RedNeuronal_MPI4_2x10","RedNeuronal_MPI10_2x10"]
     # 10x10
-    #labels = ["RedNeuronal10x10", "RedNeuronal_MPI2_10x10", "RedNeuronal_MPI4_10x10","RedNeuronal_MPI10_10x10"]
-
+    labels=["Secuencial","2MPI(2)","2MPI(4)","2MPI(10)"]
 
     funciones=[leeArchivo(labels[i]) for i in range(len(labels))]  
+  
     tam=float("inf")
     for f in funciones:
         tam=min(tam,len(f))
-    
-    x=leeArchivo("TamDatos")    
+        print(len(f))
+    # GENERAL
+    x=leeArchivo("TamDatos")  
+    # PEV
+    """x=[25,50,100,200,500,1000,2000]"""
     if tam>len(x): tam=len(x)
-    x=x[0:tam]  
+    x=x[0:tam] 
+
+    
 
     for i in range(len(labels)):
         funciones[i]=funciones[i][0:tam]

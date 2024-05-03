@@ -2868,32 +2868,32 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=500
+        tam_poblacion=25
         tam_poblacionDiv=tam_poblacion//numWorkers
         tam_poblacion=tam_poblacionDiv*numWorkers
 
-        generaciones=250
+        generaciones=25
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-        seleccion_idx=1
+        seleccion_idx=0
         # 0: Basica | 1: Uniforme | 
         # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
         # 7: Intercambio
-        cruce_idx=0
+        cruce_idx=7
         prob_cruce=0.6
         # 0: Basica    |     
         # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
         # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
         #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-        mut_idx=0
+        mut_idx=5
         # Binario: 0.05 | Real: 0.3
         prob_mut=0.05    
         precision=0.001
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
-        funcion_idx=0
+        funcion_idx=7
         num_genes=2
 
         # 0: Completa | 1: Creciente | 2: Ramped & Half 

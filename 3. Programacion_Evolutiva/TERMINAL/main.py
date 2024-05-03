@@ -2828,6 +2828,32 @@ class AlgoritmoGenetico():
     def ejecutaBin(self):
         selec=[]
 
+        """totalTimeStart = MPI.Wtime()        
+        self.init_poblacion()    
+        totalTimeEnd = MPI.Wtime()
+        print("I Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100))
+        
+        totalTimeStart = MPI.Wtime()        
+        self.evaluacion_poblacionBin()      
+        totalTimeEnd = MPI.Wtime()
+        print("E Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100))  
+        
+
+        totalTimeStart = MPI.Wtime()      
+        selec=self.seleccion_poblacionBin(5)
+        totalTimeEnd = MPI.Wtime()
+        print("S Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100)) 
+
+        totalTimeStart = MPI.Wtime()      
+        self.poblacion=self.cruce_poblacionBin(selec) 
+        totalTimeEnd = MPI.Wtime()
+        print("C Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100)) 
+
+        totalTimeStart = MPI.Wtime()      
+        self.poblacion=self.mutacion_poblacionBin(self.poblacion)
+        totalTimeEnd = MPI.Wtime()
+        print("M Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100))"""
+
         self.init_poblacion()    
         
         self.evaluacion_poblacionBin()
@@ -2872,6 +2898,33 @@ class AlgoritmoGenetico():
     def ejecutaArbol(self):
         selec=[]
 
+
+        """totalTimeStart = MPI.Wtime()
+        self.init_poblacionArbol(0)    
+        totalTimeEnd = MPI.Wtime()
+        print("I Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100))
+        
+        totalTimeStart = MPI.Wtime()        
+        self.evaluacion_poblacionArbol()      
+        totalTimeEnd = MPI.Wtime()
+        print("E Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100))  
+        
+
+        totalTimeStart = MPI.Wtime()      
+        selec=self.seleccion_poblacionArbol(5)
+        totalTimeEnd = MPI.Wtime()
+        print("S Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100)) 
+
+        totalTimeStart = MPI.Wtime()      
+        self.poblacion=self.cruce_poblacionArbol(selec) 
+        totalTimeEnd = MPI.Wtime()
+        print("C Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100)) 
+
+        totalTimeStart = MPI.Wtime()      
+        self.poblacion=self.mutacion_poblacionArbol(self.poblacion)
+        totalTimeEnd = MPI.Wtime()
+        print("M Tiempo de ejecucion total: {}\n".format((totalTimeEnd-totalTimeStart)/100))     """         
+        
         self.init_poblacionArbol(0)       
         self.evaluacion_poblacionArbol() 
                       
@@ -3510,8 +3563,8 @@ def main():
                    "Arbol",
                    "Gramatica"]
         
-    tam_poblacion=50
-    generaciones=25
+    tam_poblacion=100
+    generaciones=1
 
     # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
     #           | 4: Truncamiento  | 5: Restos | 6: Ranking
@@ -3530,7 +3583,7 @@ def main():
     mut_idx=0
     prob_mut=0.05 # Binario: 0.05 | Real: 0.3
 
-    precision=0.001
+    precision=0.000001
 
     # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
     # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
@@ -3545,11 +3598,11 @@ def main():
 
     long_cromosoma=100
 
-    filas=8
-    columnas=8
+    filas=50
+    columnas=50
     # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
     bloating_idx=0
-    ticks=100
+    ticks=800
 
     AG.set_valores( tam_poblacion, 
                     generaciones, 
