@@ -618,7 +618,7 @@ def main():
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    archivo="5000_1_2D"
+    archivo="1000_2D"
     C=7
     dists=["Manhattan","Euclidea"]
     distancia=1

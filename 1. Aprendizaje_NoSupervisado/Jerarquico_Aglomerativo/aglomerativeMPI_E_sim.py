@@ -77,7 +77,7 @@ def main():
     # Inicializa centros
     if myrank==MASTER:       
         #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
-        archivo="1000_2D"
+        archivo="100_2D"
         C=7
         poblacion=lee(archivo)
 

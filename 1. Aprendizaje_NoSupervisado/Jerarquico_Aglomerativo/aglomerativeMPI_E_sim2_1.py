@@ -8,29 +8,17 @@ import math
 import copy
 
 # EJECUTAR
-# mpiexec -np 4 python aglomerativeMPI_E_sim2.py
-
+# mpiexec -np 4 python aglomerativeMPI_E_sim2_1.py
 
 """
-Divide el calculo de nuevas distancias para la fila
+Cada worker ejecuta sus calculos. 
+El worker que actualiza la fila lo hace solo.
 
-archivo="1000_2D"
-
-Secuencial:     20.324419200012926
-MPI1:           13.145621899981052
-MPI2:           10.240664499986451
-
-
-5000: 
-Secuencial:     1622.4169267999823
-MPI2:           981.0991638000123
+¿Implementacion que mas tarda para enlace simple y completo?
 """
-
-
 
 # EN SIMPLE Y COMPLETO SI. SE COMPARAN CON UN COSTE O(N^2) TODOS LOS INDIVIDUOS DE 1 CLUSTER CON EL OTRO
 # Y ESTE PROCESO SE REPITE PARA CADA COLUMNA, COSTE O(N^3)
-
 
 """
 NORMAL:
@@ -45,13 +33,8 @@ MPI: 3 Workers
 MPI: 7 Workers
 - 100:      0.05854490003548s
 - 1000:     12.9388973999884s
-- 6000:     1410.72961850004s
 
 """
-
-
-
-
 
 
 
@@ -84,6 +67,7 @@ def main():
     myrank=comm.Get_rank()
     numProc=comm.Get_size()
     numWorkers=numProc-1
+    numWorkersIni=numWorkers
 
     
 
@@ -94,11 +78,11 @@ def main():
     # Inicializa centros
     if myrank==MASTER:       
         #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
-        archivo="5000_1_2D"
+        archivo="1000_2D"
         C=7
         poblacion=lee(archivo)
 
-        #print("\nEjecutando archivo: {}, numero de clusters para la GUI: {}, distancia: Euclidea\n".format(archivo, C))           
+        print("\nEjecutando archivo: {}, numero de clusters para la GUI: {}, distancia: Euclidea\n".format(archivo, C))           
         
         n=len(poblacion)        
         d=len(poblacion[0])     
@@ -114,8 +98,6 @@ def main():
     d=comm.bcast(d, root=MASTER)
     # Envia el numero de clusters a los workers
     C=comm.bcast(C, root=MASTER)
-    
-    numWorkers=comm.bcast(numWorkers, root=MASTER)
     
 
     # -------------------------------------------------------------------------------------
@@ -142,6 +124,7 @@ def main():
         centroides=[[] for _ in range(C)]
 
         workers=[i for i in range(1,numWorkers+1)]
+        workersT=[]
         # Diccionario con las asignaciones
         filasAsig={}
         workerFilas=[[] for _ in range(numWorkers)]
@@ -277,6 +260,8 @@ def main():
                 comm.send(c2,dest=i)
                 comm.send(aux,dest=i)
             
+            
+
 
            
             # ACTUALIZA INDICES
@@ -299,16 +284,20 @@ def main():
             del clusters[c2]
             del clustersCentros[c2]
             
-                       
-            
+
             
             # RECIBE DEL worker QUE ELIMINA FILAS
             data=comm.recv(source=aux)
             if data==-1:                        
                 workers.remove(aux)
                 numWorkers-=1
+                workersT.append(aux)
 
-            
+            for i in workersT:
+                comm.send(c1,dest=i)
+                comm.send(c2,dest=i)
+                comm.send(clustersCentros[c1],dest=i)
+                comm.send(minW,dest=i)
 
             # ENVIA EL NUEVO CLUSTER
             for i in workers:
@@ -322,23 +311,34 @@ def main():
                 """print("n=",n, "tamAsig=",len(asig[n-1]))"""         
                 k-=1
 
+            comm.recv(source=minW)
+            
 
             # TERMINA CUANDO SOLO QUEDA UNO
             if len(workers)==1: 
                 comm.send(0,dest=workers[0])
+
+                
                 break
             else:
                 for i in workers:
+                    comm.send(1,dest=i)
+                for i in workersT:
                     comm.send(1,dest=i)
             
             #if cont==2:clusters[1000000]=1
             
             cont+=1
         
+       
         
         
         data=comm.recv(source=workers[0])
         if data==0: # CONTINUA
+            for i in workersT:
+                comm.send(100,dest=i)
+
+
             while(True):
                 c1=comm.recv(source=workers[0])
                 c2=comm.recv(source=workers[0])
@@ -360,6 +360,12 @@ def main():
 
                 comm.send(clustersCentros[c1],dest=workers[0])
 
+                for i in workersT:
+                    comm.send(c1,dest=i)
+                    comm.send(c2,dest=i)
+                    comm.send(clustersCentros[c1],dest=i)
+                    comm.send(workers[0],dest=i)
+
                
                 if n<C+2: 
                     asig[k]=copy.deepcopy(clusters)
@@ -371,9 +377,16 @@ def main():
                 if data==-1: break
                 n-=1
 
+                for i in workersT:
+                    comm.send(100,dest=i)
+        
 
 
         timeEnd=MPI.Wtime()
+
+        for i in workersT:
+            comm.send(END_OF_PROCESSING,dest=i)
+
         print("Tiempo de ejecucion: {}\n".format(timeEnd-timeStart))
 
        
@@ -381,7 +394,7 @@ def main():
         """for x in asig:
             print("Len=",len(x))#,x)"""
         
-        n=len(poblacion)
+        """n=len(poblacion)
         asignacionesFin=[[-1 for _ in range(n)] for _ in range(C)]
         for numClust in range(C):
             for i in range(numClust+1):
@@ -411,7 +424,7 @@ def main():
         dbMejor=calcula_DB_mejor(DBs)
 
 
-        GUI(C, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])
+        GUI(C, dbMejor+1, fits,DBs,poblacion, asignacionesFin[dbMejor+1])"""
 
         # ----------------------------------------------------------------------
         # ----------------------------------------------------------------------
@@ -419,7 +432,7 @@ def main():
     
     else : # WORKER
         trabajando=False
-        
+                
         # ----------------------------------------------------------------------
         # --- RECIBE LOS INDICES DE LAS FILAS QUE VA A MANEJAR -----------------
         # ----------------------------------------------------------------------
@@ -481,10 +494,13 @@ def main():
             c1=None
             c2=None
             minD=float("inf")                 
-            cont+=1
+            
+            
+            
+            
 
             for i in range(tam):
-                for j in range(filas[i]+1,n):                    
+                for j in range(filas[i]+1,n):
                     if minD>M[i][j]: 
                         minD=M[i][j]
                         c1=filas[i]
@@ -525,7 +541,7 @@ def main():
             
             #print("c1:{}, c2:{}, worker={}\n".format(c1,c2,data))
             
-            
+             
             
             # WORKER QUE ELIMINA FILA
             if data==myrank:                
@@ -536,6 +552,7 @@ def main():
                 if filasDic[c2]!=len(M): 
                     M.pop(filasDic[c2])
                     filasDic.pop(c2)
+                
                 
 
                 # ELIMINA COLUMNA c2 
@@ -550,7 +567,7 @@ def main():
                     comm.send(-1,dest=MASTER)
                     trabajando=True
                     break
-                    #exit(1) # TERMINA LA EJECUCION
+                    exit(1) # TERMINA LA EJECUCION
                 else: 
                     comm.send(1,dest=MASTER)
 
@@ -559,6 +576,8 @@ def main():
                     filasDic.pop(filas[i])               
                     filas[i]-=1
                     filasDic[filas[i]]=i
+
+                
             else:
                 
                 # ELIMINA COLUMNA c2            
@@ -580,10 +599,11 @@ def main():
             del clustersCentros[c2]
             
             
+            
             # ACTUALIZA EL CLUSTER DE c1
             clustersCentros[c1]=comm.recv(source=MASTER)
             
-            #if cont==4: izq[10000]=0
+            
 
             """print("WORKER {}: poblacion= {}\n\n".format(myrank, clustersCentros))"""
             c1N=len(clustersCentros[c1])
@@ -606,80 +626,12 @@ def main():
             
             n-=1 # REDUCE EL TAMAÑO DE LA POBLACION
 
+            
+            
+            
             # ACTUALIZA FILA (SOLO EL WORKER DE c1)
-            if w==myrank:   
-                # DIVIDIR ENTRE LOS DEMAS WORKERS
-                filaNueva=[-1 for _ in range(c1+1)]
-                elems=n-c1-1
-                tamE=elems//numWorkers
-                modE=elems%numWorkers
-                
-                # ENVIA A LOS DEMAS WORKERS
-                i=1
-                izq=c1+1
-                contW=0
-                while contW!=modE:
-                    if i==myrank: 
-                        i+=1
-                        continue
-                    comm.send([izq,izq+tamE+1],dest=i)
-                    izq+=tamE+1
-                    i+=1
-                    contW+=1
-                while i!=numWorkers+1:
-                    if i==myrank: 
-                        i+=1                        
-                        continue
-                    comm.send([izq,izq+tamE],dest=i)
-                    izq+=tamE
-                    i+=1
-                
-                # CALCULA NUEVAS DISTANCIAS Y AÑADE LAS QUE RECIBA DE LOS DEMAS WORKERS
-                filaE=[]
-                # Worker que actualiza fila calcula su parte
-                for i in range(izq,n):                    
-                    aux=0.0
-                    nDist=float("inf")
-                    c2N=len(clustersCentros[i])
-                    for x in range(c1N):            # Recorre los individuos de "c1"
-                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
-                            distTMP=0
-                            for a in range(d):                                
-                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
-                            if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
-                    filaE.append(math.sqrt(nDist))
-
-                for i in range(1,numWorkers+1):
-                    if i==myrank: continue
-                    data=comm.recv(source=i)
-                    for x in data:
-                        filaNueva.append(x)
-                    
-                for x in filaE:
-                    filaNueva.append(x)
-                
-                
-                M[filasDic[c1]]=filaNueva
-            else: # LOS OTROS WORKERS CALCULAN LAS NUEVAS DISTANCIAS
-                data=comm.recv(source=w)
-                
-                filaE=[]
-                for i in range(data[0],data[1]):                    
-                    aux=0.0
-                    nDist=float("inf")
-                    c2N=len(clustersCentros[i])
-                    for x in range(c1N):            # Recorre los individuos de "c1"
-                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
-                            distTMP=0
-                            for a in range(d):                                
-                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
-                            if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
-                    filaE.append(math.sqrt(nDist))
-                
-                comm.send(filaE,dest=w)
-
-            """if w==myrank:                                
-                for i in range(c1+1,n):                    
+            if w==myrank:                                
+                """for i in range(c1+1,n):                    
                     aux=0.0
                     nDist=float("inf")
                     c2N=len(clustersCentros[i])
@@ -690,144 +642,326 @@ def main():
                                 distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
                             if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
                     M[filasDic[c1]][i]=math.sqrt(nDist)"""
+
+
                 
 
+                fila=[-1 for _ in range(n)]
+                
+                #elems=n-c1-1
+                pos=c1+1
+                i=1
+
+                
+
+                if pos<n:
+                    trabajando=[]
+                    while i<numWorkersIni+1 and pos<n:
+                        if i==myrank: 
+                            i+=1
+                            continue
+                        trabajando.append(i)
+
+                        comm.send(c1,dest=i)      # FILA. no varia
+                        
+                        comm.send(pos,dest=i)     # COLUMNA. PIDE A LOS WORKERS HASTA TENERLA COMPLETADA
+                        pos+=1
+                        i+=1
+                    
+                    while i<numWorkersIni+1:
+                        if i==myrank:
+                            i+=1                            
+                            continue
+                        comm.send(c1,dest=i)      # FILA. no varia
+                        comm.send(-1,dest=i)
+                        
+                        i+=1
+                    
+                    while pos<n:
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
+                        source_rank=status.Get_source()
+                        
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status) 
+                        
+                            
+                        fila[posicion]=celda
+
+                        comm.send(pos,dest=source_rank)
+
+                        pos+=1
+                    
+                    
+                        
+                    #for i in range(1,numWorkersIni+1):
+                    for i in trabajando:
+                        if myrank==i: continue
+                        
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                     
+                                            
+                        source_rank=status.Get_source()
+                        
+                        
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status)  
+                        
+                        
+                        fila[posicion]=celda
+                        
+                        comm.send(-1,dest=source_rank)
+                else:
+                    for i in range(1,numWorkersIni+1):
+                        if i==myrank: continue
+                        comm.send(c1,dest=i)
+                        comm.send(-1,dest=i)
+                
+                
+
+                M[filasDic[c1]]=fila
+                comm.send(1,dest=MASTER)
+                
+            else:
+                c1=comm.recv(source=w)
+                
+                while True:                   
+                    pos=comm.recv(source=w)                    
+                    
+                    if pos==-1: break
+                    
+                    aux=0.0
+                    nDist=float("inf")
+                    c2N=len(clustersCentros[pos])
+                    for x in range(c1N):            # Recorre los individuos de "c1"
+                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                            distTMP=0
+                            for a in range(d):                                
+                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
+                            if distTMP<nDist: nDist=distTMP
+                    
+                    comm.send(math.sqrt(nDist), dest=w)
+                    comm.send(pos,dest=w)
+            
+                
+                
+            
 
             
             data = comm.recv(source=MASTER)
             if data==0:                        
                 break
+
             
+            
+            cont+=1
             #if cont==3: izq[10000]=0
             
+          
+
         if trabajando==True:
-            while(True):
-                data = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                            
-                source_rank=status.Get_source() 
+            
+            
+            
+            while True:                
+                c1=comm.recv(source=MASTER)  
+                            
+                c2=comm.recv(source=MASTER)                
+                del clustersCentros[c2]
 
-                if data==-1: exit(1)
+                clustersCentros[c1]=comm.recv(source=MASTER)
 
-                
-                filaE=[]
-                for i in range(data[0],data[1]):                    
+                c1N=len(clustersCentros[c1])
+
+                w=comm.recv(source=MASTER)
+
+                    
+
+                comm.recv(source=w)                      
+                while True:                   
+                    pos=comm.recv(source=w)
+                                        
+                    if pos==-1: break
+
                     aux=0.0
                     nDist=float("inf")
-                    c2N=len(clustersCentros[i])
+                    c2N=len(clustersCentros[pos])
                     for x in range(c1N):            # Recorre los individuos de "c1"
                         for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
                             distTMP=0
                             for a in range(d):                                
-                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
-                            if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
-                    filaE.append(math.sqrt(nDist))
+                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
+                            if distTMP<nDist: nDist=distTMP
+                    
+                    comm.send(math.sqrt(nDist), dest=w)
+                    comm.send(pos,dest=w)
                 
-                comm.send(filaE,dest=source_rank)
-
-        
-        if tam==1: 
-            comm.send(-1,dest=MASTER)   
-            # ULTIMO WORKER TERMINA, ENVIA A LOS QUE ESTAN TRABAJANDO EN PARALELO
-            for i in range(1,numWorkers+1):
-                if i!=myrank:
-                    comm.send(-1,dest=i)
-
-            exit(1)
-        else:             
-            comm.send(0,dest=MASTER)
-
-        
-        while tam!=1:
-            # --------------------------------------------------------------------
-            # --- BUSCA MINIMOS --------------------------------------------------
-            # --------------------------------------------------------------------
-            c1=None
-            c2=None
-            minD=float("inf")
-            
-            #print("WORKER:", myrank, filas,"\n")
-
-            for i in range(tam):
-                for j in range(filas[i]+1,n):
-                    if minD>M[i][j]: 
-                        minD=M[i][j]
-                        c1=filas[i]
-                        c2=j 
-            
-            comm.send(c1,dest=MASTER)
-            comm.send(c2,dest=MASTER)
-
-            # ELIMINA FILA c2
-            tmp=filasDic[c2]                
-            if filasDic[c2]!=len(M): 
-                M.pop(filasDic[c2])
-                filasDic.pop(c2)
-            
-
-            # ELIMINA COLUMNA c2 
-            for row in M:                
-                del row[c2]
-
-            
-            # ACTUALIZA INDICES DEL DICCIONARIO Y FILASindices
-            filas.pop(tmp)
-            tam-=1                
-
-            for i in range(tmp,tam): 
-                filasDic.pop(filas[i])               
-                filas[i]-=1
-                filasDic[filas[i]]=i
-
-            # ELIMINA EL CLUSTER DE LA FILA ELIMINADA
-            del clustersCentros[c2]
-            
-            # ACTUALIZA EL CLUSTER DE c1
-            clustersCentros[c1]=comm.recv(source=MASTER)
-
-
-            
-
-            c1N=len(clustersCentros[c1])
-            # ACTUALIZA COLUMNAS (1 POR FILA)                                      
-            for i in range(tam):
-                if M[i][c1]==-1: break # SI ES -1 LAS DEMAS TAMBIEN LO SERAN
-                aux=0.0
+                data=comm.recv(source=MASTER)   
                 
-                nDist=float("inf")
-                distTMP=0
-                c2N=len(clustersCentros[i])
-                for x in range(c1N):            # Recorre los individuos de "c1"
-                    for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
-                        distTMP=0
-                        for a in range(d):
-                            distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
-                        if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"
+                if data==END_OF_PROCESSING: exit(1) 
 
-                M[i][c1]=math.sqrt(nDist)
-            
-            n-=1 # REDUCE EL TAMAÑO DE LA POBLACION
+                
+        else:
 
-            # ACTUALIZA FILA (SOLO EL WORKER DE c1)
-            for i in range(c1+1,n):                    
-                aux=0.0
-                for x in range(c1N):            # Recorre los individuos de "c1"
-                    for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
-                        distTMP=0    
-                        print(len(clustersCentros[c1]), "\t", len(clustersCentros[i]))                    
-                        for a in range(d):                            
-                            distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
-                        if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
-                M[filasDic[c1]][i]=math.sqrt(nDist)
-            
-            # ULTIMO WORKER TERMINA, ENVIA A LOS QUE ESTAN TRABAJANDO EN PARALELO
-            if tam==1:
-                comm.send(-1,dest=MASTER)
-                for i in range(1,numWorkers+1):
-                    if i!=myrank:
-                        comm.send(-1,dest=i)
+            if tam==1: 
+                comm.send(-1,dest=MASTER)            
                 exit(1)
             else: comm.send(0,dest=MASTER)
-               
-    
+
+            while tam!=1:
+                # --------------------------------------------------------------------
+                # --- BUSCA MINIMOS --------------------------------------------------
+                # --------------------------------------------------------------------
+                c1=None
+                c2=None
+                minD=float("inf")
+                
+                #print("WORKER:", myrank, filas,"\n")
+
+                for i in range(tam):
+                    for j in range(filas[i]+1,n):
+                        if minD>M[i][j]: 
+                            minD=M[i][j]
+                            c1=filas[i]
+                            c2=j 
+                
+                comm.send(c1,dest=MASTER)
+                comm.send(c2,dest=MASTER)
+
+                # ELIMINA FILA c2
+                tmp=filasDic[c2]                
+                if filasDic[c2]!=len(M): 
+                    M.pop(filasDic[c2])
+                    filasDic.pop(c2)
+                
+
+                # ELIMINA COLUMNA c2 
+                for row in M:                
+                    del row[c2]
+
+                
+                # ACTUALIZA INDICES DEL DICCIONARIO Y FILASindices
+                filas.pop(tmp)
+                tam-=1                
+
+                for i in range(tmp,tam): 
+                    filasDic.pop(filas[i])               
+                    filas[i]-=1
+                    filasDic[filas[i]]=i
+
+                # ELIMINA EL CLUSTER DE LA FILA ELIMINADA
+                del clustersCentros[c2]
+                
+                # ACTUALIZA EL CLUSTER DE c1
+                clustersCentros[c1]=comm.recv(source=MASTER)
+
+
+                
+
+                c1N=len(clustersCentros[c1])
+                # ACTUALIZA COLUMNAS (1 POR FILA)                                      
+                for i in range(tam):
+                    if M[i][c1]==-1: break # SI ES -1 LAS DEMAS TAMBIEN LO SERAN
+                    aux=0.0
+                    
+                    nDist=float("inf")
+                    distTMP=0
+                    c2N=len(clustersCentros[i])
+                    for x in range(c1N):            # Recorre los individuos de "c1"
+                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                            distTMP=0
+                            for a in range(d):
+                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+                            if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"
+
+                    M[i][c1]=math.sqrt(nDist)
+                
+                n-=1 # REDUCE EL TAMAÑO DE LA POBLACION
+
+                # ACTUALIZA FILA (SOLO EL WORKER DE c1)
+                                            
+                """for i in range(c1+1,n):                    
+                    aux=0.0
+                    for x in range(c1N):            # Recorre los individuos de "c1"
+                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                            distTMP=0                        
+                            for a in range(d):
+                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[i][y][a])**2
+                            if distTMP<nDist: nDist=distTMP # Coge la menor distancia entre el individuo "c1" e "i"                                
+                    M[filasDic[c1]][i]=math.sqrt(nDist)"""
+
+                fila=[-1 for _ in range(n)]
+                
+                #elems=n-c1-1
+                pos=c1+1
+                i=1
+
+                
+
+                if pos<n:
+                    trabajando=[]
+                    while i<numWorkersIni+1 and pos<n:
+                        if i==myrank: 
+                            i+=1
+                            continue
+                        trabajando.append(i)
+
+                        comm.send(c1,dest=i)      # FILA. no varia
+                        
+                        comm.send(pos,dest=i)     # COLUMNA. PIDE A LOS WORKERS HASTA TENERLA COMPLETADA
+                        pos+=1
+                        i+=1
+                    
+                    while i<numWorkersIni+1:
+                        if i==myrank:
+                            i+=1                            
+                            continue
+                        comm.send(c1,dest=i)      # FILA. no varia
+                        comm.send(-1,dest=i)
+                        
+                        i+=1
+                    
+                    while pos<n:
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
+                        source_rank=status.Get_source()
+                        
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status) 
+                        
+                            
+                        fila[posicion]=celda
+
+                        comm.send(pos,dest=source_rank)
+
+                        pos+=1
+                    
+                    
+                        
+                    #for i in range(1,numWorkersIni+1):
+                    for i in trabajando:
+                        if myrank==i: continue
+                        
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                     
+                                            
+                        source_rank=status.Get_source()
+                        
+                        
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status)  
+                        
+                        
+                        fila[posicion]=celda
+                        
+                        comm.send(-1,dest=source_rank)
+                else:
+                    for i in range(1,numWorkersIni+1):
+                        if i==myrank: continue
+                        comm.send(c1,dest=i)
+                        comm.send(-1,dest=i)
+                
+                
+
+                M[filasDic[c1]]=fila
+                #comm.send(1,dest=MASTER)
+                
+                if tam==1:comm.send(-1,dest=MASTER)
+                else: comm.send(0,dest=MASTER)
+                
+
 
 
         
