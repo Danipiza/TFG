@@ -117,18 +117,19 @@ def main():
                     comm.send(centroides,dest=i)            
                 
                 # Recibe
-                for _ in range(1,numWorkers+1):
+                for w in range(1,numWorkers+1):
                     # recibe de algun worker TODO
-                    fit = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                        
-                    source_rank=status.Get_source() 
+                    """fit = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                        
+                    source_rank=status.Get_source()""" 
+                    fit = comm.recv(source=w)                        
                     # compara con el actual
                     if fit<ret:
                         ret=fit
                         # manda un mensaje pidiendo la asignacion y centroides
-                        comm.send(-3,dest=source_rank)
-                        mejor = comm.recv(source=source_rank, tag=tag,status=status)
-                        centroidesMejor = comm.recv(source=source_rank, tag=tag,status=status)                       
-                    else: comm.send(-4,dest=source_rank)                      
+                        comm.send(-3,dest=w)
+                        mejor = comm.recv(source=w)
+                        centroidesMejor = comm.recv(source=w)                       
+                    else: comm.send(-4,dest=w)                      
                     
                               
             timeClustEnd=MPI.Wtime()
@@ -353,7 +354,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()

@@ -56,7 +56,7 @@ def main():
     
     
     # KMedias
-    #labels=["EuclideaK10","ManhattanK10","EuclideaK10_MPI(4)","ManhattanK10_MPI(4)"]
+    labels=["Euclidea","Manhattan","Euclidea_MPI(4)","Manhattan_MPI(4)"]
     
     
     # PEV
@@ -85,7 +85,7 @@ def main():
 
     # REDES NEURONALES
     # 10x10
-    labels=["Secuencial","2MPI(2)","2MPI(4)","2MPI(10)"]
+    #labels=["Secuencial","2MPI(2)","2MPI(4)","2MPI(10)"]
 
     funciones=[leeArchivo(labels[i]) for i in range(len(labels))]  
   

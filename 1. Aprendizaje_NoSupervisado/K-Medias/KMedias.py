@@ -42,22 +42,25 @@ class KMeans:
         # Inicializa centros de forma aleatoria
         # diccionario para almacenar los individuos ya seleccionados y no repetir centroides
         dic={} 
-        centroides=[]   # centroides iniciales
+        """centroides=[]   # centroides iniciales
         for i in range(self.k):
             while True:
                 rand=random.randint(0, self.n-1)
                 if rand not in dic:
                     centroides.append(self.poblacion[rand])                
                     dic[rand]=1
-                    break
-        
+                    break"""
+        cent=[[-0.12293300848913269, 8.197940858866115], [9.947053218490957, -0.6975674085386796], [9.591533658594035, -7.407552627543687], [3.7079497249547195, -8.792991586408998], [0.4522664959026699, 6.0981500948027865], [-4.868512907161257, -0.16920748146691977], [-8.199029435615495, 5.179308090342815], [9.922457533335596, -0.497719340882842], [0.5151398954729185, -4.2703198155086275], [3.702589770726254, -3.3200049788824977], [0.5912719290614117, 4.955550264440161], [6.04775453370749, 0.9769190296446162], [8.464188413408685, -3.7927519994207826], [-7.844739643806415, 2.7871471490160804], [0.4227486922140038, -0.052929778805147265], [5.280102567353076, 8.882908143762695], [-0.819485831742746, 5.588877476672495], [-3.000409968481179, -4.522314880691127], [2.748080733683093, 4.108514983968931], [6.518364569672681, -9.246791075220395]]
+        centroides=[]
+        for i in range(self.k):
+            centroides.append(cent[i])
         # TODO
         #centroides=[[2, 0], [5, 0], [12, 0]]
         #centroides=[[-6.844407445048651, 1.9947857141278398], [5.866124093070791, -3.010404365517683], [1.050669959806287, -4.833642770794762]]
         asignacion=[-1 for i in range(self.n)]
-
+        vueltas=0
         while True: # Hasta que los centroides no cambien
-            
+            vueltas+=1
             # 1. Fase de asginacion
             for i in range(self.n):
                 tmp=-1
@@ -101,24 +104,32 @@ class KMeans:
             if(self.compara_centros(centroides,centroidesNuevos)): break
             centroides=centroidesNuevos # No finaliza y se actualizan los centroides
 
+        print(vueltas)
         return asignacion,centroides
     
     # Misma ejecucion pero con euclidea
     def ejecutaE(self):
         # Inicializa centros
         dic={}
-        centroides=[]
+        """centroides=[]   # centroides iniciales
         for i in range(self.k):
             while True:
-                rand = random.randint(0, self.n - 1)
+                rand=random.randint(0, self.n-1)
                 if rand not in dic:
                     centroides.append(self.poblacion[rand])                
-                    dic[rand] = 1
-                    break
-
-        
+                    dic[rand]=1
+                    break"""
+        cent=[[-0.12293300848913269, 8.197940858866115], [9.947053218490957, -0.6975674085386796], [9.591533658594035, -7.407552627543687], [3.7079497249547195, -8.792991586408998], [0.4522664959026699, 6.0981500948027865], [-4.868512907161257, -0.16920748146691977], [-8.199029435615495, 5.179308090342815], [9.922457533335596, -0.497719340882842], [0.5151398954729185, -4.2703198155086275], [3.702589770726254, -3.3200049788824977], [0.5912719290614117, 4.955550264440161], [6.04775453370749, 0.9769190296446162], [8.464188413408685, -3.7927519994207826], [-7.844739643806415, 2.7871471490160804], [0.4227486922140038, -0.052929778805147265], [5.280102567353076, 8.882908143762695], [-0.819485831742746, 5.588877476672495], [-3.000409968481179, -4.522314880691127], [2.748080733683093, 4.108514983968931], [6.518364569672681, -9.246791075220395]]
+        centroides=[]
+        for i in range(self.k):
+            centroides.append(cent[i])
+        # TODO
+        #centroides=[[2, 0], [5, 0], [12, 0]]
+        #centroides=[[-6.844407445048651, 1.9947857141278398], [5.866124093070791, -3.010404365517683], [1.050669959806287, -4.833642770794762]]
         asignacion=[-1 for i in range(self.n)]
+        vueltas=0
         while True:
+            vueltas+=1
             # Fase de asginacion
             for i in range(self.n):
                 tmp=-1
@@ -151,6 +162,7 @@ class KMeans:
             if(self.compara_centros(centroides,centroidesNuevos)): break
             centroides=centroidesNuevos
 
+        print(vueltas)
         return asignacion,centroides
     
     def manhattan(self,a,b):
@@ -446,7 +458,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -472,13 +484,14 @@ def main():
     # 6000_2    2 generaciones de puntos aleatorios
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
-    poblacion=lee("100_2D")
-    
+    #poblacion=lee("100_2D")
+    poblacion=lee("100000_2D")
+    poblacion=poblacion[0:180]    
     # Numero de clusters ejecutados [1-k]
-    k=3
+    k=10
     
     # Variables: poblacion, numero de clusters, manh o eucl
-    asignacion=ejecuta_uno(poblacion, k, 0)
+    asignacion=ejecuta_uno(poblacion, k, 1)
 
     # Variables: poblacion, numero de clusters, manh o eucl, numero de repeticiones del algoritmo
     #asignacion=ejecuta_varios(poblacion, k, 0, 10)

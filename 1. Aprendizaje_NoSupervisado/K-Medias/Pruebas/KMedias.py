@@ -73,26 +73,38 @@ class KMeans:
         return True
 
     def ejecuta(self, a, modo):
-        procesar=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000]
+        procesar=[40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000]
         cent=[[-0.12293300848913269, 8.197940858866115], [9.947053218490957, -0.6975674085386796], [9.591533658594035, -7.407552627543687], [3.7079497249547195, -8.792991586408998], [0.4522664959026699, 6.0981500948027865], [-4.868512907161257, -0.16920748146691977], [-8.199029435615495, 5.179308090342815], [9.922457533335596, -0.497719340882842], [0.5151398954729185, -4.2703198155086275], [3.702589770726254, -3.3200049788824977], [0.5912719290614117, 4.955550264440161], [6.04775453370749, 0.9769190296446162], [8.464188413408685, -3.7927519994207826], [-7.844739643806415, 2.7871471490160804], [0.4227486922140038, -0.052929778805147265], [5.280102567353076, 8.882908143762695], [-0.819485831742746, 5.588877476672495], [-3.000409968481179, -4.522314880691127], [2.748080733683093, 4.108514983968931], [6.518364569672681, -9.246791075220395]]
         centroides=[cent[i] for i in range(self.k)]
         
-        datos=[[]for _ in range(2)]
-        tamDatos=[]
+        """datos=[[]for _ in range(2)]
+        tamDatos=[]"""
+
+        ruta_Act = os.path.dirname(os.path.abspath(__file__))
+        
+
+
         if modo==0:            
             for x in procesar:
                 timeStart=MPI.Wtime()
                 
                 self.poblacion=[]
-                for ind in a[0:x+1]:
+                for ind in a[0:x]:
                     self.poblacion.append(ind)
                 self.n=len(self.poblacion) 
 
-                self.ejecutaM(centroides) 
+                vueltas=self.ejecutaM(centroides) 
 
                 timeEnd=MPI.Wtime()
-                print("Tiempo de ejecucion D. Manhattan:",(timeEnd-timeStart))
-                datos[0].append(timeEnd-timeStart)
+                print("Tiempo de ejecucion D. Manhattan: {} iteraciones: {}".format(timeEnd-timeStart,vueltas))
+                #datos[0].append(timeEnd-timeStart)
+
+                ruta=os.path.join(ruta_Act,'KMedias{}M.txt'.format(self.k))  
+                with open(ruta, 'a') as archivo:                              
+                    archivo.write(str(timeEnd-timeStart) + ', ')
+                ruta=os.path.join(ruta_Act,'KMedias{}M_Iteraciones.txt'.format(self.k))  
+                with open(ruta, 'a') as archivo:                              
+                    archivo.write(str(vueltas) + ', ')
 
                 # ---
 
@@ -103,13 +115,25 @@ class KMeans:
                     self.poblacion.append(ind)
                 self.n=len(self.poblacion) 
                 
-                self.ejecutaE(centroides) 
+                vueltas=self.ejecutaE(centroides) 
 
                 timeEnd=MPI.Wtime()
-                print("Tiempo de ejecucion D. Euclidea:",(timeEnd-timeStart))
-                datos[1].append(timeEnd-timeStart)
-                tamDatos.append(x)
-                guarda_datos(["KMedias{}M.txt".format(self.k),"KMedias{}E.txt".format(self.k),"TamDatos.txt"],datos,tamDatos)
+                print("Tiempo de ejecucion D. Euclidea: {} iteraciones: {}".format(timeEnd-timeStart,vueltas))
+
+                ruta=os.path.join(ruta_Act,'KMedias{}E.txt'.format(self.k))  
+                with open(ruta, 'a') as archivo:                              
+                    archivo.write(str(timeEnd-timeStart) + ', ')
+                ruta=os.path.join(ruta_Act,'KMedias{}E_Iteraciones.txt'.format(self.k))  
+                with open(ruta, 'a') as archivo:                              
+                    archivo.write(str(vueltas) + ', ')
+
+                ruta=os.path.join(ruta_Act,'TamDatos.txt')  
+                with open(ruta, 'a') as archivo:                               
+                        archivo.write(str(x) + ', ')
+                
+                #datos[1].append(timeEnd-timeStart)
+                #tamDatos.append(x)
+                #guarda_datos(["KMedias{}M.txt".format(self.k),"KMedias{}E.txt".format(self.k),"TamDatos.txt"],datos,tamDatos)
 
 
                 
@@ -133,8 +157,9 @@ class KMeans:
         
         asignacion=[-1 for i in range(self.n)]
 
+        cont=0
         while True: # Hasta que los centroides no cambien
-            
+            cont+=1
             # 1. Fase de asginacion
             for i in range(self.n):
                 tmp=-1
@@ -178,7 +203,7 @@ class KMeans:
             if(self.compara_centros(centroides,centroidesNuevos)): break
             centroides=centroidesNuevos # No finaliza y se actualizan los centroides
 
-        return asignacion,centroides
+        return cont
     
     # Misma ejecucion pero con euclidea
     def ejecutaE(self, centroides):
@@ -197,7 +222,9 @@ class KMeans:
 
         #print(centroides)
         asignacion=[-1 for i in range(self.n)]
+        cont=0
         while True:
+            cont+=1
             # Fase de asginacion
             for i in range(self.n):
                 tmp=-1
@@ -230,7 +257,7 @@ class KMeans:
             if(self.compara_centros(centroides,centroidesNuevos)): break
             centroides=centroidesNuevos
 
-        return asignacion,centroides
+        return cont
     
     def manhattan(self,a,b):
         ret=0.0
@@ -371,7 +398,7 @@ def main():
     poblacion=lee("100000_2D")
     
     # Numero de clusters ejecutados [1-k]
-    numsK=[3,5,10,15,20]
+    numsK=[10]#3,5,10,15,20]
     for k in numsK:
     #k=5
         kM=KMeans(k,poblacion,False)    

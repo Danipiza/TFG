@@ -121,15 +121,16 @@ def main():
             centroidesNuevos=[[0 for _ in range(d)] for _ in range(k)]
             indsCluster=[0 for _ in range(k)]
 
-            for _ in range(numWorkers):
-                datos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
-                source_rank=status.Get_source() 
+            for w in range(1,numWorkers+1):
+                """datos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
+                source_rank=status.Get_source() """
+                datos = comm.recv(source=w)
                 # Suma los centroides
                 for i in range(k):
                     for j in range(d):
                         centroidesNuevos[i][j]+=datos[i][j]
                 # Suma los indices
-                datos = comm.recv(source=source_rank, tag=tag,status=status)
+                datos = comm.recv(source=w)
                 for i in range(k):
                     indsCluster[i]+=datos[i]                     
                         
@@ -223,7 +224,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()

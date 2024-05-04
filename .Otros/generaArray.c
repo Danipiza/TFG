@@ -3,6 +3,11 @@
 #include <string.h>
 #include <time.h>
 
+// gcc .\generaArray.c -o genera
+// ./genera <tamaño deseado>
+ 
+
+
 int duplicados, neg, ordenado;
 
 void menu(){
@@ -113,6 +118,10 @@ int main(int argc, char** argv) {
     char* archivo; 
     size_t archivoTam;
     int arrayTam;
+    if(argc!=2) {
+        printf("2 argumentos necesarios");
+        exit(0);
+    }
 
     //printf("Ingrese una cadena de caracteres para el archivo: ");
     //scanf("%s", archivo);

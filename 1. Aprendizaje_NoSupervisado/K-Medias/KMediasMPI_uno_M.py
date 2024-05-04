@@ -46,21 +46,25 @@ def main():
     if myrank==MASTER:                 
         #a,n=leeArchivo("6000")      
         #poblacion=[[x] for x in a] 
-        poblacion=lee("6000")          
+        poblacion=lee("100_2D")          
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones
-        k=3                     # Numero de cluster
+        k=10                     # Numero de cluster
 
         dic={}
-        centroides=[]
+        """centroides=[]
         for i in range(k):
             while True:
                 rand = random.randint(0, n-1)
                 if rand not in dic:
                     centroides.append(poblacion[rand])                
                     dic[rand] = 1
-                    break        
+                    break  """     
+        cent=[[-0.12293300848913269, 8.197940858866115], [9.947053218490957, -0.6975674085386796], [9.591533658594035, -7.407552627543687], [3.7079497249547195, -8.792991586408998], [0.4522664959026699, 6.0981500948027865], [-4.868512907161257, -0.16920748146691977], [-8.199029435615495, 5.179308090342815], [9.922457533335596, -0.497719340882842], [0.5151398954729185, -4.2703198155086275], [3.702589770726254, -3.3200049788824977], [0.5912719290614117, 4.955550264440161], [6.04775453370749, 0.9769190296446162], [8.464188413408685, -3.7927519994207826], [-7.844739643806415, 2.7871471490160804], [0.4227486922140038, -0.052929778805147265], [5.280102567353076, 8.882908143762695], [-0.819485831742746, 5.588877476672495], [-3.000409968481179, -4.522314880691127], [2.748080733683093, 4.108514983968931], [6.518364569672681, -9.246791075220395]]
+        centroides=[]
+        for i in range(k):
+            centroides.append(cent[i]) 
     
     # Envia el numero de clusters a los workers
     k=comm.bcast(k, root=MASTER)
@@ -115,21 +119,25 @@ def main():
         # ----------------------------------------------------------------------
                    
                 
-
+        vueltas=0
         # Procesa datos, termina cuando los centros no cambian
         while True:
+            vueltas+=1
             centroidesNuevos=[[0 for _ in range(d)] for _ in range(k)]
             indsCluster=[0 for _ in range(k)]
 
-            for _ in range(numWorkers):
-                datos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
-                source_rank=status.Get_source() 
+            for w in range(1,numWorkers+1):
+                """datos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
+                source_rank=status.Get_source() """
+                datos = comm.recv(source=w)
+                
                 # Suma los centroides
                 for i in range(k):
                     for j in range(d):
                         centroidesNuevos[i][j]+=datos[i][j]
                 # Suma los indices
-                datos = comm.recv(source=source_rank, tag=tag,status=status)
+                """datos = comm.recv(source=source_rank, tag=tag,status=status)"""
+                datos = comm.recv(source=w)
                 for i in range(k):
                     indsCluster[i]+=datos[i]                     
                         
@@ -155,7 +163,7 @@ def main():
                 comm.send(centroidesNuevos,dest=i)
             centroides=centroidesNuevos
             
-                
+        print(vueltas)
         timeEnd = MPI.Wtime()
         print("Tiempo de ejecucion: {}".format(timeEnd-timeStart))
         #print(asignacion)
@@ -222,7 +230,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
