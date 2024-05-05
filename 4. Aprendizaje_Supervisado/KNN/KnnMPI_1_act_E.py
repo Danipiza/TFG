@@ -191,13 +191,13 @@ def main():
         n=len(poblacionIni)    
 
         poblacionProbar=lee("100000_2D")
-        poblacionProbar=poblacionProbar[0:10000]
+        poblacionProbar=poblacionProbar[0:2000]
         m=len(poblacionProbar)
         
         
 
         clusters=4
-        k=100
+        k=10
 
         d=len(poblacionIni[0])
         
@@ -264,18 +264,17 @@ def main():
         for i in range(1,numWorkers+1):
             comm.send(None,dest=i)
         
+        individuo=1
         while cont<m:           
                 
             
             pq=MaxPriorityQueue()
-            # TODO MEJORAR CON ANYSOURCE
             for i in range(1,numWorkers+1):
                 dist=comm.recv(source=i)
                 etiqs=comm.recv(source=i)
                 for j in range(k):
                     if pq.size()<k: pq.push(etiqs[j],dist[j])     
-                    elif pq.top_distancia()>dist[j]: 
-                        """print("Master cambia por ", dist[j])    """       
+                    elif pq.top_distancia()>dist[j]:      
                         pq.pop()
                         pq.push(etiqs[j],dist[j])
 
@@ -296,7 +295,13 @@ def main():
             asignacionProbar.append(ret)
 
             for i in range(1,numWorkers+1):
-                comm.send(ret,dest=i)            
+                if i==individuo: comm.send(ret,dest=i)            
+                else: comm.send(None,dest=i)
+
+                        
+            
+            individuo+=1
+            if individuo>numWorkers: individuo=1
                     
             
             cont+=1

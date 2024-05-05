@@ -186,10 +186,12 @@ def main():
         n=len(poblacionIni)    
 
         poblacionProbar=lee("100000_2D")
-        poblacionProbar=poblacionProbar[0:1000]
+        poblacionProbar=poblacionProbar[0:2000]
         m=len(poblacionProbar)
+        
+        
 
-        clusters=7
+        clusters=4
         k=10
 
         d=len(poblacionIni[0])

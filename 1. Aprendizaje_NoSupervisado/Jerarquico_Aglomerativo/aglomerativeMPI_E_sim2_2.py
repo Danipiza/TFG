@@ -77,7 +77,7 @@ def main():
 
     # Inicializa centros
     if myrank==MASTER:       
-        #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0], [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
+        #poblacion=[[1,0], [2,0], [4,0], [5,0], [11,0], [12,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]]#, [14,0], [15,0], [19,0], [20,0], [20.5,0], [21,0]        
         archivo="1000_2D"
         C=7
         poblacion=lee(archivo)
@@ -99,7 +99,7 @@ def main():
     # Envia el numero de clusters a los workers
     C=comm.bcast(C, root=MASTER)
     
-    tamInicial=n
+
     # -------------------------------------------------------------------------------------
     # --- ALGORITMO -----------------------------------------------------------------------
     # -------------------------------------------------------------------------------------
@@ -629,7 +629,6 @@ def main():
             
             
             
-            
             # ACTUALIZA FILA (SOLO EL WORKER DE c1)
             if w==myrank:                                
                 """for i in range(c1+1,n):                    
@@ -652,155 +651,63 @@ def main():
                 #elems=n-c1-1
                 pos=c1+1
                 i=1
-                
-                
+
                 
 
                 if pos<n:
-                    
-                    if n>=tamInicial//5:
-                        trabajando=[]
-                        while i<numWorkersIni+1 and pos<n:
-                            if i==myrank: 
-                                i+=1
-                                continue
-                            trabajando.append(i)
-
-                            comm.send(c1,dest=i)      # FILA. no varia
-                            
-                            comm.send(pos,dest=i)     # COLUMNA. PIDE A LOS WORKERS HASTA TENERLA COMPLETADA
-                            pos+=1
+                    trabajando=[]
+                    while i<numWorkersIni+1 and pos<n:
+                        if i==myrank: 
                             i+=1
-                        
-                        while i<numWorkersIni+1:
-                            if i==myrank:
-                                i+=1                            
-                                continue
-                            comm.send(c1,dest=i)      # FILA. no varia
-                            comm.send(-1,dest=i)
-                            
-                            i+=1
-                        
-                        while pos<n:
-                            celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
-                            source_rank=status.Get_source()
-                            
-                            posicion=comm.recv(source=source_rank, tag=tag,status=status) 
-                            
-                                
-                            fila[posicion]=celda
+                            continue
+                        trabajando.append(i)
 
-                            comm.send(pos,dest=source_rank)
-
-                            pos+=1
-                                        
-                                                
-                        for i in trabajando:
-                            if myrank==i: continue
-                            
-                            celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                     
-                                                
-                            source_rank=status.Get_source()
-                            
-                            
-                            posicion=comm.recv(source=source_rank, tag=tag,status=status)  
-                            
-                            
-                            fila[posicion]=celda
-                            
-                            comm.send(-1,dest=source_rank)
-                    else:
+                        comm.send(c1,dest=i)      # FILA. no varia
                         
-                        
+                        comm.send(pos,dest=i)     # COLUMNA. PIDE A LOS WORKERS HASTA TENERLA COMPLETADA
+                        pos+=1
+                        i+=1
                     
-                        for i in range(1,numWorkersIni+1):
-                            if i==myrank: continue
-                            comm.send(c1, dest=i)
+                    while i<numWorkersIni+1:
+                        if i==myrank:
+                            i+=1                            
+                            continue
+                        comm.send(c1,dest=i)      # FILA. no varia
+                        comm.send(-1,dest=i)
+                        
+                        i+=1
+                    
+                    while pos<n:
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
+                        source_rank=status.Get_source()
+                        
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status) 
+                        
+                            
+                        fila[posicion]=celda
 
+                        comm.send(pos,dest=source_rank)
+
+                        pos+=1
+                    
+                    
+                        
+                    #for i in range(1,numWorkersIni+1):
+                    for i in trabajando:
+                        if myrank==i: continue
+                        
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                     
+                                            
+                        source_rank=status.Get_source()
                         
                         
-                        while pos<n:
-                            
-                                    
-                            for i in range(1,numWorkersIni+1):
-                                if i==myrank: continue
-                                comm.send(pos, dest=i)
-                            
-                            
-                            c2N=len(clustersCentros[pos])
-                            tamC=c2N//(numWorkersIni-1)                            
-                            moduloC=c2N%(numWorkersIni-1)
-                            contC=0        
-                            izq=0
-                            
-                            # Hay al menos 1 elemento para cada worker.
-                            if tam>=1: 
-                                
-                                i=1
-                                while i<moduloC+1:
-                                    if myrank==i:
-                                        moduloC+=1 
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send([izq,izq+tamC+1],dest=i)
-                                    
-                                    izq+=tamC+1
-                                    i+=1
-                                a=[]
-                                while i<numWorkersIni+1:
-                                    if myrank==i:
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send([izq,izq+tamC],dest=i)
-                                    a.append([izq,izq+tamC])
-                                    izq+=tamC  
-                                    i+=1        
-                                """if cont==4:
-                                    print(myrank, "\t",a)
-                                    exit(1)"""                                                                 
-                            else:
-                                i=1
-                                while i<moduloC+1:
-                                    if myrank==i:
-                                        moduloC+=1 
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send([izq,izq+tamC],dest=i)
-                                    
-                                    izq+=tamC
-                                    i+=1
-                                
-                                while i<numWorkersIni+1:
-                                    if myrank==i:
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send(0,dest=i)
-                                    izq+=tamC
-                                    i+=1                
-                            
-                            
-                            distanciaAct=float("inf")
-                            for i in range(1,numWorkersIni+1):
-                                if i==myrank: continue
-                                
-                                dist=comm.recv(source=i)   
-                                if distanciaAct>dist:
-                                    distanciaAct=dist
-                            
-                            fila[pos]=math.sqrt(distanciaAct)
-                            pos+=1
-
-                        for i in range(1,numWorkersIni+1):
-                            if myrank==i: continue
-                            comm.send(-1,dest=i)
-                             
-
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status)  
+                        
+                        
+                        fila[posicion]=celda
+                        
+                        comm.send(-1,dest=source_rank)
                 else:
-                    
                     for i in range(1,numWorkersIni+1):
                         if i==myrank: continue
                         comm.send(c1,dest=i)
@@ -812,61 +719,41 @@ def main():
                 comm.send(1,dest=MASTER)
                 
             else:
-                
                 c1=comm.recv(source=w)
                 
-                if n>=tamInicial//5:
-
-                    while True:                   
-                        pos=comm.recv(source=w)                    
-                        
-                        if pos==-1: break
-                        
-                        aux=0.0
-                        nDist=float("inf")
-                        c2N=len(clustersCentros[pos])
-                        for x in range(c1N):            # Recorre los individuos de "c1"
-                            for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
-                                distTMP=0
-                                for a in range(d):                                
-                                    distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
-                                if distTMP<nDist: nDist=distTMP
-                        
-                        comm.send(math.sqrt(nDist), dest=w)
-                        comm.send(pos,dest=w)
-                else:
-                    while True:  
-                        pos=comm.recv(source=w)                                         
-                        if pos==-1: break
-                        intervalo=comm.recv(source=w)  
-                        if intervalo==0:
-                            comm.send(float("inf"),dest=w)
-                            continue                                       
-                        
-                        aux=0.0
-                        nDist=float("inf")
-                        
-                        c2N=len(clustersCentros[pos])
-                        for x in range(c1N):    
-                            for y in range(intervalo[0],intervalo[1]):
-                                distTMP=0
-                                for a in range(d):                                
-                                    distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
-                                if distTMP<nDist: nDist=distTMP
-                        """if cont==4:
-                            print(myrank, "\t",pos,intervalo)
-                            exit(1)"""
-                        comm.send(nDist, dest=w)
+                while True:                   
+                    pos=comm.recv(source=w)                    
+                    
+                    if pos==-1: break
+                    
+                    aux=0.0
+                    nDist=float("inf")
+                    c2N=len(clustersCentros[pos])
+                    for x in range(c1N):            # Recorre los individuos de "c1"
+                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                            distTMP=0
+                            for a in range(d):                                
+                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
+                            if distTMP<nDist: nDist=distTMP
+                    
+                    comm.send(math.sqrt(nDist), dest=w)
+                    comm.send(pos,dest=w)
+            
+                
                 
             
 
+            
             data = comm.recv(source=MASTER)
             if data==0:                        
                 break
 
-            cont+=1
             
-        
+            
+            cont+=1
+            #if cont==3: izq[10000]=0
+            
+          
 
         if trabajando==True:
             
@@ -884,62 +771,34 @@ def main():
 
                 w=comm.recv(source=MASTER)
 
-                n-=1
+                    
 
-                
+                comm.recv(source=w)                      
+                while True:                   
+                    pos=comm.recv(source=w)
+                                        
+                    if pos==-1: break
 
-                comm.recv(source=w) 
-                if n>tamInicial//5:                     
-                    while True:                   
-                        pos=comm.recv(source=w)
-                                            
-                        if pos==-1: break
-
-                        aux=0.0
-                        nDist=float("inf")
-                        c2N=len(clustersCentros[pos])
-                        for x in range(c1N):            # Recorre los individuos de "c1"
-                            for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
-                                distTMP=0
-                                for a in range(d):                                
-                                    distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
-                                if distTMP<nDist: nDist=distTMP
-                        
-                        comm.send(math.sqrt(nDist), dest=w)
-                        comm.send(pos,dest=w)
-                else:
-                    while True:  
-                        pos=comm.recv(source=w)                                         
-                        if pos==-1: break
-                        intervalo=comm.recv(source=w)                                         
-                        if intervalo==0:
-                            comm.send(float("inf"),dest=w)
-                            continue 
-                        
-                        
-
-                        aux=0.0
-                        nDist=float("inf")
-                        c2N=len(clustersCentros[pos])
-                        for x in range(c1N):            
-                            #for y in range(c2N):
-                            for y in range(intervalo[0],intervalo[1]):
-                                distTMP=0
-                                for a in range(d):                                
-                                    distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
-                                if distTMP<nDist: nDist=distTMP
-                        """if cont==4:
-                            print(myrank, "\t",pos,intervalo, nDist)
-                            exit(1)"""
-                        comm.send(nDist, dest=w)
+                    aux=0.0
+                    nDist=float("inf")
+                    c2N=len(clustersCentros[pos])
+                    for x in range(c1N):            # Recorre los individuos de "c1"
+                        for y in range(c2N):    # Recorre los individuos de "i2 (individuo a cambiar de la fila)
+                            distTMP=0
+                            for a in range(d):                                
+                                distTMP+=(clustersCentros[c1][x][a]-clustersCentros[pos][y][a])**2
+                            if distTMP<nDist: nDist=distTMP
+                    
+                    comm.send(math.sqrt(nDist), dest=w)
+                    comm.send(pos,dest=w)
                 
                 data=comm.recv(source=MASTER)   
                 
                 if data==END_OF_PROCESSING: exit(1) 
-                cont+=1
+
                 
         else:
-            
+
             if tam==1: 
                 comm.send(-1,dest=MASTER)            
                 exit(1)
@@ -1036,155 +895,63 @@ def main():
                 
 
                 if pos<n:
-                    
-                    if n>=tamInicial//5:
-                        trabajando=[]
-                        while i<numWorkersIni+1 and pos<n:
-                            if i==myrank: 
-                                i+=1
-                                continue
-                            trabajando.append(i)
-
-                            comm.send(c1,dest=i)      # FILA. no varia
-                            
-                            comm.send(pos,dest=i)     # COLUMNA. PIDE A LOS WORKERS HASTA TENERLA COMPLETADA
-                            pos+=1
+                    trabajando=[]
+                    while i<numWorkersIni+1 and pos<n:
+                        if i==myrank: 
                             i+=1
-                        
-                        while i<numWorkersIni+1:
-                            if i==myrank:
-                                i+=1                            
-                                continue
-                            comm.send(c1,dest=i)      # FILA. no varia
-                            comm.send(-1,dest=i)
-                            
-                            i+=1
-                        
-                        while pos<n:
-                            celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
-                            source_rank=status.Get_source()
-                            
-                            posicion=comm.recv(source=source_rank, tag=tag,status=status) 
-                            
-                                
-                            fila[posicion]=celda
+                            continue
+                        trabajando.append(i)
 
-                            comm.send(pos,dest=source_rank)
-
-                            pos+=1
-                                        
-                                                
-                        for i in trabajando:
-                            if myrank==i: continue
-                            
-                            celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                     
-                                                
-                            source_rank=status.Get_source()
-                            
-                            
-                            posicion=comm.recv(source=source_rank, tag=tag,status=status)  
-                            
-                            
-                            fila[posicion]=celda
-                            
-                            comm.send(-1,dest=source_rank)
-                    else:
+                        comm.send(c1,dest=i)      # FILA. no varia
                         
-                        
+                        comm.send(pos,dest=i)     # COLUMNA. PIDE A LOS WORKERS HASTA TENERLA COMPLETADA
+                        pos+=1
+                        i+=1
                     
-                        for i in range(1,numWorkersIni+1):
-                            if i==myrank: continue
-                            comm.send(c1, dest=i)
+                    while i<numWorkersIni+1:
+                        if i==myrank:
+                            i+=1                            
+                            continue
+                        comm.send(c1,dest=i)      # FILA. no varia
+                        comm.send(-1,dest=i)
+                        
+                        i+=1
+                    
+                    while pos<n:
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
+                        source_rank=status.Get_source()
+                        
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status) 
+                        
+                            
+                        fila[posicion]=celda
 
+                        comm.send(pos,dest=source_rank)
+
+                        pos+=1
+                    
+                    
+                        
+                    #for i in range(1,numWorkersIni+1):
+                    for i in trabajando:
+                        if myrank==i: continue
+                        
+                        celda=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)                     
+                                            
+                        source_rank=status.Get_source()
                         
                         
-                        while pos<n:
-                            
-                                    
-                            for i in range(1,numWorkersIni+1):
-                                if i==myrank: continue
-                                comm.send(pos, dest=i)
-                            
-                            
-                            c2N=len(clustersCentros[pos])
-                            tamC=c2N//(numWorkersIni-1)                            
-                            moduloC=c2N%(numWorkersIni-1)
-                            contC=0        
-                            izq=0
-                            
-                            # Hay al menos 1 elemento para cada worker.
-                            if tam>=1: 
-                                
-                                i=1
-                                while i<moduloC+1:
-                                    if myrank==i:
-                                        moduloC+=1 
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send([izq,izq+tamC+1],dest=i)
-                                    
-                                    izq+=tamC+1
-                                    i+=1
-                                a=[]
-                                while i<numWorkersIni+1:
-                                    if myrank==i:
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send([izq,izq+tamC],dest=i)
-                                    a.append([izq,izq+tamC])
-                                    izq+=tamC  
-                                    i+=1        
-                                """if cont==4:
-                                    print(myrank, "\t",a)
-                                    exit(1)"""                                                                 
-                            else:
-                                i=1
-                                while i<moduloC+1:
-                                    if myrank==i:
-                                        moduloC+=1 
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send([izq,izq+tamC],dest=i)
-                                    
-                                    izq+=tamC
-                                    i+=1
-                                
-                                while i<numWorkersIni+1:
-                                    if myrank==i:
-                                        i+=1
-                                        continue
-                                    
-                                    comm.send(0,dest=i)
-                                    izq+=tamC
-                                    i+=1                
-                            
-                            
-                            distanciaAct=float("inf")
-                            for i in range(1,numWorkersIni+1):
-                                if i==myrank: continue
-                                
-                                dist=comm.recv(source=i)   
-                                if distanciaAct>dist:
-                                    distanciaAct=dist
-                            
-                            fila[pos]=math.sqrt(distanciaAct)
-                            pos+=1
-
-                        for i in range(1,numWorkersIni+1):
-                            if myrank==i: continue
-                            comm.send(-1,dest=i)
-                             
-
+                        posicion=comm.recv(source=source_rank, tag=tag,status=status)  
+                        
+                        
+                        fila[posicion]=celda
+                        
+                        comm.send(-1,dest=source_rank)
                 else:
-                    
                     for i in range(1,numWorkersIni+1):
                         if i==myrank: continue
                         comm.send(c1,dest=i)
                         comm.send(-1,dest=i)
-                
                 
                 
 
@@ -1362,4 +1129,3 @@ def lee(archivo):
 
 
 main()
-
