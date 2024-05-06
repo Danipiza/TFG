@@ -62,13 +62,13 @@ def main():
     # PEV
         # BIN
     # labels=["P2","P10"]
-    #labels=["P2","P10","P2_3MPI(4)","P10_3MPI(4)"]
+    labels=["P2","P10","P2_3MPI(4)","P10_3MPI(4)"]
         
         # REAL
     #labels=["AER1","AER2","AER3"]
     #labels=["AER1","AER2","AER3","AER1_MPI(4)","AER2_MPI(4)","AER3_MPI(4)"]
-    labels=["AER1","AER2","AER1_3MPI(4)","AER2_3MPI(4)"]
-    labels=["AER3","AER3_3MPI(4)"]
+    #labels=["AER1","AER2","AER1_3MPI(4)","AER2_3MPI(4)"]
+    #labels=["AER3","AER3_3MPI(4)"]
      
         # ARBOL
     #labels = ["M8X8", "M100X100"]

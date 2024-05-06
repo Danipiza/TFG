@@ -1479,7 +1479,7 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=1700
+        tam_poblacion=600
         x=tam_poblacion%(numWorkers-3)
         tam_poblacion-=x
         generaciones=10
@@ -1499,7 +1499,7 @@ def main():
         prob_mut=0.3    
         
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 |         
-        funcion_idx=5
+        funcion_idx=6
         num_genes=2
 
         # 0: Completa | 1: Creciente | 2: Ramped & Half 

@@ -1040,7 +1040,7 @@ def main():
         mut_idx=0
         # Binario: 0.05 | Real: 0.3
         prob_mut=0.05    
-        precision=0.001
+        precision=0.1
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
@@ -1137,7 +1137,7 @@ def main():
         
         for _ in range(3):
             AG.init_poblacion()                           
-            comm.send(AG.poblacion, dest=myrank+1)            
+            comm.send(AG.poblacion, dest=myrank+1)       
         
         
 
@@ -1163,6 +1163,9 @@ def main():
             AG.evaluacion_poblacionBin()                 
             
             selec=AG.seleccion_poblacionBin(5)             
+            #comm.recv(source=myrank-1) 
+
+
 
             # TAM POBLACION = 1.000
             # LLEGA
@@ -1174,12 +1177,15 @@ def main():
             """if aux==2:
                 print("LLEGA",len(selec))
                 exit(1)"""
+            
+            
+            #comm.send(1,dest=myrank+1)
+
               
 
          
 
-        generaciones-=3
-        
+        generaciones-=3      
       
         
         while(generaciones>0): 
@@ -1199,8 +1205,8 @@ def main():
             generaciones-=1
                             
         
-        AG.evaluacion_poblacionBin()
-        comm.send(AG.poblacion,dest=MASTER)
+        #AG.evaluacion_poblacionBin()
+        #comm.send(AG.poblacion,dest=MASTER)
         print(myrank, "TERMINA")
         exit(1)
 
@@ -1220,9 +1226,10 @@ def main():
             
             comm.send(poblacion,dest=myrank+1)
 
-            if generaciones==24:
+            """if generaciones==24:
                 print("LLEGA")
-                exit(1)        
+                exit(1)"""  
+            
 
             generaciones-=1
         
@@ -1237,25 +1244,13 @@ def main():
             poblacion=AG.mutacion_poblacionBin(poblacion)
             
             comm.send(poblacion,dest=MASTER+1)
-
+            
             
             generaciones-=1
             
         print(myrank, "TERMINA")
         exit(1)
-    """elif myrank==4: # WORKER EVALUACION
-        
-        
-        while(generaciones>0):                                                
-            AG.poblacion=comm.recv(source=myrank-1)
-            AG.evaluacion_poblacionBin()
-            
-            comm.send(AG.poblacion,dest=MASTER+1)
-            comm.send(AG.poblacion,dest=MASTER)                
-            
-            generaciones-=1            
-        
-        exit(1)"""
+    
         
 
         
