@@ -86,17 +86,17 @@ def lee(archivo, plot):
     return array
 
 
-""" 6000_2.txt
-p1 = genera_puntos(num, -10, -3, -10, -2)
-    p2 = genera_puntos(num, -3.5, 3.5, -10, -2)
-    p3 = genera_puntos(num, 3, 10, -10, -2)
-    p4 = genera_puntos(num, -10, -3, 2, 10)
-    p5 = genera_puntos(num, -3.5, 3.5, 2, 10)
-    p6 = genera_puntos(num, 3, 10, 2, 10)
-"""
+
 
 if __name__ == "__main__":
-    num = 10000
+    array=lee("100000_2D.txt",False)
+    escribe(array[0:50000], "50000_2D.txt")
+    a=lee("50000_2D.txt",False)
+    print(len(a))
+    
+    
+    exit(1)
+    num = 250000
     
     """p1 = genera_puntos(num, -12.5, -7.5, -10, -2.5)
     p2 = genera_puntos(num, -2.5, 2.5, -10, -2.5)
@@ -106,17 +106,29 @@ if __name__ == "__main__":
     p6 = genera_puntos(num, 7.5, 12.5, 2.5, 10)
     puntos=[p1,p2,p3,p4,p5,p6]"""
     d=2
-    mins=[-10 for _ in range(10)]
-    maxs=[10 for _ in range(10)]
+    mins=[-10 for _ in range(d)]
+    maxs=[10 for _ in range(d)]
     p1=genera_puntos(num, mins,maxs)
     puntos=[p1]
-    archivo = '10000_1_10D.txt'
+    archivo = '250000_{}D.txt'.format(d)
     
+    dic={} 
+    centroides=[]   # centroides iniciales
+    for i in range(50):
+        while True:
+            rand=random.randint(0, num-1)
+            if rand not in dic:
+                centroides.append(p1[rand])                
+                dic[rand]=1
+                break
+
+    print(centroides)
+
     escribe(puntos, archivo)
     #array=lee(archivo,True)
 
     #array=lee(archivo,False)
-    plot2D_genereados(puntos)
+    #plot2D_genereados(puntos)
 
 
 

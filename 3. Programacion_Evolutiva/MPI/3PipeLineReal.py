@@ -1313,6 +1313,7 @@ class AlgoritmoGenetico():
         if peor_generacion<0: peor_generacion*=-1
 
         self.fitness_total=self.tam_poblacion*1.05*peor_generacion-self.fitness_total
+        
         for i in range(self.tam_poblacion):
             self.prob_seleccion[i]=1.05*peor_generacion-self.poblacion[i].fitness
             self.prob_seleccion[i]/=self.fitness_total
@@ -1478,10 +1479,10 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=500
+        tam_poblacion=1700
         x=tam_poblacion%(numWorkers-3)
         tam_poblacion-=x
-        generaciones=250
+        generaciones=10
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
@@ -1498,7 +1499,7 @@ def main():
         prob_mut=0.3    
         
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 |         
-        funcion_idx=6
+        funcion_idx=5
         num_genes=2
 
         # 0: Completa | 1: Creciente | 2: Ramped & Half 
@@ -1601,25 +1602,7 @@ def main():
     
 
     if myrank==MASTER:
-
-        """ TODO
-        if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
-                comm.send(prob_seleccionAcum, dest=MASTER)
-            if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
-                comm.send(prob_seleccion, dest=MASTER)
-
-
-        if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
-                    data=comm.recv(source=source_rank)
-                    for x in data:
-                        prob_seleccionAcum.append(x)
-                if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
-                    data=comm.recv(source=source_rank)
-                    for x in data:
-                        prob_seleccion.append(x)
-        """
-
-                   
+                  
         
         poblacion=[]
         for _ in range(4):
@@ -1676,6 +1659,7 @@ def main():
         AG.evaluacion_poblacionReal()
         comm.send(AG.poblacion,dest=MASTER)
         
+        print("TERMINA ", myrank)
         exit(1)
                 
        
@@ -1699,7 +1683,7 @@ def main():
 
             generaciones-=1
         
-        
+        print("TERMINA ", myrank)
         exit(1)
         
         
@@ -1713,7 +1697,7 @@ def main():
             comm.send(selec,dest=myrank+1)
 
             generaciones-=1
-        
+        print("TERMINA ", myrank)
         exit(1)
         
     elif myrank==numWorkers: # WORKER MUTACION
@@ -1732,7 +1716,7 @@ def main():
             #comm.send(selec,dest=MASTER+1)
             
             generaciones-=1
-        
+        print("TERMINA ", myrank)
         exit(1)
         
         

@@ -14,8 +14,8 @@ from matplotlib.gridspec import GridSpec
 
 import re
 
-# Solo funciona con 5
-# mpiexec -np 5 python 3PipeLine.py
+# Solo funciona con 4
+# mpiexec -np 4 python 3PipeLine.py
 
 """
 Metodo 3. PipeLine
@@ -1022,12 +1022,12 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=25
+        tam_poblacion=1000
         generaciones=25
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-        seleccion_idx=1
+        seleccion_idx=0
         # 0: Basica | 1: Uniforme | 
         # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
         # 7: Intercambio
@@ -1133,31 +1133,16 @@ def main():
 
     if myrank==MASTER:
 
-        """ TODO
-        if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
-                comm.send(prob_seleccionAcum, dest=MASTER)
-            if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
-                comm.send(prob_seleccion, dest=MASTER)
-
-
-        if seleccion_idx==0 or seleccion_idx==3 or seleccion_idx==5:
-                    data=comm.recv(source=source_rank)
-                    for x in data:
-                        prob_seleccionAcum.append(x)
-                if seleccion_idx==4 or seleccion_idx==5 or seleccion_idx==6:
-                    data=comm.recv(source=source_rank)
-                    for x in data:
-                        prob_seleccion.append(x)
-        """
-
         poblacion=[]
         
-        for _ in range(4):
+        for _ in range(3):
             AG.init_poblacion()                           
             comm.send(AG.poblacion, dest=myrank+1)            
         
-        generaciones-=4
-        while(generaciones>0):
+        
+
+        generaciones-=3
+        while(generaciones>0):               
             data=comm.recv(source=myrank+1)
             
             generaciones-=1
@@ -1172,20 +1157,34 @@ def main():
     elif myrank==1: # WORKER SELECCION     
 
         
-        for _ in range(4):                
+        for aux in range(3):                
             AG.poblacion=comm.recv(source=myrank-1)  
             
             AG.evaluacion_poblacionBin()                 
             
-            selec=AG.seleccion_poblacionBin(5) 
-            
-            
-            comm.send(selec,dest=myrank+1)   
-                        
-        
-        generaciones-=4
+            selec=AG.seleccion_poblacionBin(5)             
 
-        while(generaciones>0):                
+            # TAM POBLACION = 1.000
+            # LLEGA
+            """if aux==2:
+                print("LLEGA",len(selec))
+                exit(1)"""
+            comm.send(selec,dest=myrank+1)  # ???
+            # NO LLEGA
+            """if aux==2:
+                print("LLEGA",len(selec))
+                exit(1)"""
+              
+
+         
+
+        generaciones-=3
+        
+      
+        
+        while(generaciones>0): 
+             
+                          
             AG.poblacion=comm.recv(source=numWorkers)
 
             AG.evaluacion_poblacionBin()            
@@ -1202,7 +1201,7 @@ def main():
         
         AG.evaluacion_poblacionBin()
         comm.send(AG.poblacion,dest=MASTER)
-        
+        print(myrank, "TERMINA")
         exit(1)
 
 
@@ -1210,18 +1209,24 @@ def main():
         
         
         while(generaciones>0):               
+            
+            
             selec=comm.recv(source=myrank-1)  
-                    
+
+                
             
             poblacion=AG.cruce_poblacionBin(selec)              
             
             
             comm.send(poblacion,dest=myrank+1)
 
+            if generaciones==24:
+                print("LLEGA")
+                exit(1)        
 
             generaciones-=1
         
-        
+        print(myrank, "TERMINA")
         exit(1)
     elif myrank==3: # WORKER MUTACION
         
@@ -1236,7 +1241,7 @@ def main():
             
             generaciones-=1
             
-        
+        print(myrank, "TERMINA")
         exit(1)
     """elif myrank==4: # WORKER EVALUACION
         

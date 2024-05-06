@@ -1,0 +1,1 @@
+Este codigo ejecuta la busqueda de hiperparametros que funcionen en un entorno. Si no hay bucle escribe la configuracion. En caso contrario no lo escribe.

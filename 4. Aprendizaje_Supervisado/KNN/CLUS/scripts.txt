@@ -1,0 +1,5 @@
+mpiexec -np 51 python KnnMPI_2.py
+mpiexec -np 101 python KnnMPI_2.py
+mpiexec -np 201 python KnnMPI_2.py
+mpiexec -np 501 python KnnMPI_2.py
+mpiexec -np 1001 python KnnMPI_2.py

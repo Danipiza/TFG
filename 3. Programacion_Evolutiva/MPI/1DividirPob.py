@@ -2868,7 +2868,7 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=25
+        tam_poblacion=2000
         tam_poblacionDiv=tam_poblacion//numWorkers
         tam_poblacion=tam_poblacionDiv*numWorkers
 
@@ -2888,8 +2888,8 @@ def main():
         #              | 9: Hoist       | 10: Contraccion | 11: Expansion
         mut_idx=5
         # Binario: 0.05 | Real: 0.3
-        prob_mut=0.05    
-        precision=0.001
+        prob_mut=0.3   
+        precision=0.0000000001
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
@@ -2902,11 +2902,11 @@ def main():
 
         long_cromosoma=100
 
-        filas=8
-        columnas=8
+        filas=100
+        columnas=100
         # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
         bloating_idx=0
-        ticks=100
+        ticks=10000
         
 
         if funcion_idx==0: funcion=Funcion1()

@@ -1,7 +1,5 @@
 from mpi4py import MPI
-import sys
 import os
-import signal
 import random
 
 # EJECUTAR
@@ -11,11 +9,6 @@ import random
 PROGRAMA QUE CALCULA LOS MEJORES HIPERPARAMETROS PARA CADA LABERINTO
 """
 
-
-def signal_handler(sig, frame):
-    print("Ctrl+C\n")    
-    sys.exit(0)
-
 def leeArchivo(archivo):
     """
     return:
@@ -24,19 +17,20 @@ def leeArchivo(archivo):
     """
         
     dir=os.getcwd()
+    print(dir)
     n=len(dir)
 
-    while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
+    """while(dir[n-3]!='T' and dir[n-2]!='F' and dir[n-1]!='G'):
         dir=os.path.dirname(dir)
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","0.Laberintos", archivo+".txt")
-           
+    path=os.path.join(dir, ".Otros","ficheros","0.Laberintos", archivo+".txt")"""
     filas=0
     columnas=0 
     M=[]
-    
+
+    path=os.path.join(dir, archivo+".txt")
     try:        
         with open(path, 'r') as archivo: # modo lectura
             for linea in archivo:                                
@@ -210,7 +204,9 @@ class Q_Learning():
             
         """print("Ejecucion final:", (timeEnd-timeEndEnt))"""
         return (timeEndEnt-timeStart), cont
-        
+
+
+
 def main():
     MASTER = 0              # int.      Master     
     END_OF_PROCESSING = -1  # End of processing
@@ -223,6 +219,7 @@ def main():
     fils=0
     cols=0
 
+
     tag=0
     comm=MPI.COMM_WORLD    
     status = MPI.Status()
@@ -230,94 +227,147 @@ def main():
     numProc=comm.Get_size()
     numWorkers=numProc-1
 
-    epsilon=0.1
     episodios=1000
-    archivo="30"
+    archivo="100"
     maze="M{}x{}".format(str(archivo),str(archivo))
 
     if myrank==MASTER:
         matriz,fils,cols=leeArchivo(archivo)
 
+  
+    
     matriz=comm.bcast(matriz, root=MASTER) 
     fils=comm.bcast(fils, root=MASTER) 
     cols=comm.bcast(cols, root=MASTER) 
 
+
+    directorio_script = os.path.dirname(os.path.abspath(__file__))
+
+    
+
     if myrank==MASTER:
-        izq=0.1
+        ruta=os.path.join(directorio_script,'M{}x{}_Salida_MPI{}.txt'.format(fils,cols,numWorkers))
+        precision=0.01
+
+        alpha=0.01
+        gamma=0.01
+        epsilon=0.01
+
         for i in range(1,numWorkers+1):
-            comm.send(0.1, dest=i) # alpha
-            comm.send(izq, dest=i) # gamma
-            izq+=0.1
+            comm.send(alpha, dest=i) # alpha
+            comm.send(gamma, dest=i) # gamma
+            comm.send(epsilon, dest=i)
+            epsilon+=precision
+            
+            if epsilon>=1:
+                epsilon=0.01
+                gamma+=precision
+                if gamma>=1:
+                    gamma=0.01
+                    alpha+=precision
         
-        gamma=izq-0.1
+        id=None
+        bucle=True
+        while bucle:
+            i=1
+            while i<numWorkers+1: 
+                a=comm.recv(source=i)   
+                g=comm.recv(source=i)   
+                e=comm.recv(source=i)   
+
+                ent=comm.recv(source=i)   
+                eval=comm.recv(source=i)   
+                tiempo=comm.recv(source=i)   
+                movimientos=comm.recv(source=i)   
+
+                if movimientos!=0:
+                    with open(ruta, 'a') as archivo:                                                 
+                        archivo.write("a:{} g:{} e:{} BE:{} BP:{} T(3):{} M: {}\n".
+                                    format(round(a,2),round(g,2),round(e,2),ent,eval,round(tiempo,3),movimientos))     
+                
+                
+
+                
+                epsilon+=precision
+                if epsilon>=1:
+                    epsilon=0.01
+                    gamma+=precision
+                    if gamma>=1:
+                        gamma=0.01
+                        alpha+=precision
+                        if alpha>=1:
+                            comm.send(END_OF_PROCESSING, dest=i)
+                            bucle=False
+                            id=i
+                            break
+                
+                
+                comm.send(alpha, dest=i)
+                comm.send(gamma, dest=i)
+                comm.send(epsilon, dest=i)
+                
+                i+=1
         
-        while True:
+        
+        for i in range(1,numWorkers+1):            
+            if i==id: continue
 
-            data=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
-            source_rank=status.Get_source()
+            data=comm.recv(source=i)          
             
-            
-            gamma+=0.1
 
-            if gamma>=1:
-                gamma=0.1
-                alpha+=0.1
-                if alpha>=1: 
-                    comm.send(END_OF_PROCESSING, dest=source_rank)
-                    break
-            
-            comm.send(alpha, dest=source_rank)
-            comm.send(gamma, dest=source_rank)
-            
-        for i in range(1,numWorkers):
-            data=comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)            
-            source_rank=status.Get_source()
-            comm.send(END_OF_PROCESSING, dest=source_rank)
+
+            comm.send(END_OF_PROCESSING, dest=i)
 
     else:
-        
-        directorio_script = os.path.dirname(os.path.abspath(__file__))
-    
-        ruta_dir=os.path.join(directorio_script, 'Pruebas_Parametros')
-        
+                
 
         alpha=comm.recv(source=MASTER)
         if alpha==END_OF_PROCESSING: exit(1)
         gamma=comm.recv(source=MASTER)
+        epsilon=comm.recv(source=MASTER)
 
         
 
         while True:            
-            ruta=os.path.join(ruta_dir,'{}_Eps{}Alpha{}.txt'.format(maze,episodios,round(alpha,1)))   
-            epsilon=0.1
+               
             
-
-            for i in range(8):
-                
-                QL=Q_Learning(alpha,gamma,epsilon,episodios, 
-                              matriz,fils,cols)
+            ent=0
+            eval=0
+            tiempo=0
+            movsMedia=0
+            timeStart=MPI.Wtime()
+            """for i in range(3):                
+                QL=Q_Learning(alpha,gamma,epsilon,episodios,
+                              matriz,fils,cols,)
                 time,movs=QL.ejecuta()
                 
-                
-                
-                
-                if movs!=-1 and movs!=-2:                
-                    with open(ruta, 'a') as archivo:                              
-                        archivo.write("W{}. Gamma: {}\tEpsilon: {}\t Tiempo: {}s\tMovimientos: {}\n".format(
-                            myrank,round(gamma,1),round(epsilon,1),time,movs))
+                if movs==-1:eval+=1
+                elif movs==-2: ent+=1
                 else:
-                    bucle="Bucle en Entrenamiento"
-                    if movs==-1: bucle="Bucle en Prueba"
-                    with open(ruta, 'a') as archivo:                              
-                        archivo.write("W{}. Gamma: {}\tEpsilon: {}\t Tiempo: {}s\t{}\n".format(
-                            myrank, round(gamma,1),round(epsilon,1), time, bucle))
-                epsilon+=0.1
-            
-            comm.send(0,dest=MASTER)
+                    tiempo+=time
+                    movsMedia+=movs"""
+            timeEndEnt=MPI.Wtime()
 
+            comm.send(alpha,dest=MASTER)
+            comm.send(gamma,dest=MASTER)
+            comm.send(epsilon,dest=MASTER)
+
+            comm.send(ent,dest=MASTER)
+            comm.send(eval,dest=MASTER)
+            comm.send(timeEndEnt-timeStart,dest=MASTER)
+            if (ent+eval)==3: 
+                comm.send(0,dest=MASTER)
+            else:                
+                comm.send((movsMedia/3-(ent+eval)),dest=MASTER)
+                
+
+           
+                
+            
             alpha=comm.recv(source=MASTER)
             if alpha==END_OF_PROCESSING: exit(1)
             gamma=comm.recv(source=MASTER)
+            epsilon=comm.recv(source=MASTER)
 
    
 

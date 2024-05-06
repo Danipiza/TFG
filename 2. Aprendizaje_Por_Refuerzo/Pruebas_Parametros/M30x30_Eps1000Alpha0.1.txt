@@ -110,3 +110,17 @@ W3. Gamma: 1.0	Epsilon: 0.8	 Tiempo: 5.954247400004533s	Movimientos: 56
 W4. Gamma: 0.4	Epsilon: 0.8	 Tiempo: 31.092264999999315s	Bucle en Prueba
 W2. Gamma: 0.4	Epsilon: 0.7	 Tiempo: 151.36231260000204s	Bucle en Prueba
 W2. Gamma: 0.4	Epsilon: 0.8	 Tiempo: 29.26474529999541s	Bucle en Prueba
+W1. Gamma: 0.1	Epsilon: 0.1	 Tiempo: 2.460846500005573s	Bucle en Entrenamiento
+W2. Gamma: 0.2	Epsilon: 0.1	 Tiempo: 4.344335499976296s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.1	 Tiempo: 4.537905000033788s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.1	 Tiempo: 4.829539300000761s	Bucle en Entrenamiento
+W1. Gamma: 0.1	Epsilon: 0.2	 Tiempo: 2.4591824999661185s	Bucle en Entrenamiento
+W2. Gamma: 0.2	Epsilon: 0.2	 Tiempo: 2.9765569000155665s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.2	 Tiempo: 3.2286580000072718s	Bucle en Entrenamiento
+W1. Gamma: 0.1	Epsilon: 0.3	 Tiempo: 3.357631599996239s	Bucle en Entrenamiento
+W2. Gamma: 0.2	Epsilon: 0.3	 Tiempo: 2.8907662000274286s	Bucle en Entrenamiento
+W1. Gamma: 0.1	Epsilon: 0.4	 Tiempo: 2.5895644000265747s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.3	 Tiempo: 4.807889399991836s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.2	 Tiempo: 9.269396300020162s	Bucle en Entrenamiento
+W2. Gamma: 0.2	Epsilon: 0.4	 Tiempo: 3.967672400001902s	Bucle en Entrenamiento
+W1. Gamma: 0.1	Epsilon: 0.5	 Tiempo: 4.1221589999622665s	Bucle en Entrenamiento

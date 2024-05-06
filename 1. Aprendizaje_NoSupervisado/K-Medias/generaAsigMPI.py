@@ -8,6 +8,21 @@ import math
 # EJECUTAR
 # mpiexec -np 5 python generaAsigMPI.py
 
+def escribe(array, archivo):
+    n=len(array)
+    m=len(array[0])
+    
+    with open(archivo, 'w') as file:
+        for i in array:
+            file.write(str(i)+", ")    
+
+        """file.write(str(array[0][0]))
+        for j in range(1,m):          
+            file.write(", "+str(array[0][j]))
+
+        for i in range(1,n):            
+            for j in range(m):          
+                file.write(", "+str(array[i][j]))"""
 
 def main():      
     MASTER = 0              # int.  Valor del proceso master
@@ -38,21 +53,24 @@ def main():
         dir=os.path.dirname(dir)
         n=len(dir)
 
-    path=os.path.join(dir, ".Otros","ficheros","Cluster")
-    archivos = os.listdir(path) 
-
+    path=os.path.join(dir, ".Otros","ficheros","2.Cluster")
+    #archivos = os.listdir(path) 
+    archivos=["100000_2D.txt"]
     for arch in archivos:
 
         # Inicializa centros
         if myrank==MASTER:        
-            poblacion=lee(arch)            
+            poblacion=lee(arch) 
+            poblacion=poblacion[0:10000]   
+            escribe(poblacion,"10000_2D.txt") 
+                 
             
             n=len(poblacion)        # Tamaño
             d=len(poblacion[0])     # Numero de dimensiones
             
             maxClusters=10
-            times=20
-      
+            times=5
+        exit(1)  
         
         # Envia el numero de clusters a los workers
         maxClusters=comm.bcast(maxClusters, root=MASTER)
@@ -197,7 +215,7 @@ def main():
                 archivoCentroides=nombre+"_C"+str(k)+".txt"
                 archivoAsig=nombre+"_A"+str(k)+".txt"                
                 
-                escribeCluster(centroidesMejores[k-1],archivoCentroides)                
+                #escribeCluster(centroidesMejores[k-1],archivoCentroides)                
                 escribeAsig(mejores[k-1],archivoAsig)
                     
 

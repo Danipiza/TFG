@@ -1,0 +1,6 @@
+mpiexec -np 33 python MergeSortMPI.py
+mpiexec -np 65 python MergeSortMPI.py
+mpiexec -np 129 python MergeSortMPI.py
+mpiexec -np 257 python MergeSortMPI.py
+mpiexec -np 513 python MergeSortMPI.py
+mpiexec -np 1025 python MergeSortMPI.py
