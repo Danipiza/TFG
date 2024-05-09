@@ -276,8 +276,8 @@ def main():
     alpha=0.3
     gamma=0.9
     epsilon=0.8
-    episodios=100
-    archivo="30"
+    episodios=1000
+    archivo="75"
     matriz,fils,cols=leeArchivo(archivo)
 
     timeStart=MPI.Wtime()
@@ -289,7 +289,7 @@ def main():
                   Q_table, A_table,
                   matriz,fils,cols)
     QL.ejecuta()
-    print(QL.Q_table)
+    #print(QL.Q_table)
 
 
 

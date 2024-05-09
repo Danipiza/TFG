@@ -196,6 +196,7 @@ class Seleccion:
     def busquedaBinaria(self, x, prob_acumulada):
         i=0
         j=self.tam_poblacion-1
+        
         while i<j:
             m=(j+i)//2
             if x>prob_acumulada[m]: i=m+1
@@ -1479,10 +1480,10 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=50
-        x=tam_poblacion%(numWorkers-3)
+        tam_poblacion=2000
+        x=tam_poblacion%4
         tam_poblacion-=x
-        generaciones=100
+        generaciones=25
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
@@ -1569,14 +1570,15 @@ def main():
     TEL=comm.bcast(TEL, root=MASTER) 
     
     
-    tam_poblacionDiv=tam_poblacion//(numWorkers-3)
-    if myrank!=MASTER and myrank<=numWorkers-3:
-        tam_poblacion//=numWorkers-3
+    tam_poblacionDiv=tam_poblacion//4
+    if myrank!=MASTER and myrank<=4:
+        tam_poblacion//=4
 
-    workersE=[]
+    """workersE=[]
     for i in range(1,numWorkers-2):
-        workersE.append(i)
-    workerS=numWorkers-2
+        workersE.append(i)"""
+    workersE=[1,2,3,4]
+    #workerS=numWorkers-2
        
 
     AG=AlgoritmoGenetico(None)
@@ -1604,18 +1606,20 @@ def main():
     if myrank==MASTER:
                   
         
-        poblacion=[]
-        for _ in range(4):
-            
+        for _ in range(2):            
             AG.init_poblacion()
             izq=0
             for i in workersE:
-                comm.send(AG.poblacion[izq:izq+tam_poblacionDiv], dest=i)      
+                comm.send(AG.poblacion[izq:izq+tam_poblacionDiv], dest=i)                                     
+                """comm.send(1, dest=i)"""
+
                 izq+=tam_poblacionDiv
+
+
         
         
         
-        generaciones-=4
+        generaciones-=2
         while(generaciones>0):
             for i in workersE:
                 data=comm.recv(source=i)
@@ -1629,44 +1633,49 @@ def main():
         print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
     
         
-    elif myrank<=numWorkers-3: # WORKER EVAL      
+    elif myrank<=4: # WORKER EVAL      
         
 
-        for _ in range(4):                
+        for _ in range(2):                
             AG.poblacion=comm.recv(source=MASTER) 
                 
             
             AG.evaluacion_poblacionReal()            
             
-            comm.send(AG.poblacion,dest=workerS)   
+            comm.send(AG.poblacion,dest=numWorkers)  
+            """data=comm.recv(source=MASTER) 
+            comm.send(1,dest=numWorkers)"""
         
                  
         
-        generaciones-=4
+        generaciones-=2
 
         while(generaciones>0):                
             AG.poblacion=comm.recv(source=numWorkers)
 
             AG.evaluacion_poblacionReal()                
             
-            comm.send(AG.poblacion,dest=workerS)   
+            comm.send(AG.poblacion,dest=numWorkers)   
             # progreso
             comm.send(AG.poblacion,dest=MASTER)
+
+
+            """data=comm.recv(source=numWorkers)
+            comm.send(AG.poblacion,dest=numWorkers)               
+            comm.send(AG.poblacion,dest=MASTER)"""
 
             generaciones-=1
                             
         
-        AG.evaluacion_poblacionReal()
-        comm.send(AG.poblacion,dest=MASTER)
         
-        print("TERMINA ", myrank)
+        #print("TERMINA ", myrank)
         exit(1)
                 
        
         
 
 
-    elif myrank==numWorkers-2: # WORKER SELEC
+    else: # WORKER SELEC + CRUCE + MUTACION
                 
 
         while(generaciones>0):                
@@ -1677,17 +1686,27 @@ def main():
                 
                 for x in data:
                     AG.poblacion.append(x)
+
+            
             
             selec=AG.seleccion_poblacionReal(5)
-            comm.send(selec,dest=myrank+1)
+            poblacion=AG.cruce_poblacionReal(selec)
+            poblacion=AG.mutacion_poblacionReal(poblacion)
+            
+
+            izq=0
+            for i in workersE:
+                comm.send(poblacion[izq:izq+tam_poblacionDiv], dest=i)    
+                """comm.send(1,dest=i)"""
+                izq+=tam_poblacionDiv
 
             generaciones-=1
         
-        print("TERMINA ", myrank)
+        #print("TERMINA ", myrank)
         exit(1)
         
         
-    elif myrank==numWorkers-1: # WORKER CRUCE
+    """elif myrank==numWorkers-1: # WORKER CRUCE
         
         while(generaciones>0):
             selec=[]    
@@ -1721,7 +1740,7 @@ def main():
         
         
         
-
+"""
         
 
     

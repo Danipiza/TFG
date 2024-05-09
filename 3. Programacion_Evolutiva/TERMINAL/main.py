@@ -3563,24 +3563,24 @@ def main():
                    "Arbol",
                    "Gramatica"]
 
-    tam_poblacion=500
+    tam_poblacion=2000
     generaciones=25
 
     # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
     #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=0
+    seleccion_idx=1
     
     # 0: Basica | 1: Uniforme | 
     # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
     # 7: Intercambio
-    cruce_idx=7
+    cruce_idx=2
     prob_cruce=0.6
     
     # 0: Basica    |     
     # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
     # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
     #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-    mut_idx=5
+    mut_idx=1
     prob_mut=0.3 # Binario: 0.05 | Real: 0.3
 
     precision=0.000001
@@ -3588,7 +3588,7 @@ def main():
     # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
     # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
     # 7: Arbol        | 8: Gramatica
-    funcion_idx=7
+    funcion_idx=6
     d=2
     elitismo=0
 

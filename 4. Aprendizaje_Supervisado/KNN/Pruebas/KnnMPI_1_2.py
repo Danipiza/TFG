@@ -214,7 +214,7 @@ def main():
                     archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')"""
 
 
-            # --- ACTUALIZA -------------------------------------------------------------
+            """# --- ACTUALIZA -------------------------------------------------------------
 
             # ---------------------------------------------------------------------------
             # --- MANHATTAN -------------------------------------------------------------
@@ -230,7 +230,7 @@ def main():
                 
                 ruta=os.path.join(ruta_Act,'KNN_1V2MPI{}_Act_k{}_M.txt'.format(numWorkers,k))  
                 with open(ruta, 'a') as archivo:                                
-                    archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
+                    archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')"""
 
 
             # ---------------------------------------------------------------------------

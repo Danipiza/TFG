@@ -51,10 +51,15 @@ def main():
     # NlogN
     #labels = ["MergeSort","MergeSort_MPI(4)","MergeSort_MPI(8)","MergeSort_MPI(16)","MergeSort_MPI(32)",]
 
-    # Aglomerativo
-    #labels = ["Centroide_Euclidea","Centroide_Manhattan","ESimple_Euclidea","ESimple_Manhattan","Centroide_Euclidea_MPI(4)","Centroide_Manhattan_MPI(4)"]
-    #labels=["Euclidea","Euclidea_MPI(4)"]
+    # Aglomerativo      
+    #labels=["ESimple_Euclidea","ESimple_Manhattan","Centroide_Euclidea","Centroide_Manhattan"]
+    #labels=["Secuencial","1MPI(4)","2MPI(4)"]#,"MPI(20)"]
+
+
+    # RL
+    #labels=["Normal", "Preprocesado"]
     
+
     # KMedias
     #labels=["Euclidea","Manhattan","Euclidea_MPI(4)","Manhattan_MPI(4)"]
     
@@ -62,13 +67,14 @@ def main():
     # PEV
         # BIN
     # labels=["P2","P10"]
-    labels=["P2","P10","P2_3MPI(4)","P10_3MPI(4)"]
+    #labels=["P2","P10","P2_3MPI(7)","P10_3MPI(7)"]
         
         # REAL
     #labels=["AER1","AER2","AER3"]
     #labels=["AER1","AER2","AER3","AER1_MPI(4)","AER2_MPI(4)","AER3_MPI(4)"]
     #labels=["AER1","AER2","AER1_3MPI(4)","AER2_3MPI(4)"]
-    #labels=["AER3","AER3_3MPI(4)"]
+    #labels=["AER3","AER3_3MPI(6)", "AER3_3MPI(10)"]
+    
      
         # ARBOL
     #labels = ["M8X8", "M100X100"]
@@ -92,7 +98,7 @@ def main():
     # Basico
     #labels=["Euclidea_Act","Euclidea_sinAct","Manhattan_Act","Manhattan_sinAct"]
     # Comparacion
-    #labels=["Secuencial","1.1_MPI(4)","1.2_MPI(4)","2_MPI(4)"]
+    labels=["Secuencial","1.1_MPI(4)","1.2_MPI(4)","2_MPI(4)"]
 
 
     # REDES NEURONALES
@@ -106,9 +112,9 @@ def main():
         tam=min(tam,len(f))
         print(len(f))
     # GENERAL
-    #x=leeArchivo("TamDatos")  
+    x=leeArchivo("TamDatos") 
     # PEV
-    x=[25,50,100,200,500,1000,2000]
+    #x=[25,50,100,200,500,1000,2000]
     if tam>len(x): tam=len(x)
     x=x[0:tam] 
 

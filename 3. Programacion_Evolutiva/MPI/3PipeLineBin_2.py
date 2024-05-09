@@ -14,8 +14,12 @@ from matplotlib.gridspec import GridSpec
 
 import re
 
-# Solo funciona con 4
-# mpiexec -np 4 python 3PipeLine.py
+# Solo funciona con 7
+# mpiexec -np 7 python 3PipeLineBin_2.py
+
+# 2 PROCESOS PARA SELECCION+EVAL
+# 2 PROCESOS PARA CRUCE
+# 2 PROCESOS PARA MUT
 
 """
 Metodo 3. PipeLine
@@ -1022,7 +1026,7 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=1000
+        tam_poblacion=2000
         generaciones=25
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
@@ -1040,7 +1044,7 @@ def main():
         mut_idx=0
         # Binario: 0.05 | Real: 0.3
         prob_mut=0.05    
-        precision=0.1
+        precision=0.0000000001
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
@@ -1110,6 +1114,7 @@ def main():
 
 
     AG=AlgoritmoGenetico(None)
+    if myrank!=MASTER: tam_poblacion//=2
     AG.set_valores( tam_poblacion, 
                     generaciones, 
                     seleccion_idx,
@@ -1129,7 +1134,7 @@ def main():
                     bloating_idx,
                     ticks) 
 
-    
+    mitad=tam_poblacion//2
 
     if myrank==MASTER:
 
@@ -1137,13 +1142,20 @@ def main():
         
         for _ in range(3):
             AG.init_poblacion()                           
-            comm.send(AG.poblacion, dest=myrank+1)       
+            comm.send(AG.poblacion[0:mitad], dest=myrank+1)       
+            comm.send(AG.poblacion[mitad:tam_poblacion], dest=myrank+2)
+            
+            
+            """comm.send(1, dest=myrank+1)
+            comm.send(1, dest=myrank+2)"""
+
         
         
 
         generaciones-=3
         while(generaciones>0):               
             data=comm.recv(source=myrank+1)
+            data2=comm.recv(source=myrank+2)
             
             generaciones-=1
             
@@ -1154,32 +1166,19 @@ def main():
         print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
        
         
-    elif myrank==1: # WORKER SELECCION     
+    elif myrank==1 or myrank==2: # WORKERS EVAL y SELECCION     
 
         
         for aux in range(3):                
-            AG.poblacion=comm.recv(source=myrank-1)  
+            AG.poblacion=comm.recv(source=MASTER)              
+            AG.evaluacion_poblacionBin()
+            selec=AG.seleccion_poblacionBin(5)
+            comm.send(selec,dest=myrank+2)    
             
-            AG.evaluacion_poblacionBin()                 
-            
-            selec=AG.seleccion_poblacionBin(5)             
-            #comm.recv(source=myrank-1) 
-
-
-
-            # TAM POBLACION = 1.000
-            # LLEGA
-            """if aux==2:
-                print("LLEGA",len(selec))
-                exit(1)"""
-            comm.send(selec,dest=myrank+1)  # ???
-            # NO LLEGA
-            """if aux==2:
-                print("LLEGA",len(selec))
-                exit(1)"""
+            """data=comm.recv(source=MASTER)   
+            comm.send(1,dest=myrank+2)"""
             
             
-            #comm.send(1,dest=myrank+1)
 
               
 
@@ -1188,67 +1187,70 @@ def main():
         generaciones-=3      
       
         
-        while(generaciones>0): 
-             
-                          
-            AG.poblacion=comm.recv(source=numWorkers)
+        while(generaciones>0):              
+            impar=1
+            if myrank%2==0: impar=0
 
-            AG.evaluacion_poblacionBin()            
-
-            selec=AG.seleccion_poblacionBin(5)
-            
-            
-            comm.send(selec,dest=myrank+1)   
+            AG.poblacion=comm.recv(source=numWorkers-impar)
+            AG.evaluacion_poblacionBin()          
+            selec=AG.seleccion_poblacionBin(5)                       
+            comm.send(selec,dest=myrank+2)   
             # progreso
             comm.send(AG.poblacion,dest=MASTER)
+
+            """data=comm.recv(source=numWorkers-impar)   
+            comm.send(1,dest=myrank+2)
+            comm.send(1,dest=MASTER)"""
 
             generaciones-=1
                             
         
         #AG.evaluacion_poblacionBin()
         #comm.send(AG.poblacion,dest=MASTER)
-        print(myrank, "TERMINA")
+        #print(myrank, "TERMINA")
         exit(1)
 
 
-    elif myrank==2: # WORKER CRUCE
+    elif myrank==3 or myrank==4: # WORKER CRUCE
         
         
-        while(generaciones>0):               
-            
-            
-            selec=comm.recv(source=myrank-1)  
 
-                
+        while(generaciones>0):            
+            selec=comm.recv(source=myrank-2)    
+            poblacion=AG.cruce_poblacionBin(selec) 
+            comm.send(poblacion,dest=myrank+2)
             
-            poblacion=AG.cruce_poblacionBin(selec)              
-            
-            
-            comm.send(poblacion,dest=myrank+1)
+            """data=comm.recv(source=myrank-2)    
+            comm.send(1,dest=myrank+2)"""
 
-            """if generaciones==24:
-                print("LLEGA")
-                exit(1)"""  
+        
             
 
             generaciones-=1
-        
-        print(myrank, "TERMINA")
+        #print(myrank, "TERMINA")
         exit(1)
-    elif myrank==3: # WORKER MUTACION
+    else: # WORKER MUTACION
         
         
         while(generaciones>0):            
-            poblacion=comm.recv(source=myrank-1)      
+            par=1
+            if myrank%2!=0: par=0
+            
+            
 
-            poblacion=AG.mutacion_poblacionBin(poblacion)
+            poblacion=comm.recv(source=myrank-2)     
+            poblacion=AG.mutacion_poblacionBin(poblacion)                        
+            comm.send(poblacion,dest=MASTER+1+par)
             
-            comm.send(poblacion,dest=MASTER+1)
+            """poblacion=comm.recv(source=myrank-2) 
+            comm.send(1,dest=MASTER+1+par)"""
             
             
+            
+
             generaciones-=1
             
-        print(myrank, "TERMINA")
+        #print(myrank, "TERMINA")
         exit(1)
     
         

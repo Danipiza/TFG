@@ -15,8 +15,8 @@ def multiplicar_contenido(input_file, output_file, multiplicador):
 
 # Ejemplo de uso
 if __name__ == "__main__":
-    archivo_entrada = "ent3.txt"
-    archivo_salida = "AER3_3MPI(4).txt"
+    archivo_entrada = "ent1.txt"
+    archivo_salida = "AER3_3_2MPI(10).txt"
     valor_multiplicador = 4  # Puedes cambiar este valor según tu necesidad
     
     multiplicar_contenido(archivo_entrada, archivo_salida, valor_multiplicador)

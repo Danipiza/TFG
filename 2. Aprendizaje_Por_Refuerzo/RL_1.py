@@ -230,7 +230,7 @@ def main():
     episodios=1000
     
 
-    QL=Q_Learning(alpha,gamma,epsilon,episodios, "100")
+    QL=Q_Learning(alpha,gamma,epsilon,episodios, "150")
     QL.ejecuta()
 
 
