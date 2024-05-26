@@ -3,7 +3,7 @@ import sys
 import os
 
 # COMPILAR
-# mpiexec -np 5 python SequentialSortMPI.py
+# mpiexec -np 5 python SequentialSortMPI_2.py
 
 # Este programa tiene (np-1) workers, cada worker recibe un elemento
 #   que envia el master para realizar el recorrido en el array
@@ -13,28 +13,7 @@ datos=[]
 tamArray=[]
 
 
-# Signal handler 
-def signal_handler(sig, frame):
-    print("Ctrl+C, almacenando en ")
-    guarda_datos(["SequentialSortMPI",
-                  "TamArray.txt"])
-    sys.exit(0)
-
-def guarda_datos(archivo):    
-    """print(tamArray)
-    for x in datos:
-        print(x,"\n")"""
-    
-
-    with open(archivo[0], 'w') as file:
-        for i, val in enumerate(datos):
-            file.write("{}, ".format(val))
-        file.write("\n")
-    with open(archivo[1], 'w') as file:
-        for i, val in enumerate(tamArray):
-            file.write("{}, ".format(val))
-        file.write("\n")
-    
+  
    
 
 def main():  	
@@ -88,8 +67,9 @@ def main():
         
     
     procesar=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000]
-
-    """try:"""    
+    
+    ruta_pruebas = os.path.dirname(os.path.abspath(__file__))
+    
     for x in procesar: 
         # Comienza el timer una vez inicializado todo
         timeStart = MPI.Wtime()
@@ -98,65 +78,49 @@ def main():
             c=[]
             for val in a[0:x]:
                 c.append(val)
-            for i in range(1,numWorkers+1):
-                comm.send(c,dest=i)
+            izq=0
+            tam=x//numWorkers
+            mod=x%numWorkers
+            for i in range(1,mod+1):
+                comm.send(c[izq:izq+tam+1],dest=i)
+                izq+=tam+1
+            for i in range(mod+1,numWorkers+1):
+                comm.send(c[izq:izq+tam],dest=i)
+                izq+=tam
+
             n=len(c)
             b=[(INF) for _ in range(n)]
         else:
             a=comm.recv(source=MASTER)
             n=len(a)
-                    
-        
+                 
 
         
 
         if myrank==MASTER:
             arrayProc=0;        
             
-            if numWorkers<=n:  
-                for i in range(1, numWorkers+1):   
-                    comm.send(c[arrayProc], dest=i)      
-                    arrayProc+=1        
-            else:
-                aux=numWorkers%n
-                for i in range(1, numWorkers-aux+1):  
-                    comm.send(c[arrayProc], dest=i) 
-                    arrayProc+=1							
-                for i in range(numWorkers-aux+1, numWorkers+1):
-                    comm.send(END_OF_PROCESSING, dest=i)                  
-                
-                numWorkers-=aux        
+                  
+            for _ in range(x):  
 
-            while arrayProc<n:		
-                pos=-1;	
-                pos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
-                source_rank = status.Get_source()
+                for i in range(1, numWorkers+1):
+                    comm.send(a[arrayProc], dest=i)  
                 
-                val = comm.recv(source=source_rank, tag=tag,status=status)
+                pos=0
+                for i in range(1, numWorkers+1):
+                    data = comm.recv(source=i)
+                    pos+=data                              
                 
                 while b[pos]!=INF: pos+=1
-                b[pos]=val
-    
-                comm.send(a[arrayProc], dest=status.source)   
+                b[pos]=val   
+                
                 arrayProc+=1
 
-                if arrayProc==n: break	
 
                                     
             
 
-            # Ultimos valores por procesar
-            while numWorkers!=0:
-                pos = comm.recv(source=MPI.ANY_SOURCE, tag=tag,status=status)
-                source_rank = status.Get_source()
-                
-                val = comm.recv(source=source_rank, tag=tag,status=status)
-
-                while b[pos]!=INF: pos+=1
-                b[pos]=val
-
-                comm.send(END_OF_PROCESSING, dest=status.source, tag=tag)   
-                numWorkers-=1
+            
             
             timeEnd = MPI.Wtime()
 
@@ -174,26 +138,23 @@ def main():
             tamArray.append(n)
                 
         else: # workers
-            while(True):
+            for _ in range(x):
                 val=comm.recv(source=0)
 
-                if val==-2: break
+                
 
                 cont=0
                 for i in range(n):            
                     if a[i]<val: cont+=1
                 
                 comm.send(cont, dest=0)
-                comm.send(val, dest=0)
             comm.recv(source=MASTER)
 
-        if myrank==MASTER:
-            guarda_datos(["SequentialSort_MPI{}.txt".format(numWorkers),"TamArray.txt"])       
-    """except KeyboardInterrupt:
-        print('\nProgram interrupted, storing processed array in a file...')
-        guarda_datos(["SequentialSortMPI",
-                  "TamArray.txt"])
-        sys.exit(0)"""
+        if myrank==MASTER:            
+            ruta=os.path.join(ruta_pruebas,"SequentialSort_2MPI{}.txt".format(numWorkers))    
+            with open(ruta, 'a') as archivo:                               
+                archivo.write(str(timeEnd-timeStart) + ', ')       
+    
     return 0
 
 

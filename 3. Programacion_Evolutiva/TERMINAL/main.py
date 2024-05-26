@@ -3563,84 +3563,87 @@ def main():
                    "Arbol",
                    "Gramatica"]
 
-    tam_poblacion=2000
-    generaciones=25
+    procesar=[2500,4000,5000,7500,10000]    
+    for x in procesar:
+        tam_poblacion=x
+        generaciones=10
 
-    # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
-    #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-    seleccion_idx=1
-    
-    # 0: Basica | 1: Uniforme | 
-    # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
-    # 7: Intercambio
-    cruce_idx=2
-    prob_cruce=0.6
-    
-    # 0: Basica    |     
-    # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
-    # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
-    #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-    mut_idx=1
-    prob_mut=0.3 # Binario: 0.05 | Real: 0.3
-
-    precision=0.000001
-
-    # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
-    # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
-    # 7: Arbol        | 8: Gramatica
-    funcion_idx=6
-    d=2
-    elitismo=0
-
-    # 0: Completa | 1: Creciente | 2: Ramped & Half 
-    modo=0
-    profundidad=4
-
-    long_cromosoma=100
-
-    filas=100
-    columnas=100
-    # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
-    bloating_idx=0
-    ticks=10000
-
-    AG.set_valores( tam_poblacion, 
-                    generaciones, 
-                    seleccion_idx,
-                    cruce_idx, 
-                    prob_cruce,
-                    mut_idx, 
-                    prob_mut,
-                    precision, 
-                    funcion_idx, 
-                    d, 
-                    elitismo,
-                    
-                    modo,
-                    profundidad,
-                    long_cromosoma,
-                    filas,
-                    columnas,
-                    bloating_idx,
-                    ticks)  
+        # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
+        #           | 4: Truncamiento  | 5: Restos | 6: Ranking
+        seleccion_idx=1
         
+        # 0: Basica | 1: Uniforme | 
+        # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
+        # 7: Intercambio
+        cruce_idx=0
+        prob_cruce=0.6
+        
+        # 0: Basica    |     
+        # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
+        # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
+        #              | 9: Hoist       | 10: Contraccion | 11: Expansion
+        mut_idx=0
+        prob_mut=0.05 # Binario: 0.05 | Real: 0.3
 
-    print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
-                                                                      seleccion_opt[seleccion_idx],
-                                                                      cruce_opt[cruce_idx],
-                                                                      prob_cruce,
-                                                                      mutacion_opt[mut_idx],
-                                                                      prob_mut))
-    
-    print("Tam. Poblacion: {}\t Num. Generaciones: {}\t Elitismo: {}%".format(tam_poblacion,
-                                                                             generaciones,
-                                                                             elitismo))
-    
-    totalTimeStart = MPI.Wtime()
-    val=AG.ejecuta()
-    totalTimeEnd = MPI.Wtime()
-    print("Valor Optimo: {}\n".format(val))
-    print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
+        precision=0.0000000001
+
+        # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
+        # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
+        # 7: Arbol        | 8: Gramatica
+        funcion_idx=0
+        d=2
+        elitismo=0
+
+        # 0: Completa | 1: Creciente | 2: Ramped & Half 
+        modo=0
+        profundidad=4
+
+        long_cromosoma=100
+
+        filas=8
+        columnas=8
+        # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
+        bloating_idx=0
+        ticks=100
+
+        AG.set_valores( tam_poblacion, 
+                        generaciones, 
+                        seleccion_idx,
+                        cruce_idx, 
+                        prob_cruce,
+                        mut_idx, 
+                        prob_mut,
+                        precision, 
+                        funcion_idx, 
+                        d, 
+                        elitismo,
+                        
+                        modo,
+                        profundidad,
+                        long_cromosoma,
+                        filas,
+                        columnas,
+                        bloating_idx,
+                        ticks)  
+            
+
+        print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
+                                                                        seleccion_opt[seleccion_idx],
+                                                                        cruce_opt[cruce_idx],
+                                                                        prob_cruce,
+                                                                        mutacion_opt[mut_idx],
+                                                                        prob_mut))
+        
+        print("Tam. Poblacion: {}\t Num. Generaciones: {}\t Elitismo: {}%".format(tam_poblacion,
+                                                                                generaciones,
+                                                                                elitismo))
+        
+        totalTimeStart = MPI.Wtime()
+        val=AG.ejecuta()
+        totalTimeEnd = MPI.Wtime()
+        """print("Valor Optimo: {}\n".format(val))
+        print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))"""
+        print(totalTimeEnd-totalTimeStart)
 
 
 

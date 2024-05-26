@@ -7,6 +7,9 @@ import math
 import queue
 
 # mpiexec -np 5 python KnnMPI_1.py
+
+ruta_Act = os.path.dirname(os.path.abspath(__file__))
+
 """
 SE DIVIDEN LA POBLACION INICIAL PARA QUE CADA WORKER COMPARE LOS K VECINOS MAS CERCANOS DE SU POBLACION
 SE LO MANDE AL MASTER Y ESTE CALCULE LA ASIGNACION
@@ -156,106 +159,99 @@ def main():
     
 
     clusters=4
-    procesar=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000]
-    #procesar_k=[2,4,6,8,10,15,20,30,50]#,100]  
-    procesar_k=[10]  
+    procesar=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000]
+    val=10250
+    for i in range(1,361):
+        procesar.append(val)
+        val+=250
+    k=15
     #if numWorkers<=10: procesar_k.append(100)
 
 
     poblacionIni=comm.bcast(poblacionIni, root=MASTER)
     asignacionIni=comm.bcast(asignacionIni, root=MASTER)
-    #m=comm.bcast(m, root=MASTER)
+    m=comm.bcast(m, root=MASTER)
     d=comm.bcast(d, root=MASTER)    
     # Poblacion 
     poblacionProbar=comm.bcast(poblacionProbar, root=MASTER)
 
-    for x in procesar:
-        ini=[]
-        iniAsig=[]
-        for y in poblacionIni:
-            ini.append(y)
-        for y in asignacionIni:
-            iniAsig.append(y)
+    
+    ini=[]
+    iniAsig=[]
+    for y in poblacionIni:
+        ini.append(y)
+    for y in asignacionIni:
+        iniAsig.append(y)
 
         
-        for k in procesar_k:
-            """# ---------------------------------------------------------------------------
-            # --- MANHATTAN -------------------------------------------------------------
-            # ---------------------------------------------------------------------------
-            totalTimeStart = MPI.Wtime()
-            
-            ejecuta_NoAct_M(comm,myrank, numWorkers, 
-                     n, x, d, clusters, ini, iniAsig, poblacionProbar[0:x], k)
-            totalTimeEnd = MPI.Wtime()
+        
+    """# ---------------------------------------------------------------------------
+    # --- MANHATTAN -------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+    totalTimeStart = MPI.Wtime()
+    
+    ejecuta_NoAct_M(comm,myrank, numWorkers, 
+                n, x, d, clusters, ini, iniAsig, poblacionProbar[0:x], k)
+    totalTimeEnd = MPI.Wtime()
 
-            
-            if myrank==MASTER:  
-                
-                ruta=os.path.join(ruta_NoAct,'KNN_1MPI{}_NoAct_k{}_M.txt'.format(numWorkers,k)) 
-                with open(ruta, 'a') as archivo:                               
-                    archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
-
-
-            # ---------------------------------------------------------------------------
-            # --- EUCLIDEA --------------------------------------------------------------
-            # ---------------------------------------------------------------------------
-
-            totalTimeStart = MPI.Wtime()
-            
-            ejecuta_NoAct_E(comm,myrank, numWorkers, 
-                     n, x, d, clusters, ini, iniAsig, poblacionProbar[0:x], k)
-            totalTimeEnd = MPI.Wtime()
-
-            
-            if myrank==MASTER:            
-                
-                ruta=os.path.join(ruta_NoAct,'KNN_1MPI{}_NoAct_k{}_E.txt'.format(numWorkers,k)) 
-                with open(ruta, 'a') as archivo:                              
-                    archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')"""
+    
+    if myrank==MASTER:  
+        
+        ruta=os.path.join(ruta_NoAct,'KNN_1MPI{}_NoAct_k{}_M.txt'.format(numWorkers,k)) 
+        with open(ruta, 'a') as archivo:                               
+            archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
 
 
-            """# --- ACTUALIZA -------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+    # --- EUCLIDEA --------------------------------------------------------------
+    # ---------------------------------------------------------------------------
 
-            # ---------------------------------------------------------------------------
-            # --- MANHATTAN -------------------------------------------------------------
-            # ---------------------------------------------------------------------------
-            totalTimeStart = MPI.Wtime()
-            
-            ejecuta_Act_M(comm,myrank, numWorkers, 
-                     n, x, d, clusters, ini, iniAsig, poblacionProbar[0:x], k)
-            totalTimeEnd = MPI.Wtime()
+    totalTimeStart = MPI.Wtime()
+    
+    ejecuta_NoAct_E(comm,myrank, numWorkers, 
+                n, x, d, clusters, ini, iniAsig, poblacionProbar[0:x], k)
+    totalTimeEnd = MPI.Wtime()
 
-            
-            if myrank==MASTER:    
-                
-                ruta=os.path.join(ruta_Act,'KNN_1V2MPI{}_Act_k{}_M.txt'.format(numWorkers,k))  
-                with open(ruta, 'a') as archivo:                                
-                    archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')"""
+    
+    if myrank==MASTER:            
+        
+        ruta=os.path.join(ruta_NoAct,'KNN_1MPI{}_NoAct_k{}_E.txt'.format(numWorkers,k)) 
+        with open(ruta, 'a') as archivo:                              
+            archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')"""
 
 
-            # ---------------------------------------------------------------------------
-            # --- EUCLIDEA --------------------------------------------------------------
-            # ---------------------------------------------------------------------------
+    """# --- ACTUALIZA -------------------------------------------------------------
 
-            totalTimeStart = MPI.Wtime()
-            
-            ejecuta_Act_E(comm,myrank, numWorkers, 
-                     n, x, d, clusters, ini, iniAsig, poblacionProbar[0:x], k)
-            totalTimeEnd = MPI.Wtime()
+    # ---------------------------------------------------------------------------
+    # --- MANHATTAN -------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+    totalTimeStart = MPI.Wtime()
+    
+    ejecuta_Act_M(comm,myrank, numWorkers, 
+                n, x, d, clusters, ini, iniAsig, poblacionProbar[0:x], k)
+    totalTimeEnd = MPI.Wtime()
 
-            
-            if myrank==MASTER:          
-                
-                ruta=os.path.join(ruta_Act,'KNN_1V2MPI{}_Act_k{}_E.txt'.format(numWorkers,k))  
-                with open(ruta, 'a') as archivo:                              
-                    archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
+    
+    if myrank==MASTER:    
+        
+        ruta=os.path.join(ruta_Act,'KNN_1V2MPI{}_Act_k{}_M.txt'.format(numWorkers,k))  
+        with open(ruta, 'a') as archivo:                                
+            archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')"""
 
-        if myrank==MASTER:
-            with open(ruta_Tam, 'a') as archivo:                               
-                archivo.write(str(x) + ', ')
+
+    # ---------------------------------------------------------------------------
+    # --- EUCLIDEA --------------------------------------------------------------
+    # ---------------------------------------------------------------------------   
+    
+    ejecuta_Act_E(comm,myrank, numWorkers, 
+                n, m, d, clusters, ini, iniAsig, poblacionProbar, k, procesar)
+    
+
+    
+
 
 def ejecuta_Act_E(comm, myrank, numWorkers, 
-             n, m, d, clusters, poblacionIni, asignacionIni, poblacionProbar, k):  
+             n, m, d, clusters, poblacionIni, asignacionIni, poblacionProbar, k, procesar):  
 
     MASTER=0
     END_OF_PROCESSING=-2
@@ -298,10 +294,11 @@ def ejecuta_Act_E(comm, myrank, numWorkers,
         # ----------------------------------------------------------------------
         
         
-
+        totalTimeStart = MPI.Wtime()
         asignacionProbar=[]     
                 
         cont=0
+        cont2=0
 
         for i in range(1,numWorkers+1):
             comm.send(None,dest=i)
@@ -343,7 +340,16 @@ def ejecuta_Act_E(comm, myrank, numWorkers,
             
             individuo+=1
             if individuo>numWorkers: individuo=1            
-                    
+            
+
+            if cont2<len(procesar) and cont>=procesar[cont2]:
+                totalTimeEnd = MPI.Wtime()
+
+                cont2+=1
+                print("(k={}) Euclidea_Act:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
+                ruta=os.path.join(ruta_Act,'KNN_1V2MPI{}_Act_k{}_E.txt'.format(numWorkers,k))  
+                with open(ruta, 'a') as archivo:                              
+                    archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
             
             cont+=1
 

@@ -9,6 +9,11 @@ import queue
 
 # Tiempo de ejecucion total: 9.944005100056529 10000_2D, 1000_2D, k=3
 
+directorio_script = os.path.dirname(os.path.abspath(__file__))
+ruta_Act=os.path.join(directorio_script, 'Actualiza')
+ruta_NoAct=os.path.join(directorio_script, 'No_Actualiza')
+ruta_Tam=os.path.join(directorio_script, 'Tam_Datos.txt')
+
 class MaxPriorityQueue(queue.PriorityQueue):
     def __init__(self):
         super().__init__()
@@ -143,12 +148,12 @@ def knn_clasificador_unoE(poblacion, asignacion, clusters, individuo, k):
 	
     return ret
 
-def ejecuta_actualizarE(poblacion, asignacion, n, poblacionProbar, m, clusters, k):    
- 
+def ejecuta_actualizarE(poblacion, asignacion, n, poblacionProbar, m, clusters, k,procesar):    
+    totalTimeStart = MPI.Wtime()
 
 
     d=len(poblacion[0])
-
+    cont=0
     asignacionProbar=[]    
     for x in range(m):                          
         pq = MaxPriorityQueue()        
@@ -186,14 +191,37 @@ def ejecuta_actualizarE(poblacion, asignacion, n, poblacionProbar, m, clusters, 
         poblacion.append(poblacionProbar[x])
         asignacion.append(ret)
         n+=1
+
+        if cont<len(procesar) and x>=procesar[cont]:
+            totalTimeEnd = MPI.Wtime()
+
+            cont+=1
+            print("(k={}) Euclidea_Act:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
+    
+
+            ruta=os.path.join(ruta_Act,'KNN_Act_k{}_E.txt'.format(k))  
+            with open(ruta, 'a') as archivo:                              
+                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
    
 # Ejecuta sin almacenar 
-def ejecuta_sin_actualizarE(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k):    
+def ejecuta_sin_actualizarE(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k, procesar):    
     
         
+    totalTimeStart = MPI.Wtime()
+    cont=0
     asignacionProbar=[]
     for i in range(m):           
         asignacionProbar.append(knn_clasificador_unoE(poblacionIni, asignacionIni, clusters, poblacionProbar[i],k))
+        if cont<len(procesar) and i>=procesar[cont]:
+            totalTimeEnd = MPI.Wtime()
+
+            cont+=1           
+            print("(k={}) Euclidea_NoAct:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
+    
+    
+            ruta=os.path.join(ruta_NoAct,'KNN_NoAct_k{}_E.txt'.format(k))  
+            with open(ruta, 'a') as archivo:                               
+                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
 
 
 """
@@ -240,11 +268,11 @@ def knn_clasificador_unoM(poblacion, asignacion, clusters, individuo, k):
 	
     return ret
 
-def ejecuta_actualizarM(poblacion, asignacion, n, poblacionProbar, m, clusters, k):    
-
+def ejecuta_actualizarM(poblacion, asignacion, n, poblacionProbar, m, clusters, k, procesar):    
+    totalTimeStart = MPI.Wtime()
 
     d=len(poblacion[0])
-
+    cont=0
     asignacionProbar=[]    
     for x in range(m):                          
         pq = MaxPriorityQueue()        
@@ -282,15 +310,36 @@ def ejecuta_actualizarM(poblacion, asignacion, n, poblacionProbar, m, clusters, 
         asignacion.append(ret)
         n+=1
 
+        if cont<len(procesar) and x>=procesar[cont]:
+            totalTimeEnd = MPI.Wtime()
+
+            cont+=1
+            print("(k={}) Manhattan_Act:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
+    
+
+            ruta=os.path.join(ruta_Act,'KNN_Act_k{}_M.txt'.format(k))  
+            with open(ruta, 'a') as archivo:                      
+                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
+
 # Ejecuta sin almacenar 
-def ejecuta_sin_actualizarM(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k):    
+def ejecuta_sin_actualizarM(poblacionIni, asignacionIni, n, poblacionProbar, m, clusters, k, procesar):    
     totalTimeStart = MPI.Wtime()
-        
+    cont=0
     asignacionProbar=[]
+    
     for i in range(m):           
         asignacionProbar.append(knn_clasificador_unoM(poblacionIni, asignacionIni, clusters, poblacionProbar[i],k))
+        if cont<len(procesar) and i>=procesar[cont]:
+            totalTimeEnd = MPI.Wtime()
+
+            cont+=1
+            print("(k={}) Manhattan_NoAct:\t{}".format(k,totalTimeEnd-totalTimeStart))
     
-    totalTimeEnd = MPI.Wtime()
+            ruta=os.path.join(ruta_NoAct,'KNN_NoAct_k{}_M.txt'.format(k))  
+            with open(ruta, 'a') as archivo:                              
+                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
+            
+
       
     
 
@@ -306,88 +355,85 @@ def main():
     m=len(poblacionProbar)
 
     clusters=4
-    k=10
+    k=15
     
     procesar=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000, 11000, 12000, 13000, 14000, 15000, 16000, 17000, 18000, 19000, 20000, 21000, 22000, 23000, 24000, 25000, 26000, 27000, 28000, 29000, 30000, 31000, 32000, 33000, 34000, 35000, 36000, 37000, 38000, 39000, 40000, 41000, 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 52000, 53000, 54000, 55000, 56000, 57000, 58000, 59000, 60000, 61000, 62000, 63000, 64000, 65000, 66000, 67000, 68000, 69000, 70000, 71000, 72000, 73000, 74000, 75000, 76000, 77000, 78000, 79000, 80000, 81000, 82000, 83000, 84000, 85000, 86000, 87000, 88000, 89000, 90000, 91000, 92000, 93000, 94000, 95000, 96000, 97000, 98000, 99000, 100000]
     #procesar_k=[2,4,6,8,10,15,20,30,50,100]    
-    procesar_k=[10]
-
-    directorio_script = os.path.dirname(os.path.abspath(__file__))
-    ruta_Act=os.path.join(directorio_script, 'Actualiza')
-    ruta_NoAct=os.path.join(directorio_script, 'No_Actualiza')
-    ruta_Tam=os.path.join(directorio_script, 'Tam_Datos.txt')
     
-    for x in procesar:
-        ini=[]
-        iniAsig=[]
-        for y in poblacionIni:
-            ini.append(y)
-        for y in asignacionIni:
-            iniAsig.append(y)
 
-        for k in procesar_k:
-            # ---------------------------------------------------------------------------
-            # --- MANHATTAN -------------------------------------------------------------
-            # ---------------------------------------------------------------------------
-            totalTimeStart = MPI.Wtime()
-            ejecuta_sin_actualizarM(ini, iniAsig, n, 
-                                poblacionProbar[0:x+1], x, clusters, k)
-            totalTimeEnd = MPI.Wtime()
-            if k!=100: print("(k={}) Manhattan_NoAct:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
-            else: print("(k={}) Manhattan_NoAct:\t{}".format(k,totalTimeEnd-totalTimeStart))
-            
-            ruta=os.path.join(ruta_NoAct,'KNN_NoAct_k{}_M.txt'.format(k))  
-            with open(ruta, 'a') as archivo:                              
-                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
+    
+    
+    
 
-            # ---------------------------------------------------------------------------
-            # --- EUCLIDEA --------------------------------------------------------------
-            # ---------------------------------------------------------------------------
-            totalTimeStart = MPI.Wtime()
-            ejecuta_sin_actualizarE(ini, iniAsig, n, 
-                                poblacionProbar[0:x+1], x, clusters, k)
-            totalTimeEnd = MPI.Wtime()
-            print("(k={}) Euclidea_NoAct:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
-            
-            
-            ruta=os.path.join(ruta_NoAct,'KNN_NoAct_k{}_E.txt'.format(k))  
-            with open(ruta, 'a') as archivo:                               
-                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
-        
+    
+    # ---------------------------------------------------------------------------
+    # --- MANHATTAN -------------------------------------------------------------
+    # ---------------------------------------------------------------------------
 
-        for k in procesar_k:
-            # ---------------------------------------------------------------------------
-            # --- MANHATTAN -------------------------------------------------------------
-            # ---------------------------------------------------------------------------
-            totalTimeStart = MPI.Wtime()
-            ejecuta_actualizarM(ini, iniAsig, n, 
-                                poblacionProbar[0:x+1], x, clusters, k)
-            totalTimeEnd = MPI.Wtime()
-            print("(k={}) Manhattan_Act:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
-            
+    ini=[]
+    iniAsig=[]
+    for y in poblacionIni:
+        ini.append(y)
+    for y in asignacionIni:
+        iniAsig.append(y)
 
-            ruta=os.path.join(ruta_Act,'KNN_Act_k{}_M.txt'.format(k))  
-            with open(ruta, 'a') as archivo:                      
-                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
+    
 
-            # ---------------------------------------------------------------------------
-            # --- EUCLIDEA --------------------------------------------------------------
-            # ---------------------------------------------------------------------------
-            totalTimeStart = MPI.Wtime()
-            ejecuta_actualizarE(ini, iniAsig, n, 
-                                poblacionProbar[0:x+1], x, clusters, k)
-            totalTimeEnd = MPI.Wtime()
-            print("(k={}) Euclidea_Act:\t\t{}".format(k,totalTimeEnd-totalTimeStart))
-           
+    
+    ejecuta_sin_actualizarM(ini, iniAsig, n, 
+                        poblacionProbar, m, clusters, k, procesar)
 
-            ruta=os.path.join(ruta_Act,'KNN_Act_k{}_E.txt'.format(k))  
-            with open(ruta, 'a') as archivo:                              
-                archivo.write(str(totalTimeEnd-totalTimeStart) + ', ')
+    # ---------------------------------------------------------------------------
+    # --- EUCLIDEA --------------------------------------------------------------
+    # ---------------------------------------------------------------------------
 
-        print()
-        
-        with open(ruta_Tam, 'a') as archivo:                               
-                archivo.write(str(x) + ', ')
+    ini=[]
+    iniAsig=[]
+    for y in poblacionIni:
+        ini.append(y)
+    for y in asignacionIni:
+        iniAsig.append(y)
+
+
+    ejecuta_sin_actualizarE(ini, iniAsig, n, 
+                        poblacionProbar, m, clusters, k, procesar)
+    
+
+    
+    # ---------------------------------------------------------------------------
+    # --- MANHATTAN -------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+
+    ini=[]
+    iniAsig=[]
+    for y in poblacionIni:
+        ini.append(y)
+    for y in asignacionIni:
+        iniAsig.append(y)
+
+
+    ejecuta_actualizarM(ini, iniAsig, n, 
+                        poblacionProbar,m, clusters, k, procesar)
+    
+
+    # ---------------------------------------------------------------------------
+    # --- EUCLIDEA --------------------------------------------------------------
+    # ---------------------------------------------------------------------------
+    
+    ini=[]
+    iniAsig=[]
+    for y in poblacionIni:
+        ini.append(y)
+    for y in asignacionIni:
+        iniAsig.append(y)
+
+    ejecuta_actualizarE(ini, iniAsig, n, 
+                        poblacionProbar, m, clusters, k, procesar)
+    
+    
+
+    
+    
 
 
 main()

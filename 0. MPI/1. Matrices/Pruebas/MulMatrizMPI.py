@@ -1,30 +1,16 @@
 from mpi4py import MPI
-import numpy as np
 import sys
 import os
+import random
 
 # EJECUTAR
 # mpiexec -np 5 python MulMatrizMPI.py
 
-"""
-MASTER ENVIA FILAS CONFORME LOS WORKERS TERMINAN 
-"""
-
-def guarda_datos(archivo,datos,tamDatos):    
-    
-
-    with open(archivo[0], 'w') as file:
-        for i, val in enumerate(datos):
-            file.write("{}, ".format(val))
-        file.write("\n")
-    with open(archivo[1], 'w') as file:
-        for i, val in enumerate(tamDatos):
-            file.write("{}, ".format(val))
-        file.write("\n")
-
 # Generar matriz aleatoria
-def genera_matriz(valor_maximo, n, m):
-    return np.random.randint(0, valor_maximo, size=(n, m))
+def genera_matriz(valor_maximo, n):
+    ret=[[random.randint(valor_maximo) for _ in range(n)] for _ in range(n)]
+    return ret
+
 
 def print_matriz(matriz):
     i=0
@@ -99,7 +85,9 @@ def main():
         # Generate matrix A			
         #print("Generando matriz A ({}x{})".format(filas,columnas))        
         #matrizA=genera_matriz(valor_maximo,filas,columnas)
-        matrizA,filas,columnas=leeArchivo("M1000X1000")
+        filas=10#5000
+        columnas=10#5000
+        matrizA=genera_matriz(10,filas)        
         print("Matriz A ({}x{})".format(filas,columnas))
         
         if PRINT:
@@ -114,7 +102,7 @@ def main():
         #print("Generando matriz B ({}x{})".format(filas,columnas))        
         #matrizB = genera_matriz(valor_maximo,filas,columnas)
         
-        matrizB,_,_=leeArchivo("M1000X1000")
+        matrizB=genera_matriz(10,filas)  
         print("Matriz B ({}x{})".format(filas,columnas))        
         if PRINT:
             print("Matriz B:")
@@ -122,12 +110,9 @@ def main():
             print(matrizB)
             print("\n")
         
-        
-    
-    
-    datos=[]
-    tamDatos=[]
-    procesa=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460,480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000]
+      
+    procesa=[10]#100,200,250,500,1000,1500,2000,2500,3000,3500,4000,4500,5000]
+    ruta_pruebas=os.path.dirname(os.path.abspath(__file__))
 
     for x in procesa:
         if myrank==0:
@@ -199,10 +184,10 @@ def main():
             
             for i in range(1,numWorkers+1):
                 comm.send(0,dest=i)
-            datos.append(timeEnd-timeStart)
-            tamDatos.append(x)
-            print("Tiempo de ejecucion: {}".format(timeEnd-timeStart))
-            guarda_datos(["MatrizMPI{}.txt".format(numWorkers),"TamDatos.txt"],datos,tamDatos)
+            
+            ruta=os.path.join(ruta_pruebas,"Mul_Matriz_MPI{}.txt".format(numWorkers))    
+            with open(ruta, 'a') as archivo:                               
+                archivo.write(str(timeEnd-timeStart) + ', ')
             
             
         else: # Workers

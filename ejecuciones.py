@@ -45,9 +45,12 @@ def GUI(x, funciones, labels):
     plt.show()
 
 def main():
+    labels=["pevP"]
+
     # Ordenaciones
     # N2
     #labels = ["BubbleSort","InsertionSort","SelectionSort","SequentialSort","SequentialSort_MPI(5)"]
+    #labels = ["SequentialSort_1MPI(5)","SequentialSort_2MPI(5)"]
     # NlogN
     #labels = ["MergeSort","MergeSort_MPI(4)","MergeSort_MPI(8)","MergeSort_MPI(16)","MergeSort_MPI(32)",]
 
@@ -98,7 +101,7 @@ def main():
     # Basico
     #labels=["Euclidea_Act","Euclidea_sinAct","Manhattan_Act","Manhattan_sinAct"]
     # Comparacion
-    labels=["Secuencial","1.1_MPI(4)","1.2_MPI(4)","2_MPI(4)"]
+    #labels=["Secuencial","1.1_MPI(4)","1.2_MPI(4)","2_MPI(4)"]
 
 
     # REDES NEURONALES
@@ -112,9 +115,10 @@ def main():
         tam=min(tam,len(f))
         print(len(f))
     # GENERAL
-    x=leeArchivo("TamDatos") 
+    #x=leeArchivo("TamDatos") 
     # PEV
     #x=[25,50,100,200,500,1000,2000]
+    x=[10*i for i in range(1,1000)]
     if tam>len(x): tam=len(x)
     x=x[0:tam] 
 

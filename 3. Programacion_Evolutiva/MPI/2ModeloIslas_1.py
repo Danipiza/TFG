@@ -3534,8 +3534,8 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=25//numWorkers
-        generaciones=25
+        tam_poblacion=10000//numWorkers
+        generaciones=10
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
@@ -3543,20 +3543,20 @@ def main():
         # 0: Basica | 1: Uniforme | 
         # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
         # 7: Intercambio
-        cruce_idx=0
+        cruce_idx=7
         prob_cruce=0.6
         # 0: Basica    |     
         # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
         # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
         #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-        mut_idx=0
+        mut_idx=5
         # Binario: 0.05 | Real: 0.3
-        prob_mut=0.3 
-        precision=0.01
+        prob_mut=0.3
+        precision=0.0000000001
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
-        funcion_idx=0
+        funcion_idx=7
         num_genes=2
         elitismo=0
 
@@ -3566,11 +3566,11 @@ def main():
 
         long_cromosoma=100
 
-        filas=8
-        columnas=8
+        filas=100
+        columnas=100
         # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
         bloating_idx=0
-        ticks=100
+        ticks=10000
 
         print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
                                                                       seleccion_opt[seleccion_idx],
