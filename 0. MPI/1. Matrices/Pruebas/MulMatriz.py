@@ -27,19 +27,19 @@ def print_matriz(matriz):
 def main():       
     PRINT = False           # boolean.  Imprimir matrices
 
-    matrizA,fA,cA=leeArchivo("M1000X1000")
+    matrizA,fA,cA=leeArchivo("M2000X2000")
     print("Matriz A({}x{}), generada.".format(fA,cA))    
-    matrizB,fB,cB=leeArchivo("M1000X1000")
+    matrizB,fB,cB=leeArchivo("M2000X2000")
     print("Matriz B({}x{}), generada.".format(fB,cB))
     
+    ruta_pruebas = os.path.dirname(os.path.abspath(__file__))    
 
     if cA != fB:
         print("No se pueden multiplicar las matrices. cA ({}) != fB ({})".format(cA,fB))
     else:
         matrizC = [[0 for _ in range(cB)] for _ in range(fA)]
     
-    # 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460,
-    procesa=[480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000]
+    procesa=[10*i for i in range(1,200)]       
 
     datos=[[]]
     tamDatos=[]
@@ -61,6 +61,14 @@ def main():
         datos[0].append(timeEnd-timeStart)
         tamDatos.append(x)
         guarda_datos(["MulMatriz.txt","TamDatos.txt"],datos,tamDatos)
+        
+        ruta=os.path.join(ruta_pruebas,'MulMatriz.txt')    
+        with open(ruta, 'a') as archivo:                               
+            archivo.write(str(timeEnd-timeStart) + ', ')
+        
+        ruta=os.path.join(ruta_pruebas,'TamDatos.txt')    
+        with open(ruta, 'a') as archivo:                               
+            archivo.write(str(x) + ', ')
     
     
         

@@ -85,9 +85,10 @@ def main():
         # Generate matrix A			
         #print("Generando matriz A ({}x{})".format(filas,columnas))        
         #matrizA=genera_matriz(valor_maximo,filas,columnas)
-        filas=10#5000
-        columnas=10#5000
-        matrizA=genera_matriz(10,filas)        
+        #filas=1000#5000
+        #columnas=1000#5000
+        matrizA=genera_matriz(10,filas) 
+        matrizA,filas,columnas=leeArchivo("M2000X2000")           
         print("Matriz A ({}x{})".format(filas,columnas))
         
         if PRINT:
@@ -102,7 +103,8 @@ def main():
         #print("Generando matriz B ({}x{})".format(filas,columnas))        
         #matrizB = genera_matriz(valor_maximo,filas,columnas)
         
-        matrizB=genera_matriz(10,filas)  
+        #matrizB=genera_matriz(10,filas)             
+        matrizB,_,_=leeArchivo("M2000X2000")    
         print("Matriz B ({}x{})".format(filas,columnas))        
         if PRINT:
             print("Matriz B:")
@@ -111,7 +113,8 @@ def main():
             print("\n")
         
       
-    procesa=[10]#100,200,250,500,1000,1500,2000,2500,3000,3500,4000,4500,5000]
+    #procesa=[10]#100,200,250,500,1000,1500,2000,2500,3000,3500,4000,4500,5000]
+    procesa=[10*i for i in range(1,200)] 
     ruta_pruebas=os.path.dirname(os.path.abspath(__file__))
 
     for x in procesa:
@@ -188,6 +191,10 @@ def main():
             ruta=os.path.join(ruta_pruebas,"Mul_Matriz_MPI{}.txt".format(numWorkers))    
             with open(ruta, 'a') as archivo:                               
                 archivo.write(str(timeEnd-timeStart) + ', ')
+            
+            ruta=os.path.join(ruta_pruebas,'TamDatosMPI{}.txt'.format(numWorkers))    
+            with open(ruta, 'a') as archivo:                               
+                archivo.write(str(x) + ', ')
             
             
         else: # Workers

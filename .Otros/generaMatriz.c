@@ -3,6 +3,13 @@
 #include <string.h>
 #include <time.h>
 
+// COMPILAR: gcc generaMatriz.c -o getMat
+
+// EJECUTAR: ./genMat M<filas>X<columnas> <maximo valor en la matriz> 
+
+// EJEMPLO, genera una matriz 100x100 con enteros en el intervalo [1-10]: 
+// ./genMat M100X100 10
+
 
 int main(int argc, char** argv) {    
     //char archivo[96]; 

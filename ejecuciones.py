@@ -54,6 +54,9 @@ def main():
     # NlogN
     #labels = ["MergeSort","MergeSort_MPI(4)","MergeSort_MPI(8)","MergeSort_MPI(16)","MergeSort_MPI(32)",]
 
+    # Matriz
+    labels=["MulMatriz","Mul_Matriz_MPI4"]
+
     # Aglomerativo      
     #labels=["ESimple_Euclidea","ESimple_Manhattan","Centroide_Euclidea","Centroide_Manhattan"]
     #labels=["Secuencial","1MPI(4)","2MPI(4)"]#,"MPI(20)"]

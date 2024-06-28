@@ -40,7 +40,7 @@ def write_converged_file3D(input_files, output_file, D):
             outfile.write(f"{line}\n")
 
 # Usage
-input_files = ['TamDatos.txt','ideal_speed.txt','bin.txt','real.txt','arb.txt']
-output_file = 'pev_2mpi_speedup.txt'
+input_files = ['TamDatos.txt','MulMatriz.txt','Mul_Matriz_MPI4.txt']
+output_file = 'multiplicacion.txt'
 
 write_converged_file(input_files, output_file)
