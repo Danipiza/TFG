@@ -1,8 +1,0 @@
-mpiexec -np 101 python .\Real_MPI.py
-mpiexec -np 201 python .\Real_MPI.py
-mpiexec -np 501 python .\Real_MPI.py
-mpiexec -np 1001 python .\Real_MPI.py
-mpiexec -np 101 python .\Arbol_MPI.py
-mpiexec -np 201 python .\Arbol_MPI.py
-mpiexec -np 501 python .\Arbol_MPI.py
-mpiexec -np 1001 python .\Arbol_MPI.py

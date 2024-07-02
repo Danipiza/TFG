@@ -1,0 +1,32 @@
+#['aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque','blanchedalmond', 'blueviolet', 
+
+, 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk', 
+
+'crimson', 'cyan', 'darkcyan', 'darkgoldenrod', 'darkgray', 
+
+, 'darkgrey', 'darkkhaki', 'darkmagenta', 'darkolivegreen', 
+
+'darkorange', 'darkorchid', 'darkred', 'darksalmon', 'darkseagreen', 
+
+'darkslateblue', 'darkslategray', 'darkslategrey', 
+
+'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dimgrey', 'dodgerblue', 'floralwhite', 'gainsboro', 'ghostwhite',
+
+'yellowgreen', 'gold', 'goldenrod', 
+
+ 'greenyellow', 'grey',
+
+, 'honeydew', 'hotpink', 'indianred', 'indigo', 
+
+'ivory', 'khaki', , 'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral', 'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen', 'lightgrey', 'lightpink', 'lightsalmon', 'lightseagreen', 
+
+'lightskyblue', 'lightslategray', 'lightslategrey', 'lightsteelblue', 'lightyellow', 'lime', 'limegreen', 'linen', , 'maroon', 'mediumaquamarine', 
+
+'mediumblue', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue', 'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin', 'navajowhite', , 'oldlace', 'olive', 'olivedrab', 'orange', 'orangered', 'orchid', 
+
+, 'palegreen', 'paleturquoise', 'palevioletred', 'papayawhip', 'peachpuff', 'peru', 'plum', 'powderblue', 'purple', 'rebeccapurple',  'rosybrown', 'royalblue', 'saddlebrown',  'sandybrown', 'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue', 
+
+'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'wheat', 'white', 'whitesmoke']
+
+
+    

@@ -1,0 +1,2 @@
+procesar_poblaciones=[25,50,100,200,500,1000,2000]
+procesar_generaciones=[25,50,100,200,500,1000,2000]

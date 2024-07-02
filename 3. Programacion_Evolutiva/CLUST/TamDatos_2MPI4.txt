@@ -1,1 +1,0 @@
-<__main__.IndividuoReal object at 0x00000222D5513950>, <__main__.IndividuoReal object at 0x00000222D69FB490>, <__main__.IndividuoReal object at 0x00000222DC857C90>, 

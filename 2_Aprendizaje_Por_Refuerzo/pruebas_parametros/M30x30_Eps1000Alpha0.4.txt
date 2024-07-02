@@ -1,0 +1,80 @@
+W4. Gamma: 0.2	Epsilon: 0.1	 Tiempo: 2.1217075000022305s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.1	 Tiempo: 3.2815365999995265s	Bucle en Entrenamiento
+W4. Gamma: 0.2	Epsilon: 0.2	 Tiempo: 2.1341831000027014s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.2	 Tiempo: 2.1048195000039414s	Bucle en Entrenamiento
+W4. Gamma: 0.2	Epsilon: 0.3	 Tiempo: 2.21533819999604s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.3	 Tiempo: 2.769713799993042s	Bucle en Entrenamiento
+W4. Gamma: 0.2	Epsilon: 0.4	 Tiempo: 2.842538600001717s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.4	 Tiempo: 2.3810475999925984s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.5	 Tiempo: 2.544757600000594s	Bucle en Entrenamiento
+W4. Gamma: 0.2	Epsilon: 0.5	 Tiempo: 4.192740099999355s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.6	 Tiempo: 2.137544600002002s	Bucle en Entrenamiento
+W4. Gamma: 0.2	Epsilon: 0.6	 Tiempo: 2.4777616999926977s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.7	 Tiempo: 3.575924100005068s	Bucle en Entrenamiento
+W4. Gamma: 0.2	Epsilon: 0.7	 Tiempo: 4.564616400006344s	Bucle en Entrenamiento
+W3. Gamma: 0.1	Epsilon: 0.8	 Tiempo: 2.2162093999941135s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.1	 Tiempo: 2.137696399993729s	Bucle en Entrenamiento
+W4. Gamma: 0.2	Epsilon: 0.8	 Tiempo: 4.72617180000816s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.2	 Tiempo: 3.0409580999985337s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.1	 Tiempo: 2.988278499993612s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.3	 Tiempo: 2.4308795999968424s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.2	 Tiempo: 3.9940776000003098s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.4	 Tiempo: 4.396354699987569s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.3	 Tiempo: 2.9419246000034036s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.5	 Tiempo: 3.3127768999984255s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.4	 Tiempo: 2.9476162000064505s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.6	 Tiempo: 6.357076799991773s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.5	 Tiempo: 9.288760499999626s	Bucle en Entrenamiento
+W3. Gamma: 0.3	Epsilon: 0.7	 Tiempo: 5.050242199999047s	Bucle en Entrenamiento
+W1. Gamma: 0.5	Epsilon: 0.1	 Tiempo: 0.24361460001091473s	Movimientos: 56
+W1. Gamma: 0.5	Epsilon: 0.2	 Tiempo: 0.27866399999766145s	Movimientos: 56
+W1. Gamma: 0.5	Epsilon: 0.3	 Tiempo: 0.3037830999965081s	Movimientos: 56
+W1. Gamma: 0.5	Epsilon: 0.4	 Tiempo: 0.36645499999576714s	Movimientos: 56
+W1. Gamma: 0.5	Epsilon: 0.5	 Tiempo: 0.4384654000023147s	Movimientos: 56
+W1. Gamma: 0.5	Epsilon: 0.6	 Tiempo: 0.5062723999872105s	Movimientos: 56
+W1. Gamma: 0.5	Epsilon: 0.7	 Tiempo: 0.6851773999951547s	Movimientos: 56
+W3. Gamma: 0.3	Epsilon: 0.8	 Tiempo: 4.110018299994408s	Bucle en Entrenamiento
+W3. Gamma: 0.6	Epsilon: 0.1	 Tiempo: 0.24497770000016317s	Movimientos: 56
+W3. Gamma: 0.6	Epsilon: 0.2	 Tiempo: 0.26453099999343976s	Movimientos: 56
+W3. Gamma: 0.6	Epsilon: 0.3	 Tiempo: 0.31561340000189375s	Movimientos: 56
+W1. Gamma: 0.5	Epsilon: 0.8	 Tiempo: 1.079662100004498s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.1	 Tiempo: 0.2392965000035474s	Movimientos: 56
+W3. Gamma: 0.6	Epsilon: 0.4	 Tiempo: 0.36830109999573324s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.2	 Tiempo: 0.2898736000061035s	Movimientos: 56
+W3. Gamma: 0.6	Epsilon: 0.5	 Tiempo: 0.4707085999980336s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.3	 Tiempo: 0.3179824999970151s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.4	 Tiempo: 0.3881734000024153s	Movimientos: 56
+W3. Gamma: 0.6	Epsilon: 0.6	 Tiempo: 0.5526230000104988s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.5	 Tiempo: 0.4288885999994818s	Movimientos: 56
+W3. Gamma: 0.6	Epsilon: 0.7	 Tiempo: 0.6933278000069549s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.6	 Tiempo: 0.501070800004527s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.7	 Tiempo: 0.6784884999942733s	Movimientos: 56
+W3. Gamma: 0.6	Epsilon: 0.8	 Tiempo: 1.0439576000062516s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.1	 Tiempo: 0.22100449999561533s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.2	 Tiempo: 0.24684790000901558s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.3	 Tiempo: 0.2926995000016177s	Movimientos: 56
+W1. Gamma: 0.7	Epsilon: 0.8	 Tiempo: 1.0329778000013903s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.1	 Tiempo: 0.21995329999481328s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.4	 Tiempo: 0.32658470000023954s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.2	 Tiempo: 0.24060000000463333s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.5	 Tiempo: 0.3899519999977201s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.3	 Tiempo: 0.30135139999038074s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.4	 Tiempo: 0.34860670000489336s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.6	 Tiempo: 0.5137211999972351s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.5	 Tiempo: 0.3792645000066841s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.7	 Tiempo: 0.6964117000024999s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.6	 Tiempo: 0.49527739999757614s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.7	 Tiempo: 0.6600945999962278s	Movimientos: 56
+W3. Gamma: 0.8	Epsilon: 0.8	 Tiempo: 1.052423600005568s	Movimientos: 56
+W1. Gamma: 0.9	Epsilon: 0.8	 Tiempo: 1.0510243000026094s	Movimientos: 56
+W3. Gamma: 1.0	Epsilon: 0.1	 Tiempo: 2.751009800005704s	Bucle en Entrenamiento
+W3. Gamma: 1.0	Epsilon: 0.2	 Tiempo: 17.80344969998987s	Movimientos: 56
+W3. Gamma: 1.0	Epsilon: 0.3	 Tiempo: 9.704135100007989s	Movimientos: 56
+W3. Gamma: 1.0	Epsilon: 0.4	 Tiempo: 5.991827899997588s	Movimientos: 56
+W3. Gamma: 1.0	Epsilon: 0.5	 Tiempo: 3.631671799987089s	Movimientos: 56
+W3. Gamma: 1.0	Epsilon: 0.6	 Tiempo: 4.216203199990559s	Movimientos: 56
+W3. Gamma: 1.0	Epsilon: 0.7	 Tiempo: 2.5428748999984236s	Movimientos: 56
+W3. Gamma: 1.0	Epsilon: 0.8	 Tiempo: 2.110246600001119s	Movimientos: 56
+W4. Gamma: 0.4	Epsilon: 0.6	 Tiempo: 63.167358999999124s	Bucle en Entrenamiento
+W4. Gamma: 0.4	Epsilon: 0.7	 Tiempo: 76.83553290000418s	Bucle en Prueba
+W4. Gamma: 0.4	Epsilon: 0.8	 Tiempo: 20.84635900000285s	Bucle en Prueba

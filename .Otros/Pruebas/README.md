@@ -1,1 +1,0 @@
-Los ficheros con las pruebas ejecutadas estan en este enlace [drive](https://drive.google.com/drive/folders/1ZkNmnM6vWJB82QAWXuf8mihNEHusAshO?usp=drive_link)

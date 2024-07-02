@@ -1,1 +1,0 @@
-print([1000+(i*50) for i in range(1,91)])
