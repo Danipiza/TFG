@@ -188,6 +188,7 @@ class Pacman:
         self.ROSA=6
         self.AZUL=7
         self.NARANJA=8
+        self.COLORES_FANTS=[5,6,7,8]
 
         # Acciones
         self.ARRIBA='arriba'
@@ -243,6 +244,7 @@ class Pacman:
         self.posicion_fants=[[0,0] for _ in range(4)]
         self.direccion_fants=[1,2,0,0]
         self.casa_fants=[False,True,True,True]
+        self.en_casa=[[1,3],[2,6],[3,9]]
         
         # Laberinto
         self.laberinto=[]
@@ -300,15 +302,10 @@ class Pacman:
                 
         
         self.imprime_laberinto()
-        #self.imprime_monedas()
 
         cont=0
         for x in range(len(self.laberinto)):
-            for y in range(len(self.laberinto[0])):
-                """if self.laberinto[x][y]==2:
-                    self.monedas_matriz[x][y]=1
-                    self.laberinto[x][y]=0"""
-                    
+            for y in range(len(self.laberinto[0])):                    
                 if self.laberinto[x][y]==self.AGENTE: 
                     self.posicion_agente=[x,y]
                     cont+=1
@@ -374,6 +371,14 @@ class Pacman:
                 if self.monedas_matriz[x-1][y]==self.MONEDA: 
                     self.monedas_matriz[x-1][y]=0
                     moneda=1
+                elif self.monedas_matriz[x-1][y]==self.POWER: 
+                    self.monedas_matriz[x-1][y]=0
+                    self.state=2
+                    self.cont_state=0
+                    for i in range(4):                        
+                        if not self.casa_fants[i]:
+                            self.direccion_fants[i]+=2
+                            self.direccion_fants[i]%=4                        
                 self.laberinto[x][y]=self.VACIO
                 x-=1
         elif mov==self.ABAJO:
@@ -381,6 +386,14 @@ class Pacman:
                 if self.monedas_matriz[x+1][y]==self.MONEDA: 
                     self.monedas_matriz[x+1][y]=0
                     moneda=1
+                elif self.monedas_matriz[x+1][y]==self.POWER: 
+                    self.monedas_matriz[x+1][y]=0
+                    self.state=2
+                    self.cont_state=0
+                    for i in range(4):
+                        if not self.casa_fants[i]:
+                            self.direccion_fants[i]+=2
+                            self.direccion_fants[i]%=4
                 self.laberinto[x][y]=self.VACIO
                 x+=1
         elif mov==self.IZQUIERDA:
@@ -390,7 +403,7 @@ class Pacman:
                     moneda=1
                 self.laberinto[x][y]=self.VACIO
                 y-=1
-            elif y==0 and (x==5 or x==9):
+            elif y==0 and (x==5 or x==9): # TODO
                 if self.monedas_matriz[x][self.m-1]==self.MONEDA: 
                     self.monedas_matriz[x][self.m-1]=0
                     moneda=1
@@ -403,12 +416,25 @@ class Pacman:
                     moneda=1
                 self.laberinto[x][y]=self.VACIO
                 y+=1
-            elif y==self.m-1 and (x==5 or x==9):
+            elif y==self.m-1 and (x==5 or x==9): # TODO
                 if self.monedas_matriz[x][0]==self.MONEDA: 
                     self.monedas_matriz[x][0]=0
                     moneda=1
                 self.laberinto[x][y]=self.VACIO
                 y=0
+        
+        if self.state==2:
+            comidos=[]
+            for i in range(4):
+                if self.posicion_fants[i][0]==x and self.posicion_fants[i][1]==y:
+                    comidos.append(i)
+            
+            for i in comidos:
+                self.posicion_fants[i][0]=self.salida_fants[0]+2
+                self.posicion_fants[i][1]=self.salida_fants[1]
+                self.en_casa.append([i,self.cont+3])
+                self.casa_fants[i]=[self.posicion_fants[i][0],self.posicion_fants[i][1]]
+                
 
         self.laberinto[x][y]=self.AGENTE
         self.posicion_agente=[x,y]
@@ -418,9 +444,9 @@ class Pacman:
     def mover_fants(self):
         
                           
-        self.mover_fantasma(0)
+        self.mover_fantasma(0) 
         self.mover_fantasma(1)
-        """self.mover_fantasma(2)"""
+        self.mover_fantasma(2)
         self.mover_fantasma(3)
 
 
@@ -430,8 +456,19 @@ class Pacman:
         print("Estado=", self.cont_state, "\tMonedas=",self.monedas)
         if self.cont_state==self.state_ticks[self.state]:          
             
-            if self.state==0: self.state=1
-            else: self.state=0
+            if self.state==0: 
+                self.state=1
+                print("NUEVO ESTADO: SCATTER",end="")
+            else: 
+                self.state=0
+                print("NUEVO ESTADO: CHASE",end="")
+
+            for i in range(4):
+                if not self.casa_fants[i]:
+                    self.direccion_fants[i]+=2
+                    self.direccion_fants[i]%=4
+            
+            print("\tGIRA 180º")
 
             self.cont_state=0
 
@@ -447,7 +484,9 @@ class Pacman:
         aux_x=0
         aux_y=0
         
-        if not self.casa_fants[fantasma]:
+        
+        if not self.casa_fants[fantasma] and (not(self.state==2 and self.cont_state%2==0)):
+            """print("SE MUEVE:",self.COLORES_FANTS[fantasma], "POS:", self.posicion_fants[fantasma])"""
             dir=self.direccion_fants[fantasma]
             x=self.posicion_fants[fantasma][0]
             y=self.posicion_fants[fantasma][1]
@@ -456,7 +495,7 @@ class Pacman:
             
             self.laberinto[x][y]=self.VACIO
 
-            print(self.posicion_agente)
+            """print(self.posicion_agente)"""
 
             # Se mueve para la direccion si no esta en una interseccion
             if self.laberinto[x+aux_x][y+aux_y]<0 and self.laberinto[x-aux_x][y-aux_y]<0:                                
@@ -471,8 +510,19 @@ class Pacman:
                 
             else: 
                 if self.state==2: # FRIGHTENED
-                    print("FRIGHTENED")
-                    
+                    """print("FRIGHTENED")"""
+                    opcs=[]
+                    for k in range(4):
+                        tmp_x=x+self.mX[k]
+                        tmp_y=y+self.mY[k]
+                        if k==((dir+2)%4) or self.laberinto[tmp_x][tmp_y]<0: continue # no puede ir para atras
+                        opcs.append(k)
+                    opc=random.randint(0,len(opcs)-1)
+                    x+=self.mX[opcs[opc]]
+                    y+=self.mY[opcs[opc]]
+                    self.direccion_fants[fantasma]=opcs[opc]
+
+
                 else:
                     target=[0,0]
                     if self.state==0: # CHASE
@@ -542,15 +592,21 @@ class Pacman:
             
             # "portales"
             if y==self.m and (x==5 or x==9): y=0
-            if y==0 and (x==5 or x==9): y=self.m-1
+            if y==-1 and (x==5 or x==9): y=self.m-1
             
+            """print(self.m, x, y)"""
             self.posicion_fants[fantasma][0]=x
             self.posicion_fants[fantasma][1]=y
             self.laberinto[x][y]=color
 
             if self.posicion_agente[0]==x and self.posicion_agente[1]==y:
-                self.fin=True
-
+                if self.state==2:
+                    self.laberinto[x][y]=self.VACIO
+                    self.posicion_fants[fantasma][0]=self.salida_fants[0]+2
+                    self.posicion_fants[fantasma][1]=self.salida_fants[1]
+                else: self.fin=True
+        """else:
+            print("no MUEVE:",self.COLORES_FANTS[fantasma], "POS:", self.posicion_fants[fantasma])"""
     def distancia_celda(self, a, b):               
         return math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2)
 
@@ -639,30 +695,33 @@ class Pacman:
                             self.direccion=3
                         else: mov=None
                         
-                        if mov!=None: 
+                        if mov!=None:                             
                             self.mover_agente(mov)
                             self.mover_fants()
-                            if self.cont==3: 
-                                self.laberinto[self.casa_fants[1][0]][self.casa_fants[1][1]]=self.VACIO
-                                self.laberinto[self.salida_fants[0]][self.salida_fants[1]]=self.ROSA
-                                self.casa_fants[1]=False
+                            """print("salida= {}\n".format(self.salida_fants))"""
+                            if len(self.en_casa)!=0 and self.cont==self.en_casa[0][1]:
+                                idx=self.en_casa.pop(0)[0]
 
-                                self.posicion_fants[1]=self.salida_fants
-                            elif self.cont==6:
-                                self.laberinto[self.casa_fants[2][0]][self.casa_fants[2][1]]=self.VACIO
-                                self.laberinto[self.salida_fants[0]][self.salida_fants[1]]=self.AZUL
-                                self.casa_fants[2]=False
+                                self.laberinto[self.casa_fants[idx][0]][self.casa_fants[idx][1]]=self.VACIO
+                                self.laberinto[self.salida_fants[0]][self.salida_fants[1]]=self.COLORES_FANTS[idx]
+                                self.casa_fants[idx]=False
 
-                                self.posicion_fants[2]=self.salida_fants
-                            elif self.cont==9:
-                                self.laberinto[self.casa_fants[3][0]][self.casa_fants[3][1]]=self.VACIO
-                                self.laberinto[self.salida_fants[0]][self.salida_fants[1]]=self.NARANJA
-                                self.casa_fants[3]=False
-
-                                self.posicion_fants[3]=self.salida_fants
+                                self.posicion_fants[idx][0]=self.salida_fants[0]
+                                self.posicion_fants[idx][1]=self.salida_fants[1]
+                            
                             #print(self.monedas)
-                            self.imprime_laberinto()                        
+                            #self.imprime_laberinto()                        
                             #print("Monedas: {}".format(self.monedas))
+                            
+                            # fantasmas
+                            i=3
+                            while i>=0:
+                                self.laberinto[self.posicion_fants[i][0]][self.posicion_fants[i][1]]=self.COLORES_FANTS[i]
+                                i-=1
+                            # agente
+                            self.laberinto[self.posicion_agente[0]][self.posicion_agente[1]]=self.AGENTE
+                            
+                            if self.monedas==132: self.fin=True
 
 
                 # dibuja el laberinto
@@ -681,10 +740,16 @@ class Pacman:
                         elif celda==self.POWER: imagen=self.power_img
                         elif celda==self.AGENTE: imagen=self.agente_imgs[self.direccion] 
                         else:
-                            if celda==self.ROJO: imagen=self.ghosts_imgs[0][self.direccion_fants[0]]
-                            elif celda==self.ROSA: imagen=self.ghosts_imgs[1][self.direccion_fants[1]]
-                            elif celda==self.AZUL: imagen=self.ghosts_imgs[2][self.direccion_fants[2]]
-                            else: imagen=self.ghosts_imgs[3][self.direccion_fants[3]]
+                            if self.state==2:
+                                if self.cont_state<20: imagen=self.ghosts_imgs[-1][0]
+                                else:
+                                    if self.cont_state%2==0: imagen=self.ghosts_imgs[-1][1]
+                                    else: imagen=self.ghosts_imgs[-1][0]
+                            else:
+                                if celda==self.ROJO: imagen=self.ghosts_imgs[0][self.direccion_fants[0]]
+                                elif celda==self.ROSA: imagen=self.ghosts_imgs[1][self.direccion_fants[1]]
+                                elif celda==self.AZUL: imagen=self.ghosts_imgs[2][self.direccion_fants[2]]
+                                else: imagen=self.ghosts_imgs[3][self.direccion_fants[3]]
                         
 
                         self.pantalla.blit(imagen, (y*self.tam_celda, x*self.tam_celda))
@@ -692,7 +757,8 @@ class Pacman:
                 pygame.display.flip()
             
             if self.fin==True:
-                print("\nPERDISTE\n")
+                if self.monedas==132: print("\nGANSTE\n")
+                else: print("\nPERDISTE\n")
                 self.reset()
     def cargar_imagenes(self, tam):
         # leer las imagenes
