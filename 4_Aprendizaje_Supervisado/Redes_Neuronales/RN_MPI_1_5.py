@@ -320,11 +320,12 @@ def main():
             salidas[ind].append(salidas_capa)
             
             # Devuelve el ultimo elemento
-            comm.send(salidas[ind][-1],dest=1)
+            comm.send(salidas[ind][-1],dest=myrank+1)
         
         # BACKPROPAGATION Y FORWARD
-        for ind in range(espacio,tam_entrenamiento):            
-            errores=comm.recv(source=1)
+        for ind in range(espacio,tam_entrenamiento):                       
+            errores=comm.recv(source=myrank+1)
+            
             
             # ACTUALIZA
             indice=numCapas-1
@@ -387,13 +388,15 @@ def main():
             salidas[ind].append(salidas_capa)
             
             # Devuelve el ultimo elemento
-            comm.send(salidas[ind][-1],dest=1)
+            comm.send(salidas[ind][-1],dest=myrank+1)
+
+            
 
         
 
         # BACKPROPAGATION ACTUALIZA 
         for ind in range(espacio):
-            errores=comm.recv(source=1)
+            errores=comm.recv(source=myrank+1)
 
             # ACTUALIZA
             indice=numCapas-1
@@ -428,43 +431,47 @@ def main():
                 errores = nuevos_errores
         
     elif myrank!=numProc-1: # Worker1 (OCULTA)
+        espacio=(numWorkers*2)-1  
         # FORWARD
-        entrada=comm.recv(source=myrank-1) # Recibe     
-        
-        #salidas.append([entrada]) 
-        salidas[0]=[entrada]
-        # Capas INTERMEDIAS del PROCESO
-        for i in range(numCapas-1):
-            entradas_capa=salidas[0][-1]
-            salidas_capa=[0 for _ in range(capas[i+1])]
-            # Recorre todos los nodos de la capa actual
-            for j in range(capas[i+1]):    
-                suma=0 # Suma todos los nodos de la capa anterior
-                for k in range(capas[i]):            
-                    suma+=entradas_capa[k]*pesos[i][k][j]
+        for ind in range(espacio):                                             
+            #salidas.append([entrada[ind][0:2]])                 
+            salidas[ind]=[comm.recv(source=myrank-1)]
+            
+            # Capas intermedias 
+            for i in range(numCapas-1):
+                entradas_capa=salidas[ind][-1]
+                salidas_capa=[0 for _ in range(capas[i+1])]                
+                # Recorre todos los nodos de la capa actual
+                for j in range(capas[i+1]):    
+                    suma=0 # Suma todos los nodos de la capa anterior
+                    for k in range(capas[i]):            
+                        suma+=entradas_capa[k]*pesos[i][k][j]
+                    salidas_capa[j]=sigmoide(suma) # Aplica funcion de activacion
+                
+                salidas[ind].append(salidas_capa)
+            
+            # Capa que conecta con el siguiente
+            indice=numCapas-1
+            entradas_capa=salidas[ind][-1]
+            salidas_capa=[0 for _ in range(capa_siguiente)]
+            # Recorre todos los nodos de la primera capa del siguiente procesp
+            for j in range(capa_siguiente):    
+                suma=0 # Suma todos los nodos de la capa actual
+                for k in range(capas[indice]):            
+                    suma+=entradas_capa[k]*pesos[indice][k][j]
                 salidas_capa[j]=sigmoide(suma) # Aplica funcion de activacion
+                
+            salidas[ind].append(salidas_capa)
             
-            salidas[0].append(salidas_capa)
-        # Capa que CONECTA con el SIGUIENTE
-        indice=numCapas-1
-        entradas_capa=salidas[0][-1]  
-        
-        salidas_capa=[0 for _ in range(capa_siguiente)]
-        # Recorre todos los nodos de la primera capa del siguiente proceso
-        for j in range(capa_siguiente):    
-            suma=0 # Suma todos los nodos de la capa actual
-            for k in range(capas[indice]):             
-                suma+=entradas_capa[k]*pesos[indice][k][j]
-            salidas_capa[j]=sigmoide(suma) # Aplica funcion de activacion
+            # Devuelve el ultimo elemento
+            comm.send(salidas[ind][-1],dest=myrank+1)
             
-        salidas[0].append(salidas_capa)
+            
         
-        # Devuelve el ultimo elemento                
-        comm.send(salidas[0][-1],dest=myrank+1)
-        
+
         # BACKPROPAGATION Y FORWARD
-        for ind in range(tam_entrenamiento-1):                              
-            errores=comm.recv(source=myrank+1)            
+        for ind in range(espacio,tam_entrenamiento):            
+            errores=comm.recv(source=myrank+1)
             
             # ACTUALIZA
             indice=numCapas-1
@@ -474,13 +481,12 @@ def main():
                 suma=0 # Suma todos los nodos de la capa siguiente (del otro proceso)
                 for k in range(capa_siguiente):            
                     suma+=errores[k]*pesos[indice][j][k]
-                nuevos_errores[j]=suma*sigmoide_derivado(salidas[ind][indice][j])
+                nuevos_errores[j]=suma*sigmoide_derivado(salidas[ind-espacio][indice][j])
 
                 # Actualiza los nodos
                 for k in range(capa_siguiente):
-                    pesos[indice][j][k]+=learning_rate*errores[k]*salidas[ind][indice][j]
+                    pesos[indice][j][k]+=learning_rate*errores[k]*salidas[ind-espacio][indice][j]
             errores=nuevos_errores
-            
             
             # OTRAS CAPAS DEL PROCESO 
             for i in range(numCapas-2,-1,-1):
@@ -490,26 +496,21 @@ def main():
                     suma=0 # Suma todos los nodos de la capa siguiente 
                     for k in range(capas[i+1]):            
                         suma+=errores[k]*pesos[i][j][k]
-                    nuevos_errores[j]=suma*sigmoide_derivado(salidas[ind][i][j])
+                    nuevos_errores[j]=suma*sigmoide_derivado(salidas[ind-espacio][i][j])
 
                     # Actualiza los nodos
                     for k in range(capas[i+1]):
-                        pesos[i][j][k]+=learning_rate*errores[k]*salidas[ind][i][j]
+                        pesos[i][j][k]+=learning_rate*errores[k]*salidas[ind-espacio][i][j]
 
                 errores = nuevos_errores
 
-            # ENVIA AL ANTERIOR
             comm.send(errores,dest=myrank-1)
-            
-            # ENVIA FORWARD              
-            entrada=comm.recv(source=myrank-1) # Recibe   
-            
-
-            #salidas.append([entrada])
-            salidas[ind+1]=[entrada]
-            # Capas INTERMEDIAS del PROCESO
+            # ENVIA FORWARD                                             
+            #salidas.append([entrada[ind][0:2]]) 
+            salidas[ind]=[comm.recv(source=myrank-1)]
+            # Capas intermedias del MASTER
             for i in range(numCapas-1):
-                entradas_capa=salidas[ind+1][-1]
+                entradas_capa=salidas[ind][-1]
                 salidas_capa=[0 for _ in range(capas[i+1])]
                 # Recorre todos los nodos de la capa actual
                 for j in range(capas[i+1]):    
@@ -519,11 +520,10 @@ def main():
                         suma+=entradas_capa[k]*pesos[i][k][j]
                     salidas_capa[j]=sigmoide(suma) # Aplica funcion de activacion
                 
-                salidas[ind+1].append(salidas_capa)
-            # Capa que CONECTA con el SIGUIENTE            
+                salidas[ind].append(salidas_capa)
+            # Capa que conecta con el siguiente
             indice=numCapas-1
-            entradas_capa=salidas[ind+1][-1]
-            
+            entradas_capa=salidas[ind][-1]
             salidas_capa=[0 for _ in range(capa_siguiente)]
             # Recorre todos los nodos de la capa actual
             for j in range(capa_siguiente):    
@@ -532,51 +532,52 @@ def main():
                     suma+=entradas_capa[k]*pesos[indice][k][j]
                 salidas_capa[j]=sigmoide(suma) # Aplica funcion de activacion
                 
-            salidas[ind+1].append(salidas_capa)
+            salidas[ind].append(salidas_capa)
             
             # Devuelve el ultimo elemento
-            comm.send(salidas[ind+1][-1],dest=myrank+1)            
-            
-        
+            comm.send(salidas[ind][-1],dest=myrank+1)
+       
+        # BACKPROPAGATION ACTUALIZA 
+        for ind in range(espacio):
+            errores=comm.recv(source=myrank+1)
 
-        # BACKPROPAGATION
-        errores=comm.recv(source=myrank+1)            
-            
-        # ACTUALIZA
-        indice=numCapas-1
-        # PROCESO ACTUAL CON EL QUE HACE BORDE
-        nuevos_errores=[0 for _ in range(capas[indice])]            
-        for j in range(capas[indice]): # Recorre todos los nodos de la capa que hace borde
-            suma=0 # Suma todos los nodos de la capa siguiente (del otro proceso)
-            for k in range(capa_siguiente):            
-                suma+=errores[k]*pesos[indice][j][k]
-            nuevos_errores[j]=suma*sigmoide_derivado(salidas[tam_entrenamiento-1][indice][j])
-
-            # Actualiza los nodos
-            for k in range(capa_siguiente):
-                pesos[indice][j][k]+=learning_rate*errores[k]*salidas[tam_entrenamiento-1][indice][j]
-        errores=nuevos_errores
-        
-        # OTRAS CAPAS DEL PROCESO 
-        for i in range(numCapas-2,-1,-1):
-            nuevos_errores=[0 for _ in range(capas[i])]
-            # Recorre todos los nodos de la capa actual
-            for j in range(capas[i]):
-                suma=0 # Suma todos los nodos de la capa siguiente 
-                for k in range(capas[i+1]):            
-                    suma+=errores[k]*pesos[i][j][k]
-                nuevos_errores[j]=suma*sigmoide_derivado(salidas[tam_entrenamiento-1][i][j])
+            # ACTUALIZA
+            indice=numCapas-1
+            # PROCESO ACTUAL CON EL QUE HACE BORDE
+            nuevos_errores=[0 for _ in range(capas[indice])]            
+            for j in range(capas[indice]): # Recorre todos los nodos de la capa que hace borde
+                suma=0 # Suma todos los nodos de la capa siguiente (del otro proceso)
+                for k in range(capa_siguiente):            
+                    suma+=errores[k]*pesos[indice][j][k]
+                nuevos_errores[j]=suma*sigmoide_derivado(salidas[tam_entrenamiento+ind-espacio][indice][j])
 
                 # Actualiza los nodos
-                for k in range(capas[i+1]):
-                    pesos[i][j][k]+=learning_rate*errores[k]*salidas[tam_entrenamiento-1][i][j]
+                for k in range(capa_siguiente):
+                    pesos[indice][j][k]+=learning_rate*errores[k]*salidas[tam_entrenamiento+ind-espacio][indice][j]
+            errores=nuevos_errores            
+                    
+            
+            # OTRAS CAPAS DEL PROCESO 
+            for i in range(numCapas-2,-1,-1):
+                nuevos_errores=[0 for _ in range(capas[i])]
+                # Recorre todos los nodos de la capa actual
+                for j in range(capas[i]):
+                    suma=0 # Suma todos los nodos de la capa siguiente 
+                    for k in range(capas[i+1]):            
+                        suma+=errores[k]*pesos[i][j][k]
+                    nuevos_errores[j]=suma*sigmoide_derivado(salidas[tam_entrenamiento+ind-espacio][i][j])
 
-            errores = nuevos_errores
+                    # Actualiza los nodos
+                    for k in range(capas[i+1]):
+                        pesos[i][j][k]+=learning_rate*errores[k]*salidas[tam_entrenamiento+ind-espacio][i][j]
 
-        # ENVIA AL ANTERIOR
-        comm.send(errores,dest=myrank-1)
+                errores = nuevos_errores
+
+
+            comm.send(errores,dest=myrank-1)
+        
     else: # Worker2 (SALIDA)                            
-
+        
         for i in range(tam_entrenamiento):            
             data=comm.recv(source=myrank-1) # Recibe float:IMC calculado (TODO mejorar?)
             
@@ -587,7 +588,7 @@ def main():
         
         
 
-        
+    
         
     """if myrank!=numWorkers:
         print("(DESPUES) ID: {}. pesos={}".format(myrank,pesos))"""
@@ -636,7 +637,7 @@ def main():
             salidas[ind].append(salidas_capa)
             
             # Devuelve el ultimo elemento
-            comm.send(salidas[ind][-1],dest=1)
+            comm.send(salidas[ind][-1],dest=myrank+1)
         
         timePredEnd = MPI.Wtime()
         print("Tiempo de Prediccion: {}s\n".format(timePredEnd-timePredStart))

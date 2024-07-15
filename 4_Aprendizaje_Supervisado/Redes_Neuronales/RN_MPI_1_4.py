@@ -177,7 +177,7 @@ def main():
         
         # --- DEFINIR LA RED NEURONAL ---------------------------------------------------------        
         tam_entrada=2
-        tam_oculta=10
+        tam_oculta=200
         tam_salida=1
         learning_rate=0.1
         repeticiones=10

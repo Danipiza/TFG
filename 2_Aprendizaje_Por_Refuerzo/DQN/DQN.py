@@ -29,6 +29,8 @@ class PacmanGUI:
 
     def __init__(self,file_name):
         self.file_name=file_name
+        self.version=int(file_name[8])
+        self.win_condition=132 if self.version==1 else 21
         
         # -------------------------------------------------------------------------------------------------------------------
         # --- CONSTANTS -----------------------------------------------------------------------------------------------------
@@ -57,9 +59,15 @@ class PacmanGUI:
         self.mX=[-1,0,1,0]
         self.mY=[0,1,0,-1]
                 
-
-        self.ghosts_colors  =[5,6,7,8]
-        self.state_ticks    =[60,30,30]
+        
+        self.ghosts_colors  =[]
+        self.state_ticks    =[]
+        if self.version==1:
+            self.ghosts_colors  =[5,6,7,8]
+            self.state_ticks    =[60,30,30]
+        else:
+            self.ghosts_colors  =[5]
+            self.state_ticks    =[20,10,10]
 
         # -------------------------------------------------------------------------------------------------------------------       
         # --- VARIABLES -----------------------------------------------------------------------------------------------------
@@ -89,11 +97,18 @@ class PacmanGUI:
         self.agent_coins=0   
 
         # ghosts.
-        self.ghosts_pos=[[0,0] for _ in range(4)]
-        self.ghosts_dir=[1,2,0,0]
-        self.ghosts_house=[False,True,True,True]
-        # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
-        self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        self.n_ghosts=4 if self.version==1 else 1
+        self.ghosts_pos=[[0,0] for _ in range(self.n_ghosts)]
+        if self.version==1:
+            self.ghosts_dir=[1,2,0,0]
+            self.ghosts_house=[False,True,True,True]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        else:
+            self.ghosts_dir=[3]
+            self.ghosts_house=[False]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[]
         
         # maze.
         self.maze           =[] # used for the walls, agent and ghosts positions in the GUI
@@ -144,10 +159,17 @@ class PacmanGUI:
         self.agent_dir=1
         self.agent_coins=0   
 
-        self.ghosts_pos=[[0,0] for _ in range(4)]
-        self.ghosts_dir=[1,2,0,0]
-        self.ghosts_house=[False,True,True,True]
-        self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        self.ghosts_pos=[[0,0] for _ in range(self.n_ghosts)]
+        if self.version==1:
+            self.ghosts_dir=[1,2,0,0]
+            self.ghosts_house=[False,True,True,True]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        else:
+            self.ghosts_dir=[3]
+            self.ghosts_house=[False]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[]
         
         self.maze=[]
         self.coins_matrix=[]
@@ -155,7 +177,9 @@ class PacmanGUI:
         self.n=len(self.maze)
         self.m=len(self.maze[0])
 
-        self.scatter_targets=[[0,self.m],[0,0],[self.n,self.m],[self.n,0]]
+        if self.version==1:
+            self.scatter_targets=[[0,self.m],[0,0],[self.n,self.m],[self.n,0]]
+        else:  self.scatter_targets=[[0,4]]
 
         self.end=False
 
@@ -288,7 +312,7 @@ class PacmanGUI:
                     self.count_state=0
                     
                     # change the directions of the ghosts
-                    for i in range(4):                        
+                    for i in range(self.n_ghosts):                        
                         if not self.ghosts_house[i]:
                             self.ghosts_dir[i]+=2
                             self.ghosts_dir[i]%=4                        
@@ -305,7 +329,7 @@ class PacmanGUI:
                     self.coins_matrix[x+1][y]=0
                     self.state=2
                     self.count_state=0
-                    for i in range(4):
+                    for i in range(self.n_ghosts):
                         if not self.ghosts_house[i]:
                             self.ghosts_dir[i]+=2
                             self.ghosts_dir[i]%=4
@@ -318,10 +342,21 @@ class PacmanGUI:
                 if self.coins_matrix[x][y-1]==self.COIN:    # COIN. adds a coin
                     self.coins_matrix[x][y-1]=0
                     coin=1
+                elif self.coins_matrix[x][y-1]==self.POWER: # POWER. change the game state to FRIGHTENED
+                    self.coins_matrix[x][y-1]=0
+                    self.state=2
+                    self.count_state=0
+                    
+                    # change the directions of the ghosts
+                    for i in range(self.n_ghosts):                        
+                        if not self.ghosts_house[i]:
+                            self.ghosts_dir[i]+=2
+                            self.ghosts_dir[i]%=4 
                 
                 self.maze[x][y]=self.EMPTY
                 y-=1
-            elif y==0 and (x==5 or x==9):           # "portal"                                 
+                
+            elif y==0 and self.portal_gates(x):           # "portal"                                 
                 self.maze[x][y]=self.EMPTY
                 y=self.m-1
 
@@ -330,10 +365,19 @@ class PacmanGUI:
                 if self.coins_matrix[x][y+1]==self.COIN:    # COIN. adds a coin
                     self.coins_matrix[x][y+1]=0
                     coin=1
+                elif self.coins_matrix[x][y+1]==self.POWER: # POWER. change the game state to FRIGHTENED
+                    self.coins_matrix[x][y+1]=0
+                    self.state=2
+                    self.count_state=0
+                    for i in range(self.n_ghosts):
+                        if not self.ghosts_house[i]:
+                            self.ghosts_dir[i]+=2
+                            self.ghosts_dir[i]%=4
                 
                 self.maze[x][y]=self.EMPTY
                 y+=1
-            elif y==self.m-1 and (x==5 or x==9):    # "portal"                             
+                
+            elif y==self.m-1 and self.portal_gates(x):    # "portal"                             
                 self.maze[x][y]=self.EMPTY
                 y=0
         
@@ -342,7 +386,7 @@ class PacmanGUI:
 
         if self.state==2:   # eat.
             eaten=[]
-            for i in range(4):
+            for i in range(self.n_ghosts):
                 if self.ghosts_pos[i][0]==x and self.ghosts_pos[i][1]==y:
                     eaten.append(i)
             
@@ -359,7 +403,7 @@ class PacmanGUI:
 
                 tmp+=1
         else:               # lose.
-            for i in range(4):
+            for i in range(self.n_ghosts):
                 if self.ghosts_pos[i][0]==x and self.ghosts_pos[i][1]==y: 
                     self.end=True
                     self.maze[self.agent_pos[0]][self.agent_pos[1]]=self.EMPTY
@@ -373,6 +417,10 @@ class PacmanGUI:
         return coin
 
 
+    def portal_gates(self, x):
+        if self.version==0: return (x==5 or x==9)
+        else: return x==4
+
     """
     Moving the ghosts.
     Also change the game state
@@ -384,12 +432,10 @@ class PacmanGUI:
         
         # -------------------------------------------------------------------------------------------------------------------
         # --- MOVE ----------------------------------------------------------------------------------------------------------
-                    
-        self.move_ghost(0) 
-        self.move_ghost(1)
-        self.move_ghost(2)
-        self.move_ghost(3)
 
+        for i in range(self.n_ghosts):
+            self.move_ghost(i) 
+        
 
         # -------------------------------------------------------------------------------------------------------------------
         # --- STATE ---------------------------------------------------------------------------------------------------------
@@ -406,7 +452,7 @@ class PacmanGUI:
                 self.state=0
                 print("New state: CHASE",end="")
 
-            for i in range(4):
+            for i in range(self.n_ghosts):
                 if not self.ghosts_house[i]:
                     self.ghosts_dir[i]+=2
                     self.ghosts_dir[i]%=4
@@ -555,8 +601,8 @@ class PacmanGUI:
                     y+=self.mY[dir_idx]
             
             # "portals"
-            if y==self.m and (x==5 or x==9): y=0
-            if y==-1 and (x==5 or x==9): y=self.m-1
+            if y==self.m and self.portal_gates(x): y=0
+            if y==-1 and self.portal_gates(x): y=self.m-1
             
             
             
@@ -655,7 +701,7 @@ class PacmanGUI:
                                             
                             self.move_agent(mov)
                             # check for end condition
-                            if self.agent_coins==132: self.end=True
+                            if self.agent_coins==self.win_condition: self.end=True
                             
                             if self.end!=True:  # no end condition, continues
                                 
@@ -673,7 +719,7 @@ class PacmanGUI:
                                     self.ghosts_pos[idx][1]=self.salida_fants[1]
                                 
                                 # update ghost positions (from lower to higher priority)
-                                i=3
+                                i=self.n_ghosts-1
                                 while i>=0:
                                     self.maze[self.ghosts_pos[i][0]][self.ghosts_pos[i][1]]=self.ghosts_colors[i]
                                     i-=1
@@ -692,7 +738,7 @@ class PacmanGUI:
             # --- END MESSAGE ---------------------------------------------------------------------------------------------------  
 
         
-            if self.agent_coins==132:   # win condition
+            if self.agent_coins==self.win_condition:   # win condition
                 print("\nYOU WIN!!!\n")
                 for _ in range(3):
                     self.GUI_message(1)
@@ -1032,7 +1078,7 @@ class DQNAgent:
 
     def choose_action(self, state):
         if random.uniform(0, 1) < self.epsilon:
-            return random.randint(0, 3)  # Assuming 4 possible actions
+            return random.randint(0, 3)  
         else:
             q_values = self.model.predecir(state)
             return q_values.index(max(q_values))
@@ -1084,6 +1130,8 @@ class Pacman:
 
     def __init__(self,file_name):
         self.file_name=file_name
+        self.version=int(file_name[8]) 
+        self.win_condition=132 if self.version==1 else 21
         
         # -------------------------------------------------------------------------------------------------------------------
         # --- CONSTANTS -----------------------------------------------------------------------------------------------------
@@ -1100,9 +1148,10 @@ class Pacman:
 
         # actions.
         self.UP     ='up'
-        self.LEFT   ='left'
-        self.DOWN   ='down'        
-        self.RIGHT  ='right'
+        self.RIGHT  ='right'        
+        self.DOWN   ='down' 
+        self.LEFT   ='left'       
+        
 
         self.actions=[self.UP,self.RIGHT, self.DOWN, self.LEFT]
 
@@ -1145,12 +1194,20 @@ class Pacman:
         self.agent_dir=1
         self.agent_coins=0   
 
-        # ghosts.
-        self.ghosts_pos=[[0,0] for _ in range(4)]
-        self.ghosts_dir=[1,2,0,0]
-        self.ghosts_house=[False,True,True,True]
-        # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
-        self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        # ghosts.        
+        self.n_ghosts=4 if self.version==1 else 1
+        if self.n_ghosts==4:
+            self.ghosts_pos=[[0,0] for _ in range(4)]
+            self.ghosts_dir=[1,2,0,0]
+            self.ghosts_house=[False,True,True,True]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        else:
+            self.ghosts_pos=[[0,0]]
+            self.ghosts_dir=[3]
+            self.ghosts_house=[False]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[]
         
         # maze.
         self.maze=[]    # used for the walls, agent and ghosts positions in the GUI                
@@ -1160,7 +1217,7 @@ class Pacman:
         # finalization variable
         self.end=False
 
-        self.reset()
+        self.reset(True,None,None,None,None)
     
         
 
@@ -1186,7 +1243,7 @@ class Pacman:
         state.append(self.agent_pos[0])
         state.append(self.agent_pos[1])
         #state.append(self.agent_coins) # not useful
-        for i in range(4):
+        for i in range(self.n_ghosts):
             state.append(self.ghosts_pos[i][0])
             state.append(self.ghosts_pos[i][1])
 
@@ -1221,14 +1278,20 @@ class Pacman:
         
         # has been eaten by a ghost
         if self.end==True:
-            if self.agent_coins!=132: 
+            if self.agent_coins!=self.win_condition: 
                 reward=-100
                 aux="PIERDE"
             else:                 
                 reward=1000
                 aux="GANA"
         
-        print("Tick={}  \tState={}  \tCoins={}  \t{}".format(self.exec_tick, self.count_state, self.agent_coins,aux))
+        a="N"
+        if accion==1: a="E"
+        elif accion==2: a="S"
+        elif accion==3: a="W"
+        print("{}\tTick={}  \tState={}  \tCoins={}  \t{}\tAgent= {}\tGhost= {}".format(a,self.exec_tick, 
+                                                                                                 self.count_state, self.agent_coins,aux,
+                                                                                                 self.agent_pos, self.ghosts_pos[0]))
         
         
 
@@ -1291,7 +1354,7 @@ class Pacman:
     :type self: class    
     :rtype: None
     """
-    def reset(self):
+    def reset(self,init,positions,coins,states,dirs):
 
         self.exec_tick=0
 
@@ -1301,20 +1364,51 @@ class Pacman:
         self.agent_pos=None
         self.agent_dir=1
         self.agent_coins=0   
-
-        self.ghosts_pos=[[0,0] for _ in range(4)]
-        self.ghosts_dir=[1,2,0,0]
-        self.ghosts_house=[False,True,True,True]
-        self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        
+        if self.n_ghosts==4:
+            self.ghosts_pos=[[0,0] for _ in range(4)]
+            self.ghosts_dir=[1,2,0,0]
+            self.ghosts_house=[False,True,True,True]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[[1,3],[2,6],[3,9]]
+        else:
+            self.ghosts_pos=[[0,0]]
+            self.ghosts_dir=[3]
+            self.ghosts_house=[False]
+            # queue, for the leaving order. 0th: ghost id. 1th: home leaving tick
+            self.ghost_inHouse=[]
         
         self.maze=[]
         self.read_maze()
         self.n=len(self.maze)
         self.m=len(self.maze[0])
 
-        self.scatter_targets=[[0,self.m],[0,0],[self.n,self.m],[self.n,0]]
+        if self.version==1:
+            self.scatter_targets=[[0,self.m],[0,0],[self.n,self.m],[self.n,0]]
+        else:  self.scatter_targets=[[0,4]]
 
         self.end=False
+
+        if init==False:
+            idx=int(self.file_name[10])            
+            if idx>0:
+                self.ghosts_house=[False,False,False,False]
+                self.ghost_inHouse=[]
+
+                self.exec_tick=states[idx]            
+                self.count_state=states[idx]
+                self.agent_coins=coins[idx]
+
+                if self.version==1:
+                    self.salida_fants=[5,10]
+                else: self.salida_fants=[2,5]
+                
+                for g in range(self.n_ghosts):
+                    self.ghosts_pos[g][0]=positions[idx][g][0]
+                    self.ghosts_pos[g][1]=positions[idx][g][1]
+                    self.ghosts_dir[g]=dirs[idx][g]
+
+
 
         return self.get_state()
     
@@ -1413,7 +1507,7 @@ class Pacman:
                     ret=1
 
                     # change the directions of the ghosts
-                    for i in range(4):                        
+                    for i in range(self.n_ghosts):                        
                         if not self.ghosts_house[i]:
                             self.ghosts_dir[i]+=2
                             self.ghosts_dir[i]%=4                        
@@ -1433,7 +1527,7 @@ class Pacman:
                     self.count_state=0
                     ret=1
 
-                    for i in range(4):
+                    for i in range(self.n_ghosts):
                         if not self.ghosts_house[i]:
                             self.ghosts_dir[i]+=2
                             self.ghosts_dir[i]%=4
@@ -1445,10 +1539,20 @@ class Pacman:
             if y>0 and self.maze[x][y-1]!=1:                # dest position != wall
                 if self.maze[x][y-1]==self.COIN:    # COIN. adds a coin
                     self.maze[x][y-1]=0
-                    ret=2                
+                    ret=2 
+                elif self.maze[x][y-1]==self.POWER: # POWER. change the game state to FRIGHTENED
+                    self.maze[x][y-1]=0
+                    self.state=2
+                    self.count_state=0
+                    ret=1
+
+                    for i in range(self.n_ghosts):
+                        if not self.ghosts_house[i]:
+                            self.ghosts_dir[i]+=2
+                            self.ghosts_dir[i]%=4               
                 
                 y-=1
-            elif y==0 and (x==5 or x==9):           # "portal"                                                 
+            elif y==0 and self.portal_gates(x):           # "portal"                                                 
                 y=self.m-1
                 ret=3
 
@@ -1459,7 +1563,7 @@ class Pacman:
                     ret=2                
                 
                 y+=1
-            elif y==self.m-1 and (x==5 or x==9):    # "portal"                                             
+            elif y==self.m-1 and self.portal_gates(x):    # "portal"                                             
                 y=0
                 ret=3
         
@@ -1468,7 +1572,7 @@ class Pacman:
 
         if self.state==2:   # eat.
             eaten=[]
-            for i in range(4):
+            for i in range(self.n_ghosts):
                 if self.ghosts_pos[i][0]==x and self.ghosts_pos[i][1]==y:
                     eaten.append(i)
             
@@ -1487,7 +1591,7 @@ class Pacman:
 
                 tmp+=1
         else:               # lose.
-            for i in range(4):
+            for i in range(self.n_ghosts):
                 if self.ghosts_pos[i][0]==x and self.ghosts_pos[i][1]==y: 
                     
                     ret=5
@@ -1501,6 +1605,11 @@ class Pacman:
             
         return ret
 
+
+    def portal_gates(self, x):
+        if self.version==0: return (x==5 or x==9)
+        else: return x==4
+
     """
     Moving the ghosts.
     Also change the game state
@@ -1512,11 +1621,10 @@ class Pacman:
         
         # -------------------------------------------------------------------------------------------------------------------
         # --- MOVE ----------------------------------------------------------------------------------------------------------
-                    
-        self.move_ghost(0) 
-        self.move_ghost(1)
-        self.move_ghost(2)
-        self.move_ghost(3)
+
+        for i in range(self.n_ghosts):
+            self.move_ghost(i) 
+        
         
 
         # -------------------------------------------------------------------------------------------------------------------
@@ -1547,7 +1655,7 @@ class Pacman:
                 self.state=0
                 print("New state: CHASE",end="")
 
-            for i in range(4):
+            for i in range(self.n_ghosts):
                 if not self.ghosts_house[i]:
                     self.ghosts_dir[i]+=2
                     self.ghosts_dir[i]%=4
@@ -1585,7 +1693,7 @@ class Pacman:
         
         if not self.ghosts_house[ghost] and (not(self.state==2 and self.count_state%2==0)):
             
-            dir=self.ghosts_dir[ghost]
+            dir=self.ghosts_dir[ghost]            
             x=self.ghosts_pos[ghost][0]
             y=self.ghosts_pos[ghost][1]
 
@@ -1596,7 +1704,7 @@ class Pacman:
 
             
 
-            # intersection, moves in the same direction.
+            # intersection, moves in the same direction.            
             if self.maze[x+aux_x][y+aux_y]==1 and self.maze[x-aux_x][y-aux_y]==1:
                 if dir==0: x-=1
                 elif dir==1: y+=1
@@ -1696,8 +1804,8 @@ class Pacman:
                     y+=self.mY[dir_idx]
             
             # "portals"
-            if y==self.m and (x==5 or x==9): y=0
-            if y==-1 and (x==5 or x==9): y=self.m-1
+            if y==self.m and self.portal_gates(x): y=0
+            if y==-1 and self.portal_gates(x): y=self.m-1
             
             
             
@@ -1760,15 +1868,26 @@ class Pacman:
 class Main:
     def signal_handler(self, sig, frame):
         self.timeEnd=MPI.Wtime()
-        path=os.path.join("entrenamiento", "model_Neu.txt")
+
+        for i in self.accionesR:
+            print(i)
+
+
+        path=os.path.join("entrenamiento", "model_Neu{}.txt".format(self.version))
         with open(path, "a") as archivo:
-            archivo.write(str(self.agent.model.pesos) + "\n\n")
+            archivo.write(str(self.agent.model.pesos) + "\n\n")        
+        path=os.path.join("data", "model_Neu{}.txt".format(self.version))
+        with open(path, "w") as archivo:
+            archivo.write(str(self.agent.model.pesos))
         
-        path=os.path.join("entrenamiento", "target_model_Neu.txt")
+        path=os.path.join("entrenamiento", "target_model_Neu{}.txt".format(self.version))
         with open(path, "a") as archivo:
             archivo.write(str(self.agent.target_model.pesos) + "\n\n")
+        path=os.path.join("data", "target_model_Neu{}.txt".format(self.version))
+        with open(path, "w") as archivo:
+            archivo.write(str(self.agent.target_model.pesos))
 
-        path=os.path.join("entrenamiento", "times.txt")
+        path=os.path.join("entrenamiento", "times{}.txt".format(self.version))
         with open(path, "a") as archivo:
             archivo.write(str(self.timeEnd-self.timeStart) + "\n\n")
         
@@ -1779,39 +1898,85 @@ class Main:
     
     def train_dqn(self, episodes):
         signal.signal(signal.SIGINT, self.signal_handler)
-        try:            
-            env = Pacman(os.path.join("data", "env_0.txt"))
-            input_size = len(env.get_state())
 
-            #agent = DQNAgent(input_size=4, hidden_size=16, output_size=4, learning_rate=0.01, gamma=0.99, epsilon=1.0)
-            self.agent = DQNAgent(input_size=input_size, hidden_size=[16], output_size=4, learning_rate=0.01, gamma=0.99, epsilon=1.0,
-                                  #archivo1=None,archivo2=None)
-                                  archivo1=os.path.join("data", "model_Neu.txt"),
-                                  archivo2=os.path.join("data", "target_model_Neu.txt")) # Usar (None) para que no lea unos pesos ya entrenados
-            
-            self.timeStart=MPI.Wtime()
-            for episode in range(episodes):
-                state = env.reset()
-                done = False
-                total_reward = 0
-                print("Empieza: ", episode+1)
-                tStart=MPI.Wtime()
-                while not done:
-                    action = self.agent.choose_action(state)
-                    next_state, reward, done = env.step(action)
-                    
-                    self.agent.remember(state, action, reward, next_state, done)
-                    self.agent.replay()
-                    
-                    state = next_state
-                    total_reward += reward
-                tEnd=MPI.Wtime()
-                print("Ha terminado un episodio entrenamiento en: {} \n".format(tEnd-tStart))  
-                self.agent.update_target_model()
+        env = Pacman(os.path.join("data", "env2_0.txt"))
+        input_size = len(env.get_state())
+        self.version=env.version
+
+        """posiciones=[[],
+                    [[1, 17],[2, 1],[9, 15],[8, 7]],
+                    [[3, 19],[3, 4],[11, 19],[12, 7]],
+                    [[1, 16],[1, 1],[9, 16],[9, 7]], 
+                    [[3, 18],[4, 4],[6, 13],[5, 9]]]
+
+        dirs=[[],
+              [3,0,1,2],
+              [1,2,1,1],
+              [3,0,1,2],
+              [1,0,2,3]]
+
+        coins=[0, 8,11,8,5]
+        states=[0, 15,21,16,10]"""
+
+        posiciones=[[],
+                    [[1, 2]],
+                    [[3, 1]],
+                    [[2, 1]]]
+
+        dirs=[[],
+              [3],
+              [2],
+              [2]]
+
+        coins=[0, 3,7,5]
+        states=[0, 4,7,6]
+
+        
+
+        #agent = DQNAgent(input_size=4, hidden_size=16, output_size=4, learning_rate=0.01, gamma=0.99, epsilon=1.0)
+        self.agent = DQNAgent(input_size=input_size, hidden_size=[16], output_size=4, learning_rate=0.01, gamma=0.99, epsilon=0.50,
+                            #archivo1=None,archivo2=None)
+                            archivo1=os.path.join("data", "model_Neu{}.txt".format(self.version)),
+                            archivo2=os.path.join("data", "target_model_Neu{}.txt".format(self.version))) # Usar (None) para que no lea unos pesos ya entrenados
+        
+        try:      
+            for i in range(1,4):      
+                env = Pacman(os.path.join("data", "env2_{}.txt".format(i)))                
                 
-                print(f"Episode {episode + 1}: Total Reward: {total_reward}")
+                self.accionesR=[0,0,0,0]
+                
+                self.timeStart=MPI.Wtime()
+                for episode in range(1000):
+                    state = env.reset(init=False,positions=posiciones,coins=coins,states=states,dirs=dirs)#positions=None,coins=None,states=None,dirs=None)
+                    done = False
+                    total_reward = 0
+                    print("Empieza: ", episode+1)
+                    tStart=MPI.Wtime()
+                    while not done:
+                        """action = self.agent.choose_action(state)"""
+                        action=random.randint(0, 3)  
+                        self.accionesR[action]+=1
+                        next_state, reward, done = env.step(action)
+                        
+                        self.agent.remember(state, action, reward, next_state, done)
+                        self.agent.replay()
+                        
+                        state = next_state
+                        total_reward += reward
+                    tEnd=MPI.Wtime()
+                    print("Ha terminado un episodio entrenamiento en: {} \n".format(tEnd-tStart))  
+                    self.agent.update_target_model()
+                    
+                    print(f"Episode {episode + 1}: Total Reward: {total_reward}")
+                    env.print_matrix(env.maze)
+
+                    """random.seed(random.randint(1,1000000))"""
+
+                
             
-            os.kill(os.getpid(), signal.SIGINT)
+            while(True):
+                x=0
+
 
         except KeyboardInterrupt:
             # Handle the KeyboardInterrupt exception if needed
@@ -1825,10 +1990,10 @@ class Main:
 
 if __name__ == "__main__":
     main=Main()
-    main.train_dqn(1000)
+    main.train_dqn(500)
     
-    #env=PacmanGUI(os.path.join("data", "env.txt"))
-    #env=Pacman(os.path.join("data", "env_0.txt"))
+    #env=PacmanGUI(os.path.join("data", "env2.txt"))
+    #env=Pacman(os.path.join("data", "env1_0.txt"))
     
     
     

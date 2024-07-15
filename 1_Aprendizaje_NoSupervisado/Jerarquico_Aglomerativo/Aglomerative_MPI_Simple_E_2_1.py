@@ -75,7 +75,7 @@ def main():
         poblacion=lee(archivo)
 
         print("\nEjecutando archivo: {}, numero de clusters para la GUI: {}, distancia: Euclidea\n".format(archivo, C))           
-        poblacion=poblacion[0:200]
+        poblacion=poblacion[0:2000]
         n=len(poblacion)        
         d=len(poblacion[0])     
 

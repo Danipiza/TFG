@@ -17,5 +17,32 @@ for x, fila in enumerate(matrix):
         print("x={}, y={}\tval={}".format(x,y,celda))"""
 
 
-print("Tick={}  \tState={}  \tCoins={}  \t{}".format(1000000, 1000, 100, "COIN"))
-print("Tick={}  \tState={}  \tCoins={}  \t{}".format(100, 10, 10, "COIN"))
+"""print("Tick={}  \tState={}  \tCoins={}  \t{}".format(1000000, 1000, 100, "COIN"))
+print("Tick={}  \tState={}  \tCoins={}  \t{}".format(100, 10, 10, "COIN"))"""
+
+import random
+
+class DQN:
+    def choose_action(epsilon=1.0):
+        if random.uniform(0,1)<1.0:
+            return random.randint(0, 3)  
+        else:
+            return 0
+
+class Main:
+
+    def main():
+        dqn=DQN()
+        acciones=[0,0,0,0]
+
+
+        for i in range(10000):
+            #acciones[random.randint(0, 3)]+=1
+            acciones[dqn.choose_action()]+=1
+
+        for i in acciones:
+            print(i)
+    
+main=Main
+
+main.main()

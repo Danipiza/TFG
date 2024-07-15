@@ -189,7 +189,7 @@ def main():
     # ----------------------------------------------------------------------------------------
 
     tam_entrada=2               # Entrada: Altura y peso
-    tam_capas_ocultas=[200 for _ in range(5)]   # Tamaño de las capas ocultas (ejemplo)
+    tam_capas_ocultas=[5 for _ in range(1)]   # Tamaño de las capas ocultas (ejemplo)
     tam_salida=1                # Salida: IMC
 
     # Mejor => lr=0.05 rep=1000
