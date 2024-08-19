@@ -46,11 +46,11 @@ def main():
     if myrank==MASTER:                 
         #a,n=leeArchivo("6000")      
         #poblacion=[[x] for x in a] 
-        poblacion=lee("6000")          
+        poblacion=lee("1000_2D")          
         
         n=len(poblacion)        # Tamaño
         d=len(poblacion[0])     # Numero de dimensiones
-        k=3                     # Numero de cluster
+        k=4                     # Numero de cluster
 
         dic={}
         centroides=[]
@@ -224,7 +224,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2_Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()

@@ -230,7 +230,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2_Cluster", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()

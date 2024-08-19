@@ -199,7 +199,7 @@ def GUI(k, mejor, fits, coefs, poblacion,asignacion):
 
 
     # Crear la figura y GridSpec
-    fig = plt.figure(figsize=(10, 6))
+    fig = plt.figure(figsize=(20, 20))
     gs = GridSpec(2, 2, figure=fig)
 
     # Grafico 1 (arriba a la izquierda)
@@ -285,7 +285,9 @@ def plot2D(poblacion,asignacion,k):
     #['aliceblue', 'antiquewhite', 'aqua', 'aquamarine', 'azure', 'beige', 'bisque', 'black', 'blanchedalmond', 'blue', 'blueviolet', 'brown', 'burlywood', 'cadetblue', 'chartreuse', 'chocolate', 'coral', 'cornflowerblue', 'cornsilk', 'crimson', 'cyan', 'darkblue', 'darkcyan', 'darkgoldenrod', 'darkgray', 'darkgreen', 'darkgrey', 'darkkhaki', 'darkmagenta', 'darkolivegreen', 'darkorange', 'darkorchid', 'darkred', 'darksalmon', 'darkseagreen', 'darkslateblue', 'darkslategray', 'darkslategrey', 'darkturquoise', 'darkviolet', 'deeppink', 'deepskyblue', 'dimgray', 'dimgrey', 'dodgerblue', 'firebrick', 'floralwhite', 'forestgreen', 'fuchsia', 'gainsboro', 'ghostwhite', 'gold', 'goldenrod', 'gray', 'green', 'greenyellow', 'grey', 'honeydew', 'hotpink', 'indianred', 'indigo', 'ivory', 'khaki', 'lavender', 'lavenderblush', 'lawngreen', 'lemonchiffon', 'lightblue', 'lightcoral', 'lightcyan', 'lightgoldenrodyellow', 'lightgray', 'lightgreen', 'lightgrey', 'lightpink', 'lightsalmon', 'lightseagreen', 'lightskyblue', 'lightslategray', 'lightslategrey', 'lightsteelblue', 'lightyellow', 'lime', 'limegreen', 'linen', 'magenta', 'maroon', 'mediumaquamarine', 'mediumblue', 'mediumorchid', 'mediumpurple', 'mediumseagreen', 'mediumslateblue', 'mediumspringgreen', 'mediumturquoise', 'mediumvioletred', 'midnightblue', 'mintcream', 'mistyrose', 'moccasin', 'navajowhite', 'navy', 'oldlace', 'olive', 'olivedrab', 'orange', 'orangered', 'orchid', 'palegoldenrod', 'palegreen', 'paleturquoise', 'palevioletred', 'papayawhip', 'peachpuff', 'peru', 'pink', 'plum', 'powderblue', 'purple', 'rebeccapurple', 'red', 'rosybrown', 'royalblue', 'saddlebrown', 'salmon', 'sandybrown', 'seagreen', 'seashell', 'sienna', 'silver', 'skyblue', 'slateblue', 'slategray', 'slategrey', 'snow', 'springgreen', 'steelblue', 'tan', 'teal', 'thistle', 'tomato', 'turquoise', 'violet', 'wheat', 'white', 'whitesmoke', 'yellow', 'yellowgreen']
     colors=['blue','red','green','black','pink','yellow','magenta','brown','darkgreen','gray','fuchsia','violet','salmon','darkturquoise','forestgreen','firebrick', 'darkblue','lavender','palegoldenrod','navy']
     n=len(poblacion)
-
+    
+    
+    
     x=[[]for _ in range(k)]
     y=[[]for _ in range(k)]
     for i in range(n):
@@ -294,6 +296,7 @@ def plot2D(poblacion,asignacion,k):
         
     for i in range(k):
         plt.scatter(x[i], y[i], color=colors[i])            
+    
     
     plt.xlabel('X')
     plt.ylabel('Y')
@@ -457,7 +460,8 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir, ".Otros","ficheros","2.Cluster", archivo+".txt")
+    path=os.path.join(dir, ".Otros","ficheros","2_Cluster", archivo+".txt")
+    print(path)
 
     with open(path, 'r') as file:
         content = file.read()
@@ -484,10 +488,9 @@ def main():
     # 6000_3    6 generaciones de puntos aleatorios
     # 100000_2D    6 generaciones de puntos aleatorios
     #poblacion=lee("100_2D")
-    poblacion=lee("100000_2D")
-    poblacion=poblacion[0:180]    
+    poblacion=lee("1000_2D")  
     # Numero de clusters ejecutados [1-k]
-    k=10
+    k=4
     
     # Variables: poblacion, numero de clusters, manh o eucl
     asignacion=ejecuta_uno(poblacion, k, 1)
