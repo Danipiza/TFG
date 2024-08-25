@@ -25,7 +25,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4_RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -168,13 +168,15 @@ def main():
     procesar_ocultas=[]
     """procesar_ocultas=[[2,2],[2],[5],[1,1,1,1,1]]"""
     
-    procesar_ocultas.append([5 for _ in range(1)])   
+    """procesar_ocultas.append([5 for _ in range(1)])   
     procesar_ocultas.append([10 for _ in range(2)])   
     procesar_ocultas.append([10 for _ in range(10)])   
     procesar_ocultas.append([50 for _ in range(5)])   
-    procesar_ocultas.append([100 for _ in range(25)])   
+    procesar_ocultas.append([100 for _ in range(25)])"""   
     
-    procesar=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000]
+    procesar_ocultas.append([50 for _ in range(2)])
+
+
     cont=0
 
     rutaDir=os.path.dirname(os.path.abspath(__file__))
@@ -191,13 +193,13 @@ def main():
                 entrada=data[:2]
                 etiqueta=[data[2]]
                 RedN.entrenar(entrada,etiqueta,learning_rate)
-            if procesar[cont]==rep:                
+            if cont%20==0:                
                 timeEntrEnd= MPI.Wtime()        
-                print("{}\tTiempo de ejecucion: {}".format(procesar[cont],timeEntrEnd-timeEntrStart))
+                print("{}\tTiempo de ejecucion: {}".format(cont,timeEntrEnd-timeEntrStart))
                 ruta=os.path.join(rutaDir,'RedNeuronal{}x{}.txt'.format(len(x),x[0]))          
                 with open(ruta, 'a') as archivo:                      
                     archivo.write(str(timeEntrEnd-timeEntrStart) + ', ')
-                cont+=1
+            cont+=1
         print()   
         
 

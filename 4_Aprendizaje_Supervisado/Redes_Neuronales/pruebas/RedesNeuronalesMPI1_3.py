@@ -19,7 +19,7 @@ def lee(archivo):
         n=len(dir)
 
     if archivo==None: archivo=input("Introduce un nombre del fichero: ")    
-    path=os.path.join(dir,".Otros","ficheros","4.RedNeu", archivo+".txt")
+    path=os.path.join(dir,".Otros","ficheros","4_RedNeu", archivo+".txt")
 
     with open(path, 'r') as file:
         content = file.read()
@@ -177,17 +177,17 @@ def main():
         
         # --- DEFINIR LA RED NEURONAL ---------------------------------------------------------        
         tam_entrada=2
-        tam_oculta=5
+        tam_oculta=50
         tam_salida=1
         learning_rate=0.1
-        repeticiones=10000
+        repeticiones=125
         """
         1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000
         """
         tam_entrenamiento=len(poblacion)
+        
         procesar=[20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1250, 1500, 1750, 2000, 2250, 2500, 2750, 3000, 3250, 3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500, 6750, 7000, 7250, 7500, 7750, 8000, 8250, 8500, 8750, 9000, 9250, 9500, 9750, 10000]
-        for x in range(len(procesar)):
-            procesar[x]=procesar[x]*tam_entrenamiento
+        
         tam_poblacion=tam_entrenamiento
         tam_entrenamiento*=repeticiones
 
@@ -370,6 +370,8 @@ def main():
                 ruta=os.path.join(directorio_script,'RedNeuronal_1_1MPI{}_1x5.txt'.format(numProc))  
                 with open(ruta, 'a') as archivo:                              
                     archivo.write(str(timeEntrEnd-timeStart) + ', ')
+            else:
+                print(procesar[cont], ind)
 
             # ENVIA FORWARD                                             
             #salidas.append([entrada[ind][0:2]]) 
@@ -441,6 +443,8 @@ def main():
 
                 errores = nuevos_errores
         
+        print("termina", pesos)
+
     elif myrank!=numProc-1: # Worker1 (OCULTA)
         # FORWARD
         entrada=comm.recv(source=myrank-1) # Recibe     
