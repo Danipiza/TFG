@@ -14,18 +14,15 @@ from matplotlib.gridspec import GridSpec
 
 import re
 
-# Solo funciona con 5
-# mpiexec -np 5 python 3PipeLine.py
+
+# mpiexec -np 10 python 3PipeLine.py
 
 """
 Metodo 3. PipeLine
 
 Master inicializa y evalua.
 
-Worker1 = Seleccion
-Worker2 = Cruce
-Worker3 = Mutacion
-Worker4 = Evaluacion
+
 
 Cada worker se encarga de una subpoblacion.
 El MASTER selecciona la poblacion a cruzar y mutar, y la divide entre a los workers
@@ -1480,8 +1477,8 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=2000
-        x=tam_poblacion%4
+        tam_poblacion=1000 # 25:12, 50:25, 100:50, 200:100, 500:250, 1000:500, 2000:1000
+        x=tam_poblacion%8
         tam_poblacion-=x
         generaciones=25
 
@@ -1570,14 +1567,14 @@ def main():
     TEL=comm.bcast(TEL, root=MASTER) 
     
     
-    tam_poblacionDiv=tam_poblacion//4
-    if myrank!=MASTER and myrank<=4:
-        tam_poblacion//=4
+    tam_poblacionDiv=tam_poblacion//8
+    if myrank!=MASTER and myrank<=8:
+        tam_poblacion//=8
 
     """workersE=[]
     for i in range(1,numWorkers-2):
         workersE.append(i)"""
-    workersE=[1,2,3,4]
+    workersE=[1,2,3,4,5,6,7,8]
     #workerS=numWorkers-2
        
 
@@ -1633,7 +1630,7 @@ def main():
         print("Tiempo de ejecucion total: {}\n".format(totalTimeEnd-totalTimeStart))
     
         
-    elif myrank<=4: # WORKER EVAL      
+    elif myrank<=8: # WORKER EVAL      
         
 
         for _ in range(2):                

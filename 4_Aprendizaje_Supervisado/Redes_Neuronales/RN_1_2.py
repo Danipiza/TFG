@@ -145,8 +145,8 @@ def main():
                             [1.75, 65, 21.2],
                             [1.60, 50, 19.5],
                             [1.85, 80, 23.4],]"""
-    #datos_entrenamiento=lee("datos80")
-    datos_entrenamiento=lee("datos2042")    
+    datos_entrenamiento=lee("datos80")
+    #datos_entrenamiento=lee("datos2042")    
     
     
     # (altura, peso)
@@ -194,7 +194,7 @@ def main():
 
     # Mejor => lr=0.05 rep=1000
     learning_rate=0.1           # Aprendizaje
-    repeticiones=5              # Numero de repeticiones en el entrenamiento
+    repeticiones=125              # Numero de repeticiones en el entrenamiento
 
     RedN=RedNeuronal(tam_entrada,tam_capas_ocultas,tam_salida)
     print("Tamaños de las capas ocultas: {}, numero de repeticiones: {}".format(tam_capas_ocultas, repeticiones))

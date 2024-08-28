@@ -370,8 +370,7 @@ def main():
                 ruta=os.path.join(directorio_script,'RedNeuronal_1_1MPI{}_1x5.txt'.format(numProc))  
                 with open(ruta, 'a') as archivo:                              
                     archivo.write(str(timeEntrEnd-timeStart) + ', ')
-            else:
-                print(procesar[cont], ind)
+          
 
             # ENVIA FORWARD                                             
             #salidas.append([entrada[ind][0:2]]) 

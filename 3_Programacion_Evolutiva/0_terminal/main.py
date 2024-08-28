@@ -2874,7 +2874,7 @@ class AlgoritmoGenetico():
         self.init_poblacion()    
         
         self.evaluacion_poblacionBin()
-
+        print(len(self.poblacion[0].genes[1].v))
         while self.generaciones > 0:
             selec=self.seleccion_poblacionBin(5)
             
@@ -3580,10 +3580,10 @@ def main():
                    "Arbol",
                    "Gramatica"]
 
-    procesar=[2500,4000,5000,7500,10000]    
+    procesar=[25,50,100,200,500,1000,2000]    
     for x in procesar:
         tam_poblacion=x
-        generaciones=10
+        generaciones=25
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
@@ -3592,22 +3592,24 @@ def main():
         # 0: Basica | 1: Uniforme | 
         # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
         # 7: Intercambio
-        cruce_idx=0
+        cruce_idx=2
         prob_cruce=0.6
         
         # 0: Basica    |     
         # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
         # 5: Terminal  | 6: Funcional   | 7: Arbol        | 8: Permutacion
         #              | 9: Hoist       | 10: Contraccion | 11: Expansion
-        mut_idx=0
+        mut_idx=1
         prob_mut=0.05 # Binario: 0.05 | Real: 0.3
 
+        #precision=0.01
         precision=0.0000000001
+        
 
         # 0: Funcion 1    | 1: Funcion 2    | 2: Funcion 3    | 3: Funcion 4
         # 4: Aeropuerto 1 | 5: Aeropuerto 2 | 6: Aeropuerto 3 | 
         # 7: Arbol        | 8: Gramatica
-        funcion_idx=0
+        funcion_idx=6
         d=2
         elitismo=0
 

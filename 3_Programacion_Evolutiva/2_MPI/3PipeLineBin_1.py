@@ -1023,7 +1023,7 @@ def main():
 
     if myrank==MASTER:
         tam_poblacion=100
-        generaciones=100
+        generaciones=20
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
