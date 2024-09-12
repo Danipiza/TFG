@@ -1,303 +1,421 @@
-## TFG: Optimización usando técnicas de cómputo de alto rendimiento aplicado a la IA
----
-#### Estudiante: Daniel Pizarro Gallego (GII)
+<hr>
 
-#### Dirigido por: Alberto Núñez Covarrubias
----
+<h1 align="center">
+    Optimización de algoritmos de IA aplicando técnicas enfocadas al cómputo de alto rendimiento 
+</h1>
+<h2 align="center">
+    Optimization of AI algorithms by applying high-performance computing techniques
+</h2>
+
+<br>
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/ffad1fd9-b830-4bdf-936b-dc2295f9bfe0" alt="escudo_ucm" width="200">
+</div>
+
+<h3 align="center">
+TRABAJO DE FIN DE GRADO
+<br>
+</h3>
+<h3 align="center">
+DANIEL PIZARRO GALLEGO
+</h3>
+<h4 align="center">
+Director:
+Alberto Núñez Covarrubias
+</h4>
+<br>
+<h4 align="center">
+Facultad de Informática
+	
+Universidad Complutense de Madrid
+	
+13 de septiembre del 2024
+</h4>
+
+<hr>
+
 ## Índice
-
 1. [MPI](#mpi)
-2. [Aprendizaje por Refuerzo](aprendizaje-por-refuerzo)
-3. [Programación Evolutiva](programación-evolutiva)
-4. [Aprendizaje no Supervisado](aprendizaje-no-supervisado)
+2. [Aprendizaje no Supervisado](#aprendizaje-no-supervisado)
+3. [Aprendizaje por Refuerzo](#aprendizaje-por-refuerzo)
+4. [Programación Evolutiva](#programación-evolutiva)
 5. [Aprendizaje Supervisados](#aprendizaje-supervisado)
 
-## Python
-Es uno de los lenguajes más populares para la IA debido a su sintaxis sencilla, amplia variedad de bibliotecas de IA (como TensorFlow, PyTorch, scikit-learn, etc.) y una gran comunidad de desarrolladores. Pero es un lenguaje bastante lento, lo que provoca que a la hora de ejecutar el código tarde mucho tiempo en finalizar.
+
+<h3> <img src="https://skillicons.dev/icons?i=python" alt="C Language Icon" width="20" height="20" /> Python </h3>
+
+Es uno de los lenguajes más populares para la IA debido a su sintaxis sencilla, amplia variedad de bibliotecas de IA (como TensorFlow, PyTorch, scikit-learn, etc.) y una gran comunidad de desarrolladores. Pero es un lenguaje bastante lento, lo que provoca que a la hora de ejecutar el código demore bastante tiempo en finalizar.
 
 Voy a estar programando en python, y probando maneras de reducir el tiempo de ejecución.
 
-### Mejoras
-- **No usar recursión**
-- **Manejo de Interrupciones**
-- **División del Espacio de Búsqueda:** Se puede reducir el tiempo de ejecucion de lineal a logaritmico, produciendo, potencias de 2 o 10, hilos.
-- **Cálculo ideal del Número de Workers:** Crear y gestionar demasiados hilos pueden generar un costo adicional, tanto en espacio como en tiempo.
 
----
+<hr>
+
 
 ## MPI
-[MPI](https://mpi4py.readthedocs.io/en/stable/) es un estándar para una biblioteca de paso de mensajes. El objetivo es comunicar procesos en ordenadores remotos.
+Es un estándar para una biblioteca de paso de mensajes, cuyo objetivo es facilitar la programación paralela en entornos distribuidos, permitiendo que múltiples procesos independientes se comuniquen para resolver tareas de manera eficiente.
 
-Actualmente hay varias implementaciones: [Open MPI](http://www.open-mpi.org/), [MPICH](http://www.mpich.org/) , [MVAPICH](http://mvapich.cse.ohio-state.edu/), [IBM Platform MPI](http://www.ibm.com/systems/es/platformcomputing/products/mpi/), [Intel MPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/mpi-library.html)
+Actualmente hay varias implementaciones: [Open MPI](http://www.open-mpi.org/), [MPICH](http://www.mpich.org/) , [MVAPICH](http://mvapich.cse.ohio-state.edu/), [IBM Platform MPI](http://www.ibm.com/systems/es/platformcomputing/products/mpi/), [Intel MPI](https://www.intel.com/content/www/us/en/developer/tools/oneapi/mpi-library.html). En este proyecto se usa [mpi4py](https://mpi4py.readthedocs.io/en/stable/).
 
-MPI 2.0 tiene más de 100 funciones. Se intercambia información usando paso de mensajes.
-
-### La Ley de Amdahl (1967)
-```
-Acceleración = 1/((1-p) + p/n)
-```
-**Memoria Compartida:** Lecturas en paralelo, escrituras con exclusión mutua (Mutex). **1 Nodo, n procesos.**
-
-**Memoria Distribuida** Un proceso sólo tiene acceso a su espacio de memoria. El proceso **X le envía al proceso Y datos**. **n Nodos, n procesos.**
-
-Taxonomía de Flynn
-- SISD (Single Instruction, Single Data stream) 
-- SIMD (Single Instruction, Multiple Data streams) 
-- MISD (Multiple Instruction, Single Data stream), Poco común 
-- MIMD (Multiple Instruction, Multiple Data streams)
-
-## Single Program Multiple Data (SPMD) 
+### Single Program Multiple Data (SPMD) 
 **1 programa** ejecutado en paralelo. El mismo programa se **copia a todos los nodos**. Cada proceso tiene su propio su ID (Rank) 
 
-![MPI](https://github.com/Danipiza/TFG/assets/98972125/9725df3b-60ba-4d4d-9726-0f5087f5c37b)
+La principal diferencia entre la **memoria compartida** y **distribuida** radica en cómo se organizan y gestionan los recursos de memoria en sistemas de cómputo paralelos. La memoria compartida tiene una sola memoria que comparte entre todos los procesos, teniendo que ejecutar técnicas para garantizar la sincronización. En su contraparte, la memoria distribuida utiliza memorias independientes entre cada proceso, por lo que estos problemas no ocurren. Sin embargo, la comunicación entre procesos resulta ser más costosa en los sistemas distribuidos.
 
----
 
-## Funciones 
+<div align="center">
+   <img  src="https://github.com/Danipiza/TFG/blob/main/.Otros/Imagenes/MPI.png" width="600" height="300"/> 
+</div>
 
-### Funciones de Entorno
-**Comunicador** agrupa los procesos en “comunicadores”. Los procesos que intercambian mensajes comparten comunicador ```comm=MPI.COMM_WORLD```
+<br>
 
-**Inicializar**. Establecer un entorno de MPI. Se invoca automáticamente al importar mpi4py, se puede hacer manual si se desactiva la configuracion base.
+Esquema básico para ejecutar un programa MPI en Python:
+```python
+ from mpi4py import MPI # Al importar la biblioteca en Python se genera el entorno.
+
+ comm = MPI.COMM_WORLD     	# Comunicador
+ status = MPI.Status()   	# Status
+ myrank = comm.Get_rank() 	# id de cada proceso
+ numProc = comm.Get_size() 	# Numero de procesadores
+
+ if myrank==0:           	# Master
+    # Carga el conjunto de datos. Los divide y envia.
+    # Recibe todos los datos procesados.
+ else:                   	# Workers
+    # Recibe el subconjunto de datos que le asigna el Master.
+    # Procesa los datos. Los envia.
 ```
-mpi4py.rc.initialize = False
-MPI.Init()
+
+
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/0_MPI).
+<hr>
+
+## Aprendizaje no Supervisado
+
+Los métodos no supervisados (unsupervised methods, en inglés) son algoritmos de aprendizaje automático que basan su proceso en un entrenamiento con datos sin etiquetar. Es decir, a priori, no se conoce ningún valor objetivo, ya sea categórico o numérico. La meta de este aprendizaje es encontrar patrones o estructuras en los datos proporcionados. Estos algoritmos son útiles en escenarios en los cuales hay escasez de datos etiquetados o éstos no están disponibles.
+
+En este proyecto vamos a reducir el tiempo de ejecución de las técnicas de _clustering_ que se encargan de agrupar individuos basándose en alguna medida de similitud. Los algoritmos son los siguientes:
+
+1. [Aglomerativo](#jerárquico-aglomerativo)
+2. [KMedias](#algoritmo-kmedias)
+
+### Jerárquico Aglomerativo
+```python
+FASE 1: Crear la matriz de distancias inicial D. Es una matriz simétrica (basta con usar una de las matrices triangulares) 
+FASE 2: Agrupación de Individuos 
+    o 2.1. Partición inicial P0: Cada objeto es un cluster 
+    o 2.2. Calcular la partición siguiente usando la matriz de distancias D
+         Elegir los dos clusters más cercanos. Serán la fila y la columna del mínimo de la matriz D 
+         Agrupar los dos en un cluster. Eliminar de la matriz la fila y columna de los clusters agrupados.
+	  Generar la nueva matriz de distancias D. 
+	    • Añadir una fila y una columna con el cluster nuevo 
+            • Calcular la distancia del resto de clusters al cluster nuevo 
+
+	 Repetir este el paso 2.2. hasta tener sólo un cluster con todos los individuos
+FASE 3 (OPCIONAL): Representar el dendograma.
+
+La complejidad con los enlaces simple y completo tienen un coste cúbico O(N^3). Existen implementaciones más eficientes (N^2).
 ```
+## Algoritmos secuenciales
+- [Algoritmo](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo/Aglomerative.py)
 
-**Finalizar**. Terminar el procesamiento de MPI. Tiene que ser la ultima llamada MPI. Se invoca automáticamente, se puede hacer manual si se desactiva la configuracion base.
-```
-mpi4py.rc.finalize = False
-MPI.Finalize()
-```
+## Estrategias MPI implementadas
+### Dividir la matriz entre los procesos
+Divide la matriz entre todos los procesos. El proceso _master_ se encarga de gestionar la comunicación entre los procesos para dividr el algoritmo entre estos. Dependiendo de la distancia hay más o menos implementaciones.
 
-**Size**. Para comprobar el número de procesos relacionados con el comunicador (también cuenta el master). ```comm.Get_size()```
+Distancia por centroides:
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo/Aglomerative_MPI_Cent_E.py)
 
-**Rank**. Para comprobar el ID (rank) del proceso asociado a un comunicador [0,(size-1)] ```comm.Get_rank()```
-
-**Status**. Se utiliza para almacenar información sobre el mensaje recibido. Origen del mensaje, tag asociado, tamaño del mensaje. Es un objeto Status que proporciona esta información.
-
-**MPI.ANY_SOURCE**. Se utiliza en funciones de recibir mensajes, especifica que recibe el mensaje de cualquier destinatario.
-
-**Tag**. Es una etiqueta asociada con el mensaje que se envía. Es una forma de etiquetar los mensajes y es útil cuando estás implementando una comunicación entre múltiples procesos y necesitas distinguir entre diferentes tipos de mensajes.
-
-
-**Abortar**. Fuerza la finalización de todos los procesos MPI. ```MPI_Abort()```
+Distancias por enlace simple/completo, (complejidad mayor que la anterior distancia):
+- El proceso que actualiza la fila trabaja solo.
+	- [Implementación 1](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo/Aglomerative_MPI_Simple_E_1.py)
+- El proceso que actualiza la fila trabaja con todos los procesos _workers_.
+	- [Implementación 2_0](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo/Aglomerative_MPI_Simple_E_2_0.py)
+ 	- [Implementación 2_1](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo/Aglomerative_MPI_Simple_E_2_1.py)
+  	- [Implementación 2_2](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo/Aglomerative_MPI_Simple_E_2_2.py)
 
 
-### Funciones Punto a Punto
-Proceso **emisor y receptor** del mensaje
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo).
 
-**SÍNCRONA**: El proceso **emisor espera** a que se realice el envío del mensaje. Comunicación **bloqueante**
-
-**Enviar (sinc)** Envía un mensaje de forma síncrona. El mensaje _data_ lo envia un proceso y lo recibe el _dest_.
-```comm.send(data, dest=, status=)```
-
-**Recibir (sinc)** Recibe un mensaje de forma síncrona. El mensaje _data_ lo guarda en una variable el proceso que recibe desde _source_.
-```data = comm.recv(source=, tag=, status=)```
-
-
-**ASÍNCRONA**: El proceso emisor envía el mensaje y **continúa su ejecución** sin asegurarse de que el proceso receptor haya solicitado el mensaje. Comunicación **no bloqueante**
-
-**Enviar (asinc)**. Envía un mensaje de forma asíncrona. Mensaje lo puede recibir un proceso mediante MPI_Recv o MPI_IRecv
-```comm.Isend(data, dest=destino)```
-
-**Recibir (asinc)**. Recibe un mensaje de forma asíncrona
-```
-data = comm.Irecv(source=, tag=, status=)
-data.Wait() # De esta forma espera a recibir el mensaje
-```
+<br>
  
-![Master_Worker](https://github.com/Danipiza/TFG/assets/98972125/bb3bb7ab-b896-4638-a83b-ec256823baf5)
+### Algoritmo KMedias
 
----
+```python
+Fijar un valor k.
+
+FASE 1: Inicializar los K centros de los clusters de forma aleatoria.
+    • Generando puntos aleatorios en el espacio dimensional
+    • Seleccionando aleatoriamente individuos
+FASE 2: Repetir esta fase hasta que los centros no cambien.
+    o 2.1. (Asignación): Calcular el cluster más cercano para cada individuo.
+	Requiere el uso de una distancia (normalmente Euclídea o Manhattan).
+    o 2.2. (Actualización): Calcular los nuevos centros con la asignación (de esta iteración) de los individuos.
+	Se calcula con la media de los valores de los individuos de cada cluster.
+
+Como los clusters se generan aleatoriamente, no siempre va a dar un buen resultado a la primera.
+Por lo que conviene ejecutar varias veces este algoritmo para encontrar la mejor asignación.
+```
+## Algoritmos secuenciales
+- [Algoritmo y búsqueda](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMedias.py)
+
+## Estrategias MPI implementadas
+### Dividir la población
+Divide la población de individuos matriz entre todos los procesos. El proceso _master_ se encarga de gestionar de calcular los nuevos centros en cada iteración.
+
+Distancia Euclidea:
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_uno_E.py)
+
+Distancia Manhattan:
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_uno_M.py)
+
+### Búsqueda de la mejor asignación
+Para la búsqueda se ejecuta un bucle principal con el número de centros maximo que se quiere estudiar, es decir, se ejecuta el algoritmo para los valores de _K_ entre _\[2, K_max\]_. En este bucle principal se repite 5 veces para encontar la mejor asignación para cada valor de _K_. Hay dos implementaciones, la estrategia MPI comentada en la subsección anterior, o ejecutar en varios procesos el algoritmo secuencial con diferentes valores de _K_, pero mismos centros.
+- [Dividir la población](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_busqueda_E_1.py)
+- [Ejecuciones secuenciales en paralelo](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_busqueda_E_2.py)
+
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/1_Aprendizaje_NoSupervisado/K-Medias).
+
+<hr>
 
 ## Aprendizaje por Refuerzo
-### Reinforcement Learning
-Se basa en experiencias y simulaciones, con prueba y error, recibiendo recompensas con las acciones tomadas (también pueden ser negativas). Nadie le dice al agente que hacer, toma las decisiones con diferentes estrategias. En la etapa de entrenamiento suele ser de forma aleatoria. Una vez tiene un feedback del entrenamiento se toma las decisiones maximizando las recompensas obtenidas en experiencias pasadas.
+Se basa en experiencias y simulaciones, con prueba y error, recibiendo recompensas con las acciones tomadas (también pueden ser negativas). Nadie le dice al agente que hacer, este toma las decisiones con diferentes estrategias. Se realiza una etapa de entrenamiento para que aprenda a moverse por el entorno, tomando las decisiones que maximicen las recompensas obtenidas en experiencias pasadas.
 
-### Algoritmo Q-Learning:
+Los algoritmos desarrollados en este proyecto son los siguientes:
+1. [Q-Learning](#q-learning)
+2. [DQN](#dqn)
+
+### Q-Learning
 Mezcla entre programación dinámica y Monte Carlo. R=Matriz de recompensas.
 - R=Matriz de recompensas.
 - Q=Matriz (Estados x Acciones). Que acción elegir en cada estado. (mayor valor)
 
-Aprende el camino si es una buena acción, Back Propagation (Como en redes neuronales).
-
-S=estado actual. A=acción tomada. S’=Estado siguiente. Ai=una acción.
-
-```Q(S, A) = (1−α)*Q(S, A) + α*(R(S, A) + γ*maxi Q(S’, Ai))```
+### Entorno 
+Para este algoritmo es un laberinto. Se entrena al agente para que consiga llegar desde un punto origen a uno destino en el menor número de acciones necesarias.
 
 ### Hiperparametros:
-
 - α (tasa de aprendizaje): 
 Debería disminuir a medida que continúa adquiriendo una base de conocimientos cada vez mayor.
 - γ (factor de descuento): 
 A medida que se acerca cada vez más al valor límite, su preferencia por la recompensa a corto plazo debería aumentar, ya que no estará el tiempo suficiente para obtener la recompensa a largo plazo, lo que significa que su gamma debería disminuir.
-- ϵ:  Evita que la acción siga siempre la misma ruta.
+- ϵ (factor de exploración-explotación): Evita que la acción siga siempre la misma ruta.
 A medida que desarrollamos nuestra estrategia, tenemos menos necesidad de exploración y más explotación para obtener más utilidad de nuestra política, por lo que en vez de utilizar un valor fijo, a medida que aumentan los ensayos, épsilon debería disminuir. Al principio un épsilon alto genera más episodios de exploración y al final un épsilon bajo explota el conocimiento aprendido.
 
+La función que usa para almacenar las experiencias en la Q-Table es la siguiente:
+
+```Q(S, A) = (1−α)*Q(S, A) + α*(R(S, A) + γ*maxi Q(S’, Ai))```
+
+Siendo _S_ el estado actual, _A_ la acción tomada, _S’_ el estado siguiente y _Ai_ una acción de entre todas las acciones del agente.
+
+## Algoritmos secuenciales
+- [Algoritmo](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_1.py)
+- [Algoritmo con preprocesado](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_2.py)
+
+## Estrategias MPI implementadas
+
+### Dividir el entorno entre los procesos
+Al dividir el laberinto entre los procesos (primera mejora), cada proceso controla una zona, y se genera un flujo constante de episodios (iteraciones del algoritmo). Cuando un agente sale del dominio de un proceso, éste le manda un mensaje al proceso que controla esa parte del laberinto con la posición en la que entra
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_MPI_3.py)
+
+### Ejecuciones en paralelo y juntar las experiencias.
+El master recolecta las experiencias de los workers, haciendo la media de los Q-valor obtenidos de los procesos, calculando así las mejores acciones para cada estado.
+- [Implementación 1](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_MPI_2_1.py)
+- [Implementación 2](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_MPI_2_2.py)
 
 
+### Búsqueda de hiper-parámetros
+Igual que la mejora anterior, pero esta vez para encontrar hiper-parámetros. Cada proceso ejecuta combinaciones distintas y almacena en ficheros los resultados obtenidos (Fin, Bucle, ...)
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_MPI_1.py)
+
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/2_Aprendizaje_Por_Refuerzo/RL).
+<br>
+
+### DQN
+Este algoritmo combina redes neuronales con la base de aprendizaje por refuerzo, eliminando así la Q-Table.
+
+La estructura de la red neuronal depende del entorno del problema. Los valores de la capa oculta se pueden modificar dependiendo de las necesidades del programador, pero la capa de entrada y salida depende del problema. La entrada se adapta para recibir un estado del entorno, como por ejemplo una imagen representada como una matriz. La salida de la red tendrá tantos nodos como acciones tenga el agente. 
+
+### Entorno
+El juego Pacman, diseñado por la empresa _Namco_, y en particular la versión de _Atari 2600_. El juego consiste en recolectar todas las monedas del laberinto sin ser comido por un fantasma. Implementamos el juego -desde cero- para moldear según nuestros intereses la implementación y que el algoritmo DQN sea más eficiente y sencillo.
+
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/ff437eec-2092-4d0c-9aad-0e1f43159c55" alt="pacman" width="400">
+</div>
+
+### Hiperparametros:
+- Gamma (factor de descuento \[0, 1\]). Utilizado para saber cuánto resta a la recompensa adquirida al realizar una acción en un estado.
+- Epsilon (tasa de exploración \[0, 1\]). Probabilidad utilizada para ejecutar una acción aleatoria o la mejor hasta el momento. 
+- Learning rate (tasa de aprendizaje \[0, 1\]). Para la propagación hacia atrás de las redes neuronales. Esencialmente, mide cuánto cambian los pesos de los nodos al tener un fallo.
+
+Además de estos parámetros, el algoritmo cuenta con otras variables para desarrollar las redes neuronales.
+- Epsilon decay. Utilizado para no usar siempre el mismo valor de epsilon. Esta variable marca cuanto se reduce la variable epsilon entre episodios.
+- Número de ejemplos de entrenamiento (batch size}. Se utiliza para actualizar los parámetros de la red neuronal durante una sola iteración del entrenamiento.
+- Tamaño de la capa oculta. Marca el número de neuronas en cada capa.
+
+## Algoritmos secuenciales
+- [Algoritmo y Pacman](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/DQN/DQN.py)
 
 
-### Mejorar 
-Se puede lograr con varias estrategias. El contexto del problema es muy importante.
+## Estrategias MPI implementadas
 
-### Paralelización del entorno: 
-Entrenando un agente en un entorno complejo, se puede dividir el proceso de entrenamiento en varios workers/hilos.
-- Ejecutar en varios “workers“ el programa en la misma celda.
--	Ejecutar en varios “workers” el programa en diferentes celdas.
--	Ejecutar varios “workers” asignando secciones del mapa.
--	Recorrer la matriz Q e ir actualizando los valores
+### Búsqueda de hiper-parámetros
+Igual que la mejora anterior, pero esta vez para encontrar hiper-parámetros. Cada proceso ejecuta combinaciones distintas y almacena en ficheros los resultados obtenidos (Fin, Bucle, ...)
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/DQN/DQN_mpi.py)
 
-  
-### Explotación y evaluación simultáneas: 
-Además de explorar el entorno, puedes utilizar hilos para realizar simultáneamente la explotación (es decir, tomar decisiones basadas en el conocimiento actual del agente) y la evaluación (es decir, medir el desempeño del agente en el entorno). Esto puede acelerar el proceso de aprendizaje al permitir que el agente ajuste su estrategia más rápidamente.
+### Mismas estrategias que en las [Redes Neuronales](#redes-neuronales)
 
-### Optimización de Hiperparámetros: 
-alpha, beta y gamma son los hiperparámetros que se usan para almacenar las experiencias del agente. Con vairos workers/hilos con diferentes hiperparámetros así comprobando de forma paralela cual sería la mejor configuracion. EJ, con técnicas como la **búsqueda aleatoria** u **optimización bayesiana distribuida** para encontrar la mejor configuración de hiperparámetros para el modelo de aprendizaje por refuerzo.
-
-### Implementación Eficiente de Algoritmos: 
-Hay algoritmos de aprendizaje por refuerzo, que se pueden paralelizar manera eficiente.
-
- [**A3C (Asynchronous Advantage Actor-Critic)**](https://www.activeloop.ai/resources/glossary/asynchronous-advantage-actor-critic-a-3-c/#:~:text=A3C%2C%20or%20Asynchronous%20Advantage%20Actor,form%20of%20rewards%20or%20penalties.)  visto en la asignatura IA1, básicamente el agente recibe un feedback de la operación que ha ejecutado, dando recompensas (si es negativa es una penalización).
- 
- [**PPO (Proximal Policy Optimization)**](https://openai.com/research/openai-baselines-ppo)
-
----
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/2_Aprendizaje_Por_Refuerzo/DQN).
+<hr>
 
 ## Programación Evolutiva
 
 La programación evolutiva es una técnica de optimización inspirada en la teoría de la evolución biológica. Se basa en el concepto de selección natural y evolución de las poblaciones para encontrar soluciones a problemas complejos.
 
-Una población está compuesta por individuos. Un individuo tiene un cromosoma, que tiene uno o varios genes, que a su vez cada gen tiene 1 o varios alelos. Los individuos se pueden representar: 
--	Binarios: Cada alelo es un bit. Los rangos de números naturales en binario son de 2N, para codificar un 127 en binario se necesitan 27 bits. Y si queremos añadir números reales con una cierta precisión este número de bits aumenta.
--	Reales: Números reales, este es más fácil de manejar.
-
-El **fenotipo** (Decodificación) de un individuo son los rasgos observables, es decir el valor numérico. 
-
-El **genotipo** (Codificación) es la composición genética de un individuo.
-
+Una población está compuesta por individuos, que son sometida a métodos de evaluación, selección, cruce y mutación para, con el paso de las generaciones, maximizar o minimizar un valor fitness. Un individuo tiene un cromosoma, que tiene uno o varios genes, que a su vez cada gen tiene uno o varios alelos. Los individuos se pueden representar de la siguientes formas: 
+- Binarios: Cada alelo es un bit. 
+- Reales: Cada alelo es un número real. Estos individuos son más fáciles de manejar.
+- Árboles: Cada alelo es un nodo del árbol.
 
 
 ### Plantilla básica de una Algoritmo Evolutivo
-``` 
+```python
 poblacion = iniciar_poblacion(tam_poblacion)
 evaluar_poblacion(poblacion)
-while(<<condición>>):
+while(<<condicion>>):
   seleccion = seleccionar_poblacion()
   # Reproducción
   cruzar_poblacion(seleccion, prob_cruce)
-  mutar_poblacion(seleccion, prob_muta)
-  3 Elegir que individuos pasan a la siguiente generacion
-  eleccion_poblacion(poblacion, seleccionados)
+  mutar_poblacion(seleccion, prob_muta)  
   evaluar_poblacion()
 ```
-![PEV](https://github.com/Danipiza/TFG/assets/98972125/6eeb6388-e177-4f5c-bd92-73631620d6c3)
+## Algoritmos secuenciales
+- [Terminal](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/0_terminal/main.py)
+- [GUI](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/1_gui/main.py)
 
-- Inicializar Población:
-Para inicializar la población, se pasa por parámetro el tamaño de la poblacion, y se inicializan todos los Individuos.
+## Estrategias MPI implementadas
 
-Los Individuos suelen ser un array de bits, por lo que se recorre el individuo, es decir, el cromosoma y con un numero random se genera cada alelo del cromosoma.
+### Dividir la población
+La población se divide entre los procesos generados. El _master_ se encarga de gestionar las comunicaciones para que la población evolucione.
+- [Implementación](https://github.com/Danipiza/TFG/tree/main/3_Programacion_Evolutiva/2_MPI/1DividirPob.py)
 
-Cada individuo puede tener muchos bits, debido a un tamaño de cromosoma elevado. Si tenemos muchos individuos y el tamaño del cromosoma es muy grande se puede distribuir la carga
-de trabajo entre varios workers/hilos para que generen una parte y envien al master lo generado.
+### Modelo de islas
+La población se divide en subpoblaciones repartidas entre los procesos ejecutados, para, en paralelo, evolucionar a la población general. Los procesos se comunican cada cierto tiempo para reiniciar las poblaciones con los mejores individuos de todos los procesos.
+- [Implementación](https://github.com/Danipiza/TFG/tree/main/3_Programacion_Evolutiva/2_MPI/2ModeloIslas_1.py)
 
-- Evaluar Población:
-Para evaluar la población, se reciben los individuos de la población y se calcula su fitness, como de buenos son estos individuos para el problema a resolver.
-
-La funcion de aptitud calcula el fitness, recibiendo el array de bits de un individuo. 
-
-Dependiendo del problema, puede ser un calculo rápido con el fenotipo asociado al individuo, o un cálculo que requiera recorrer todo el array de bits. Se puede distribuir la carga de trabajo entre varios workers/hilos para calcular el fitness de una parte de la población. (Como a la hora de inicializar)
-
-- Seleccionar Población:
-Para seleccionar la poblacion, hay varios métodos, ruleta, torneo, estocástico universal...
-
-Se recibe el fitness de la población y el método se encarga de elegir individuos, puede elegir a los mejores o elegir de manera justa.
-
-Por ejemplo en el método de ruleta se selecciona un número de individuos de la población de manera aleatoria, pero teniendo en cuenta su adaptabilidad, por lo que los mejores individuos tienen más probabilidades de ser escogidos. Se puede realizar un distribucion para que varios workers/hilos seleccionen una parte de la población.
-
-- Cruzar Población:
-Una vez seleccionados los individuos de la población, con una probabilidad de cruce que se pasa por parámetro se seleccionan 2 individuos aleatorios y se cruzan dependiendo de la probabilidad, si no se quedan como están.
-
-Hay varios métodos para el cruce, unos mas simples y otros más complejos. Por ello se puede gestionar este proceso con workers/hilos que reciban una parte de los individuos seleccionados y devuelvan esa parte una vez realizada el cruce.
-
-- Mutar Población:
-Cuando ya se han cruzado los elementos seleccionados estos pasan a una etapa de mutación, en la cual con una probabilidad de mutación, se recorre los alelos de los individuos seleccionados y cruzados para aplicar diversidad.
-
-Al igual que con el cruce hay varios métodos, simples y complejos, que se pueden paralelizar con workers/hilos. 
+### Pipeline
+Cada parte del algoritmo se divide entre los procesos. El _master_ genera subpoblaciones, y los workers ejecutados se encargan de evaluar, seleccionar, cruzar y mutar las poblaciones que reciben del proceso anterior. Una vez procesan los datos recibidos, los envían hacia adelante y esperan a recibir nuevos datos. Cada proceso se encarga de una parte, generando un flujo constante de mensajes entre los procesos.
+- [General](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLine.py)
+- [Binario \(4 procesos\)](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLineBin_1.py)
+- [Binario \(7 procesos\)](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLineBin_2.py)
+- [Real \(5 procesos\)](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLineReal_2.py)
+- [Real \(10 procesos\)](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLineReal_3.py)
 
 
----
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/3_Programacion_Evolutiva).
+<hr>
 
-## Aprendizaje no Supervisado
-
-1. [Aglomerativo](#algoritmo-de-clustering-jerárquico-aglomerativo)
-2. [KMedias](algoritmo-de-kmedias)
-
-### Algoritmo de clustering jerárquico aglomerativo
-
-```
--	FASE 1: Crear la matriz de distancias inicial D 
-Es una matriz simétrica (basta con usar una de las matrices triangulares) - 
--	FASE 2: Agrupación de Individuos 
-    o	Partición inicial P0: Cada objeto es un cluster 
-    o	Calcular la partición siguiente usando la matriz de distancias D
-        	Elegir los dos clusters más cercanos. Serán la fila y la columna del mínimo de la matriz D 
-        	Agrupar los dos en un cluster. Eliminar de la matriz la fila y columna de los clusters agrupados. Generar la nueva matriz de distancias D. 
-            •	Añadir una fila y una columna con el cluster nuevo 
-            •	Calcular la distancia del resto de clusters al cluster nuevo 
-    o	Repetir paso 2 hasta tener sólo un cluster con todos los individuos • Representar el dendograma (árbol de clasificación) 
-La complejidad con los enlaces simple y completo tienen un coste cúbico O(n3). Existen implementaciones más eficientes (𝑛2).
-```
-
- 
-### Algoritmo de KMedias: 
-**Algoritmos de clustering basados en particiones**
-
-Se fija un valor k. 
-1. Inicializar los k centros (o centroides) de los clusters de forma aleatoria.
-- Generando puntos aleatorios en el espacio dimensional
-- Seleccionando aleatoriamente individuos
-2. Repite el siguiente proceso hasta que los centros no cambien.
-
-**Fase de asignación:** Para cada individuo se le asigna el cluster más cercano. Requiere el uso de una distancia (normalmente euclídea, también se puede usar manhattan o Chebychev)
-
-**Actualiza el centro de los clusters.** Se calcula con la media de los individuos del Como los clusters se generan aleatoriamente, no siempre va a dar un buen resultado a la primera. Por lo que se pasa por parámetro cuantas veces **se repite hasta encontrar el mejor**. Encontrar el **valor ideal para k**.
-
-
----
 
 ## Aprendizaje Supervisado
 1. [KNN](#knn)
 2. [Redes Neuronales](redes-neuronales)
 
-### Validacion Cruzada
-1. Los datos se dividen aleatoriamente en k subconjuntos iguales 
-2. Se entrena el conjunto con (k-1) y se valida con el restante 
-3. Se repite k veces el paso 2, cambiando el conjunto que se usa para validar 
-4. Como medida de error final se suele presentar la media de las k medidas de error de validación (aunque puede ser interesante comprobar que las k medidas sean similares)
-
-![Validacion_Cruzada](https://github.com/Danipiza/TFG/assets/98972125/3f08fd2b-495e-48e2-846b-05c04d1a60cf)
-
 ### KNN
-Es simple pero potente y se basa en la idea de que los puntos de datos similares tienden a agruparse en el espacio de características.
-	1. Empezar con un dataset con categorías conocidas.
-	2. Añadir un nuevo individuo con categoría desconocida.
-	3. Clasificar el individuo con los k vecinos más cercanos.
-Se puede aplicar a mapas de calor
+simple pero potente, resultando muy efectivo para tareas de clasificación y regresión. Se basa en la idea de que los puntos de datos similares tienden a agruparse en el espacio de características. Este algoritmo pertenece al paradigma de aprendizaje perezoso o basado en instancias.
 
-No hay una forma de determinar el mejor valor para k, por lo que hay que probar con varias ejecuciones. valores pequeños de k crea sonido. Valores grandes con pocos datos hará que siempre sea la misma categoría
+```python
+FASE 1: Inicializar las poblaciones categorizadas y a predecir, y la variable K
+FASE 2: Agrupar un nuevo individuo
+    o 2.1. Recorrer todos los individuos de la población categorizada, y almacenar las K individuos más cercanos.
+    o 2.2. Asignar el cluster con más repeticiones al individuo actual.
+    o 2.3. (opcional) Añadir el individuo actual a la población categorizada.
+
+No hay una forma de determinar el mejor valor para k, por lo que hay que probar con varias ejecuciones. 
+Valores pequeños de K crea sonido. 
+Valores grandes con pocos datos hará que siempre sea la misma categoría     
+```
+## Algoritmos secuenciales
+- [Algoritmo](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN.py)
+
+## Estrategias MPI implementadas
+Las estrategias se dividen en dos principales implementaciones, actualizando la población categorizada conforme se categorizan nuevos individuos, o no actualizando. Si se actualiza se obtienen mejores resultados en cuanto a predicciones se refiere, pero el tiempo de ejecución es mucho mayor.
+
+### Dividir la población categorizada
+Se divide la población categorizada entre los procesos para que estos trabajen de manera paralela en un mismo individuo. Es decir, cada _worker_ envía los _K_ vecinos más cercanos de su subpoblación categorizada.
+No Actualiza:
+- [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_E_NoAct.py)
+- [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_M_NoAct.py)
+
+Actualiza:
+- [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_E_Act.py)
+- [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_M_Act.py)
+
+
+### Dividir la población a predecir
+Se divide la población a predecir entre los procesos para que estos trabajen en paralelo de manera independiente. Es decir, cada _worker_ envía al proceso _master_ un individuo distinto al terminar un procesado.
+No Actualiza:
+- [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_2_E_NoAct.py)
+- [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_2_M_NoAct.py)
+
+Actualiza:
+- [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_2_Act.py)
+- [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_2_Act.py)
+
+
+
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/4_Aprendizaje_Supervisado/KNN).
+<br>
+
+
+
 
 
 ### Redes Neuronales
-![Esquema_red](https://github.com/Danipiza/TFG/assets/98972125/cf25aa2b-00e0-45e7-877f-d97f891f1ec4)
--	La primera columna es la capa de entrada de la variable. 
--	La última columna es la capa de salida con todas las posibles salidas. 
--	Las columnas intermedias son las capas ocultas
 
-Cada neurona hace una operación simple. Suma los valores de todas las neuronas de la columna anterior. Estos valores multiplicados por un peso que determina la importancia de conexión entre las dos neuronas. Todas las neuronas conectadas tienen un peso que irán cambiando durante el proceso de aprendizaje. Además, un valor bias puede ser añado al valor calculado. No es un valor que viene de una neurona especifica y se escoge antes de la fase de aprendizaje. Puede ser útil para la red. Con el valor calculado se aplica a una función de activación, para obtener el valor final. Se suele usar para dar un valor entre [0-1].
+Las redes neuronales son un modelo computacional inspirado en el funcionamiento y estructura de las neuronas del cerebro humano. Esencialmente, consisten en capas de nodos interconectados, llamadas neuronas artificiales. La red neuronal se compone de las siguientes capas:
+- Capa de entrada, en la cual, habrá tantas neuronas como variables de entrada tenga el modelo de predicción.
+- Capa oculta, representada con una o más capas internas. Cada una contiene un número determinado de neuronas.
+- Capa de salida. Como en la entrada, tendrá un número de neuronas relacionadas con las variables de salida.
+
+<div align="center">
+  <img src="https://github.com/Danipiza/TFG/assets/98972125/cf25aa2b-00e0-45e7-877f-d97f891f1ec4" alt="escudo_ucm">
+</div>
+
+
+
+
+Cada neurona hace una operación simple. Suma los valores de todas las neuronas de la columna anterior. Estos valores multiplicados por un peso que determina la importancia de conexión entre las dos neuronas. Todas las neuronas conectadas tienen un peso que irán cambiando durante el proceso de aprendizaje. Además, un valor bias puede ser añado al valor calculado. Con el valor calculado se aplica a una función de activación, para obtener el valor final. 
+
 Proceso de aprendizaje/entrenamiento:
-Lo que queremos que haga la red neuronal, es que dado una entrada devuelva una salida. Al principio no va a ser así, solo por suerte devuelve la salida correcta. Por esto se genera la etapa de aprendizaje, en la que cada entrada tiene asociada una etiqueta, para explicar que salida debería de haber adivinado.
--	Acierta: los parámetros actuales se guardan, y se envía la siguiente entrada
--	Falla: los pesos son cambiados. Se suele usar backpropagation
+```python
+FASE 1: Inicializar los pesos de la red neuronal con los datos de inicializacion
+FASE 2: Entrenamiento
+    o 2.1. (Forward) Enviar un individuo por la red neuronal. Suma el valor recibido de la capa anterior multiplicada
+	por los pesos de la capa actual con la siguiente. Así se determina la importancia de conexión entre las neuronas.
+	Con el valor calculado se aplica a una función de activación y se pasa a la siguiente capa hasta llegar a la salida.
+    o 2.2. (Backpropagation) Enviar el error cometido hacia atrás. El valor predicho calculado en la salida es comparado con
+	la etiqueta, y se calcula el error. Este error se manda para atrás actualizando los pesos. Se suma la multiplicación
+	del valor predicho en cada capa con la tasa de aprendizaje y el error.
+```
 
+## Algoritmos secuenciales
+- [Algoritmo](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_1_2.py)
+- [Búsqueda de hiper-parámetros](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_2_1.py)
+
+## Estrategias MPI implementadas
+
+### Pipeline
+Al igual que en los algoritmos evolutivos cada proceso se encarga de una parte para generar un flujo constante de mensajes. En este caso cada worker se encarga de una capa.
+- [Síncrono](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_MPI_1_3.py)
+- [Asíncrono](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_MPI_1_4.py)
+
+### Dividir el entrenamiento
+Se divide la población de entrenamiento entre los procesos. Al final se juntan las experiencias haciendo la media. (No funciona correctamente, da malas predicciones)
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_MPI_3_1.py)
+
+### Búsqueda de hiper-parámetros
+Al igual que en otros algoritmos, se ejecutan en paralelo ejecuciones secuenciales, en donde cada proceso almacena los resultados.
+- [Implementación](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_MPI_2_1.py)
+
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/edit/main/README.md).
+<hr>
