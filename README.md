@@ -1,3 +1,5 @@
+*[ENGLISH](https://github.com/Danipiza/TFG/blob/main/README_ENG.md) ∙ [ESPAÑOL](README.md)* <img align="right" src="https://visitor-badge.laobi.icu/badge?page_id=danipiza.TFG" />
+
 <hr>
 
 <h1 align="center">
@@ -47,7 +49,7 @@ Universidad Complutense de Madrid
 
 Es uno de los lenguajes más populares para la IA debido a su sintaxis sencilla, amplia variedad de bibliotecas de IA (como TensorFlow, PyTorch, scikit-learn, etc.) y una gran comunidad de desarrolladores. Pero es un lenguaje bastante lento, lo que provoca que a la hora de ejecutar el código demore bastante tiempo en finalizar.
 
-Voy a estar programando en python, y probando maneras de reducir el tiempo de ejecución.
+Voy a estar programando en Python, y probando maneras de reducir el tiempo de ejecución.
 
 
 <hr>
@@ -98,7 +100,7 @@ Los métodos no supervisados (unsupervised methods, en inglés) son algoritmos d
 En este proyecto vamos a reducir el tiempo de ejecución de las técnicas de _clustering_ que se encargan de agrupar individuos basándose en alguna medida de similitud. Los algoritmos son los siguientes:
 
 1. [Aglomerativo](#jerárquico-aglomerativo)
-2. [KMedias](#algoritmo-kmedias)
+2. [KMedias](#kmedias)
 
 ### Jerárquico Aglomerativo
 ```python
@@ -106,11 +108,10 @@ FASE 1: Crear la matriz de distancias inicial D. Es una matriz simétrica (basta
 FASE 2: Agrupación de Individuos 
     o 2.1. Partición inicial P0: Cada objeto es un cluster 
     o 2.2. Calcular la partición siguiente usando la matriz de distancias D
-         Elegir los dos clusters más cercanos. Serán la fila y la columna del mínimo de la matriz D 
-         Agrupar los dos en un cluster. Eliminar de la matriz la fila y columna de los clusters agrupados.
-	  Generar la nueva matriz de distancias D. 
-	    • Añadir una fila y una columna con el cluster nuevo 
-            • Calcular la distancia del resto de clusters al cluster nuevo 
+         Elegir los dos clusters más cercanos. Serán la fila y la columna del valor mínimo de la matriz D 
+         Agrupar los dos en un cluster. Eliminar de la matriz la fila y columna con mayor indice de los dos clusters agrupados.	  
+	        • Actualizar la fila de los dos clusters que se agrupan.
+            • Calcular la distancia del resto de clusters al cluster nuevo .
 
 	 Repetir este el paso 2.2. hasta tener sólo un cluster con todos los individuos
 FASE 3 (OPCIONAL): Representar el dendograma.
@@ -122,7 +123,7 @@ La complejidad con los enlaces simple y completo tienen un coste cúbico O(N^3).
 
 ## Estrategias MPI implementadas
 ### Dividir la matriz entre los procesos
-Divide la matriz entre todos los procesos. El proceso _master_ se encarga de gestionar la comunicación entre los procesos para dividr el algoritmo entre estos. Dependiendo de la distancia hay más o menos implementaciones.
+Divide la matriz entre todos los procesos. El proceso _master_ se encarga de gestionar la comunicación entre los procesos para dividir el algoritmo entre estos. Dependiendo de la distancia hay más o menos implementaciones.
 
 Distancia por centroides:
 - [Implementación](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/Jerarquico_Aglomerativo/Aglomerative_MPI_Cent_E.py)
@@ -140,7 +141,7 @@ Distancias por enlace simple/completo, (complejidad mayor que la anterior distan
 
 <br>
  
-### Algoritmo KMedias
+### KMedias
 
 ```python
 Fijar un valor k.
@@ -151,7 +152,7 @@ FASE 1: Inicializar los K centros de los clusters de forma aleatoria.
 FASE 2: Repetir esta fase hasta que los centros no cambien.
     o 2.1. (Asignación): Calcular el cluster más cercano para cada individuo.
 	Requiere el uso de una distancia (normalmente Euclídea o Manhattan).
-    o 2.2. (Actualización): Calcular los nuevos centros con la asignación (de esta iteración) de los individuos.
+    o 2.2. (Actualización): Calcular los nuevos centros con la asignación calculada de los individuos.
 	Se calcula con la media de los valores de los individuos de cada cluster.
 
 Como los clusters se generan aleatoriamente, no siempre va a dar un buen resultado a la primera.
@@ -164,14 +165,14 @@ Por lo que conviene ejecutar varias veces este algoritmo para encontrar la mejor
 ### Dividir la población
 Divide la población de individuos matriz entre todos los procesos. El proceso _master_ se encarga de gestionar de calcular los nuevos centros en cada iteración.
 
-Distancia Euclidea:
+Distancia Euclídea:
 - [Implementación](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_uno_E.py)
 
 Distancia Manhattan:
 - [Implementación](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_uno_M.py)
 
 ### Búsqueda de la mejor asignación
-Para la búsqueda se ejecuta un bucle principal con el número de centros maximo que se quiere estudiar, es decir, se ejecuta el algoritmo para los valores de _K_ entre _\[2, K_max\]_. En este bucle principal se repite 5 veces para encontar la mejor asignación para cada valor de _K_. Hay dos implementaciones, la estrategia MPI comentada en la subsección anterior, o ejecutar en varios procesos el algoritmo secuencial con diferentes valores de _K_, pero mismos centros.
+Para la búsqueda se ejecuta un bucle principal con el número de centros máximo que se quiere estudiar, es decir, se ejecuta el algoritmo para los valores de _K_ entre _\[2, K_max\]_. En este bucle principal se repite 5 veces para encontrar la mejor asignación para cada valor de _K_. Hay dos implementaciones, la estrategia MPI comentada en la subsección anterior, o ejecutar en varios procesos el algoritmo secuencial con diferentes valores de _K_, pero mismos centros.
 - [Dividir la población](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_busqueda_E_1.py)
 - [Ejecuciones secuenciales en paralelo](https://github.com/Danipiza/TFG/blob/main/1_Aprendizaje_NoSupervisado/K-Medias/KMediasMPI_busqueda_E_2.py)
 
@@ -180,27 +181,24 @@ Para la búsqueda se ejecuta un bucle principal con el número de centros maximo
 <hr>
 
 ## Aprendizaje por Refuerzo
-Se basa en experiencias y simulaciones, con prueba y error, recibiendo recompensas con las acciones tomadas (también pueden ser negativas). Nadie le dice al agente que hacer, este toma las decisiones con diferentes estrategias. Se realiza una etapa de entrenamiento para que aprenda a moverse por el entorno, tomando las decisiones que maximicen las recompensas obtenidas en experiencias pasadas.
+Se basa en experiencias y simulaciones, con prueba y error, recibiendo recompensas con las acciones tomadas (también pueden ser negativas). Nadie le dice al agente que hacer, éste toma las decisiones con diferentes estrategias. Se realiza una etapa de entrenamiento para que aprenda a moverse por el entorno, tomando las decisiones que maximicen las recompensas obtenidas en experiencias pasadas.
 
 Los algoritmos desarrollados en este proyecto son los siguientes:
 1. [Q-Learning](#q-learning)
 2. [DQN](#dqn)
 
 ### Q-Learning
-Mezcla entre programación dinámica y Monte Carlo. R=Matriz de recompensas.
-- R=Matriz de recompensas.
-- Q=Matriz (Estados x Acciones). Que acción elegir en cada estado. (mayor valor)
+Mezcla entre programación dinámica y Monte Carlo. 
+- R = Matriz de recompensas.
+- Q = Matriz (Estados x Acciones). Que acción elegir en cada estado. (mayor valor)
 
 ### Entorno 
 Para este algoritmo es un laberinto. Se entrena al agente para que consiga llegar desde un punto origen a uno destino en el menor número de acciones necesarias.
 
 ### Hiperparametros:
-- α (tasa de aprendizaje): 
-Debería disminuir a medida que continúa adquiriendo una base de conocimientos cada vez mayor.
-- γ (factor de descuento): 
-A medida que se acerca cada vez más al valor límite, su preferencia por la recompensa a corto plazo debería aumentar, ya que no estará el tiempo suficiente para obtener la recompensa a largo plazo, lo que significa que su gamma debería disminuir.
-- ϵ (factor de exploración-explotación): Evita que la acción siga siempre la misma ruta.
-A medida que desarrollamos nuestra estrategia, tenemos menos necesidad de exploración y más explotación para obtener más utilidad de nuestra política, por lo que en vez de utilizar un valor fijo, a medida que aumentan los ensayos, épsilon debería disminuir. Al principio un épsilon alto genera más episodios de exploración y al final un épsilon bajo explota el conocimiento aprendido.
+- α (tasa de aprendizaje): Este hiper-parámetro controla cuánto modifica una nueva experiencia.
+- γ (factor de descuento): Representa cuánto de importancia le damos a las recompensas futuras.
+- ϵ (factor de exploración-explotación): Este hiper-parámetro controla el balance entre exploración y explotación. Cuanto más lejos esté el agente de la ejecución inicial, menores actuaciones de exploración y mayor explotación serán necesarias para obtener más utilidad de nuestra póliza, por lo que, en vez de utilizar un valor fijo, a medida que aumentan los ensayos, épsilon debería disminuir. Al principio un epsilon alto genera más episodios de exploración y al final un épsilon bajo explota el conocimiento aprendido.
 
 La función que usa para almacenar las experiencias en la Q-Table es la siguiente:
 
@@ -215,11 +213,11 @@ Siendo _S_ el estado actual, _A_ la acción tomada, _S’_ el estado siguiente y
 ## Estrategias MPI implementadas
 
 ### Dividir el entorno entre los procesos
-Al dividir el laberinto entre los procesos (primera mejora), cada proceso controla una zona, y se genera un flujo constante de episodios (iteraciones del algoritmo). Cuando un agente sale del dominio de un proceso, éste le manda un mensaje al proceso que controla esa parte del laberinto con la posición en la que entra
+Al dividir el laberinto entre los procesos, cada proceso controla una zona, y se genera un flujo constante de episodios (iteraciones del algoritmo). Cuando un agente sale del dominio de un proceso, éste le manda un mensaje al proceso que controla esa parte del laberinto con la posición en la que entra
 - [Implementación](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_MPI_3.py)
 
 ### Ejecuciones en paralelo y juntar las experiencias.
-El master recolecta las experiencias de los workers, haciendo la media de los Q-valor obtenidos de los procesos, calculando así las mejores acciones para cada estado.
+El _master_ recolecta las experiencias de los _workers_, haciendo la media de los Q-valor obtenidos de los procesos, calculando así las mejores acciones para cada estado.
 - [Implementación 1](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_MPI_2_1.py)
 - [Implementación 2](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/RL/RL_MPI_2_2.py)
 
@@ -260,7 +258,7 @@ Además de estos parámetros, el algoritmo cuenta con otras variables para desar
 ## Estrategias MPI implementadas
 
 ### Búsqueda de hiper-parámetros
-Igual que la mejora anterior, pero esta vez para encontrar hiper-parámetros. Cada proceso ejecuta combinaciones distintas y almacena en ficheros los resultados obtenidos (Fin, Bucle, ...)
+Misma estrategias de búsqueda que la del algoritmo Q-Learning.
 - [Implementación](https://github.com/Danipiza/TFG/blob/main/2_Aprendizaje_Por_Refuerzo/DQN/DQN_mpi.py)
 
 ### Mismas estrategias que en las [Redes Neuronales](#redes-neuronales)
@@ -272,7 +270,7 @@ Igual que la mejora anterior, pero esta vez para encontrar hiper-parámetros. Ca
 
 La programación evolutiva es una técnica de optimización inspirada en la teoría de la evolución biológica. Se basa en el concepto de selección natural y evolución de las poblaciones para encontrar soluciones a problemas complejos.
 
-Una población está compuesta por individuos, que son sometida a métodos de evaluación, selección, cruce y mutación para, con el paso de las generaciones, maximizar o minimizar un valor fitness. Un individuo tiene un cromosoma, que tiene uno o varios genes, que a su vez cada gen tiene uno o varios alelos. Los individuos se pueden representar de la siguientes formas: 
+Una población está compuesta por individuos, que son sometida a métodos de evaluación, selección, cruce y mutación para, con el paso de las generaciones, maximizar o minimizar un valor fitness. Un individuo tiene un cromosoma, que tiene uno o varios genes, que a su vez cada gen tiene uno o varios alelos. Los individuos se pueden representar de las siguientes formas: 
 - Binarios: Cada alelo es un bit. 
 - Reales: Cada alelo es un número real. Estos individuos son más fáciles de manejar.
 - Árboles: Cada alelo es un nodo del árbol.
@@ -285,8 +283,8 @@ evaluar_poblacion(poblacion)
 while(<<condicion>>):
   seleccion = seleccionar_poblacion()
   # Reproducción
-  cruzar_poblacion(seleccion, prob_cruce)
-  mutar_poblacion(seleccion, prob_muta)  
+  poblacion = cruzar_poblacion(seleccion, prob_cruce)
+  poblacion = mutar_poblacion(seleccion, prob_muta)  
   evaluar_poblacion()
 ```
 ## Algoritmos secuenciales
@@ -304,7 +302,7 @@ La población se divide en subpoblaciones repartidas entre los procesos ejecutad
 - [Implementación](https://github.com/Danipiza/TFG/tree/main/3_Programacion_Evolutiva/2_MPI/2ModeloIslas_1.py)
 
 ### Pipeline
-Cada parte del algoritmo se divide entre los procesos. El _master_ genera subpoblaciones, y los workers ejecutados se encargan de evaluar, seleccionar, cruzar y mutar las poblaciones que reciben del proceso anterior. Una vez procesan los datos recibidos, los envían hacia adelante y esperan a recibir nuevos datos. Cada proceso se encarga de una parte, generando un flujo constante de mensajes entre los procesos.
+Cada parte del algoritmo se divide entre los procesos. El _master_ genera subpoblaciones, y los _workers_ ejecutados se encargan de evaluar, seleccionar, cruzar y mutar las poblaciones que reciben del proceso anterior. Una vez procesan los datos recibidos, los envían hacia adelante y esperan a recibir nuevos datos. Cada proceso se encarga de una parte, generando un flujo constante de mensajes entre los procesos.
 - [General](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLine.py)
 - [Binario \(4 procesos\)](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLineBin_1.py)
 - [Binario \(7 procesos\)](https://github.com/Danipiza/TFG/blob/main/3_Programacion_Evolutiva/2_MPI/3PipeLineBin_2.py)
@@ -318,21 +316,21 @@ Cada parte del algoritmo se divide entre los procesos. El _master_ genera subpob
 
 ## Aprendizaje Supervisado
 1. [KNN](#knn)
-2. [Redes Neuronales](redes-neuronales)
+2. [Redes Neuronales](#redes-neuronales)
 
 ### KNN
-simple pero potente, resultando muy efectivo para tareas de clasificación y regresión. Se basa en la idea de que los puntos de datos similares tienden a agruparse en el espacio de características. Este algoritmo pertenece al paradigma de aprendizaje perezoso o basado en instancias.
+Simple pero potente, resultando muy efectivo para tareas de clasificación y regresión. Se basa en la idea de que los puntos de datos similares tienden a agruparse en el espacio de características. Este algoritmo pertenece al paradigma de aprendizaje perezoso o basado en instancias.
 
 ```python
 FASE 1: Inicializar las poblaciones categorizadas y a predecir, y la variable K
-FASE 2: Agrupar un nuevo individuo
+FASE 2: Para cada individuo. Agruparlo con la población categorizada
     o 2.1. Recorrer todos los individuos de la población categorizada, y almacenar las K individuos más cercanos.
     o 2.2. Asignar el cluster con más repeticiones al individuo actual.
     o 2.3. (opcional) Añadir el individuo actual a la población categorizada.
 
-No hay una forma de determinar el mejor valor para k, por lo que hay que probar con varias ejecuciones. 
-Valores pequeños de K crea sonido. 
-Valores grandes con pocos datos hará que siempre sea la misma categoría     
+No hay manera de determinar el mejor valor para K, por lo que hay que ejecutar el algoritmo varias veces con diferentes valores de K.
+Valores pequeños de K crean sonido. 
+Valores grandes con pocos datos hará que siempre clasifique la misma categoría.
 ```
 ## Algoritmos secuenciales
 - [Algoritmo](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN.py)
@@ -342,24 +340,24 @@ Las estrategias se dividen en dos principales implementaciones, actualizando la 
 
 ### Dividir la población categorizada
 Se divide la población categorizada entre los procesos para que estos trabajen de manera paralela en un mismo individuo. Es decir, cada _worker_ envía los _K_ vecinos más cercanos de su subpoblación categorizada.
-No Actualiza:
+No Actualizando:
 - [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_E_NoAct.py)
 - [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_M_NoAct.py)
 
-Actualiza:
+Actualizando:
 - [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_E_Act.py)
 - [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_M_Act.py)
 
 
 ### Dividir la población a predecir
 Se divide la población a predecir entre los procesos para que estos trabajen en paralelo de manera independiente. Es decir, cada _worker_ envía al proceso _master_ un individuo distinto al terminar un procesado.
-No Actualiza:
+No Actualizando:
 - [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_2_E_NoAct.py)
 - [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_2_M_NoAct.py)
 
-Actualiza:
-- [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_2_Act.py)
-- [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_1_2_Act.py)
+Actualizando:
+- [Euclídea](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_2_E_Act.py)
+- [Manhattan](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/KNN/KNN_MPI_2_M_Act.py)
 
 
 
@@ -388,7 +386,7 @@ Cada neurona hace una operación simple. Suma los valores de todas las neuronas 
 
 Proceso de aprendizaje/entrenamiento:
 ```python
-FASE 1: Inicializar los pesos de la red neuronal con los datos de inicializacion
+FASE 1: Inicializar los pesos de la red neuronal con los datos de inicialización
 FASE 2: Entrenamiento
     o 2.1. (Forward) Enviar un individuo por la red neuronal. Suma el valor recibido de la capa anterior multiplicada
 	por los pesos de la capa actual con la siguiente. Así se determina la importancia de conexión entre las neuronas.
@@ -405,7 +403,7 @@ FASE 2: Entrenamiento
 ## Estrategias MPI implementadas
 
 ### Pipeline
-Al igual que en los algoritmos evolutivos cada proceso se encarga de una parte para generar un flujo constante de mensajes. En este caso cada worker se encarga de una capa.
+Al igual que en los algoritmos evolutivos cada proceso se encarga de una parte del modelo para generar un flujo constante de mensajes. En este caso cada _worker_ se encarga de una capa.
 - [Síncrono](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_MPI_1_3.py)
 - [Asíncrono](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_MPI_1_4.py)
 
@@ -417,5 +415,5 @@ Se divide la población de entrenamiento entre los procesos. Al final se juntan 
 Al igual que en otros algoritmos, se ejecutan en paralelo ejecuciones secuenciales, en donde cada proceso almacena los resultados.
 - [Implementación](https://github.com/Danipiza/TFG/blob/main/4_Aprendizaje_Supervisado/Redes_Neuronales/RN_MPI_2_1.py)
 
-### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/edit/main/README.md).
+### Carpeta con explicaciones y el código [AQUÍ](https://github.com/Danipiza/TFG/tree/main/4_Aprendizaje_Supervisado/Redes_Neuronales).
 <hr>
