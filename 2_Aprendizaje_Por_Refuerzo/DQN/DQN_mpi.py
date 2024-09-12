@@ -13,6 +13,11 @@ import collections
 
 import ast # lee mas facilmente una lista de enteros desde un archivo .txt
 
+# EJECUTAR
+# mpiexec -np 9 python DQN_mpi.py
+
+
+
 # GHOSTS AI
 # https://www.youtube.com/watch?v=ataGotQ7ir8&ab_channel=RetroGameMechanicsExplained
 
@@ -442,22 +447,18 @@ class PacmanGUI:
 
         self.count_state+=1
         
-        print("State=", self.count_state, "\tCoins=",self.agent_coins)
+        
         
         if self.count_state==self.state_ticks[self.state]:                     
-            if self.state==0: 
-                self.state=1
-                print("New state: SCATTER",end="")
-            else: 
-                self.state=0
-                print("New state: CHASE",end="")
+            if self.state==0: self.state=1                
+            else: self.state=0
+                
 
             for i in range(self.n_ghosts):
                 if not self.ghosts_house[i]:
                     self.ghosts_dir[i]+=2
                     self.ghosts_dir[i]%=4
             
-            print("\nTurn 180º all ghosts")
 
             # reset
             self.count_state=0
@@ -1238,7 +1239,7 @@ class Pacman:
 
         return state
 
-    def step(self, accion):                
+    def step(self, accion, PRINT):                
         eat=self.move_agent(self.actions[accion])
         self.move_ghosts()
         
@@ -1279,9 +1280,11 @@ class Pacman:
         if accion==1: a="E"
         elif accion==2: a="S"
         elif accion==3: a="W"
-        print("{}\tTick={}  \tState={}  \tCoins={}  \t{}\tAgent= {}\tGhost= {}".format(a,self.exec_tick, 
-                                                                                                 self.count_state, self.agent_coins,aux,
-                                                                                                 self.agent_pos, self.ghosts_pos[0]))
+        if PRINT:
+            print("{}\tTick={}  \tState={}  \tCoins={}  \t{}\tAgent= {}\tGhost= {}".
+                  format(a,self.exec_tick, self.count_state, 
+                         self.agent_coins,aux,self.agent_pos, 
+                         self.ghosts_pos[0]))
         
         
 
@@ -1640,17 +1643,14 @@ class Pacman:
         if self.count_state==self.state_ticks[self.state]:                     
             if self.state==0: 
                 self.state=1
-                print("New state: SCATTER",end="")
-            else: 
-                self.state=0
-                print("New state: CHASE",end="")
+            else: self.state=0
 
             for i in range(self.n_ghosts):
                 if not self.ghosts_house[i]:
                     self.ghosts_dir[i]+=2
                     self.ghosts_dir[i]%=4
             
-            print("\nTurn 180º all ghosts")
+            
 
             # reset
             self.count_state=0
@@ -1884,9 +1884,14 @@ class Main:
         print("\nCtrl+C pressed. Variable written to file.")
         sys.exit(0)
     
-
+    def write_scores(self, name, score):    
+        try:
+            with open("{}.txt".format(name), 'a') as file:                
+                file.write(str(score) + '\n')
+        except Exception as e:
+            print(f"An error occurred: {e}")
     
-    def train_dqn(self, episodes):
+    def train_dqn2(self, episodes):
         signal.signal(signal.SIGINT, self.signal_handler)
 
         env = Pacman(os.path.join("data", "env2_0.txt"))
@@ -1944,7 +1949,7 @@ class Main:
                     print("Empieza: ", episode+1)
                     tStart=MPI.Wtime()
                     while not done:
-                        """action = self.agent.choose_action(state)"""
+                        action = self.agent.choose_action(state)
                         action=random.randint(0, 3)  
                         self.accionesR[action]+=1
                         next_state, reward, done = env.step(action)
@@ -1973,18 +1978,107 @@ class Main:
             # Handle the KeyboardInterrupt exception if needed
             print("\nKeyboardInterrupt caught. Exiting gracefully.")
 
+    def train_dqn(self, episodes, 
+                  eps_dec, lr, env):
+        
+        env=Pacman(os.path.join("data", env)) 
+        input_size = len(env.get_state())
+        self.version=env.version
 
+        self.agent=DQNAgent(input_size=input_size, hidden_size=[64, 64], output_size=4, 
+                              learning_rate=lr, gamma=0.99, epsilon=1, eps_dec=eps_dec,
+                              archivo1=None,archivo2=None)
+                            
+                 
+                       
+        
+        self.final_score=0
+        scores=[] 
+        best_score=0
 
+        timeStart=MPI.Wtime()
+        for _ in range(episodes):
+            state=env.reset(init=True,positions=None,coins=None,states=None,dirs=None)
+            
+            done=False
+            total_reward=0
+
+            while not done:
+                action=self.agent.choose_action(state)
+                
+                
+                next_state, reward, done=env.step(action, False)
+                
+                self.agent.remember(state, action, reward, next_state, done)
+                self.agent.learn()
+                
+                # mover al siguiente estado
+                state=next_state
+
+                total_reward+=reward
+            
+            scores.append(total_reward)
+            if best_score<total_reward:                
+                self.agent.update_target_model()
+                best_score=total_reward                       
+            
+
+        timeEnd=MPI.Wtime()
+
+        self.final_score=0
+        for score in scores[-100:]: self.final_score+=score
+        self.final_score/=100
+
+        print("Tiempo de ejecucion:",timeEnd-timeStart)
 
 
 
 
 if __name__ == "__main__":
-    main=Main()
-    main.train_dqn(500)
+
+    # Init MPI.  rank y tag de MPI y el numero de procesos creados (el primero es el master)
+    tag=0
+    comm=MPI.COMM_WORLD    
+    status = MPI.Status()
+    myrank=comm.Get_rank()
+    numProc=comm.Get_size()
+    numWorkers=numProc-1
+
     
-    #env=PacmanGUI(os.path.join("data", "env2.txt"))
-    #env=Pacman(os.path.join("data", "env1_0.txt"))
+    episodes=1000
+
+    env='env1_0.txt'
+    
+    """
+    0: 376
+    1: 294
+    2: 431
+    3: 270
+    4: 287
+    5: 317
+    6: 246
+    7: 241
+    8: 281    
+    """
+    # lr=2e-4  # 0.0002
+    lr_vals=[0.001, 0.0025, 0.005, 0.0001, 0.00025, 0.0005, 0.00001, 0.000025, 0.00005]
+    lr=lr_vals[myrank]
+
+    # eps_dec=2.5e-5 # 0.000025       
+    eps_dec_vals=[0.0001, 0.00025, 0.0005, 0.00075, 0.00001, 0.000025, 0.00005, 0.000075]
+    
+        
+    
+    
+    print("Proceso {}. Ejecuciones:".format(myrank))
+    for eps_dec in eps_dec_vals:
+        main=Main()
+        main.train_dqn(episodes, 
+                       eps_dec, lr, env)
+        
+        main.write_scores("proceso_{}.txt".format(myrank), main.final_score)
+    
+    
     
     
     

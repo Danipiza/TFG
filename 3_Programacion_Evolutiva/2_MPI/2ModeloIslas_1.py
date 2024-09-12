@@ -3534,7 +3534,7 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=10000//numWorkers
+        tam_poblacion=2000//numWorkers
         generaciones=10
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
@@ -3566,11 +3566,11 @@ def main():
 
         long_cromosoma=100
 
-        filas=100
-        columnas=100
+        filas=10
+        columnas=10
         # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
         bloating_idx=0
-        ticks=10000
+        ticks=150
 
         print("\nFuncion: {}\t Seleccion: {}\t Cruce: {} (p:{})\tMutacion:{} (p:{})".format(funcion_opt[funcion_idx],
                                                                       seleccion_opt[seleccion_idx],

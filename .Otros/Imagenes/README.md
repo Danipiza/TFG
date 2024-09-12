@@ -1,0 +1,1 @@
+Imágenes utilizadas para los README.md del repositorio.

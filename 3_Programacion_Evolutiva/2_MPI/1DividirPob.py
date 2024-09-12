@@ -2868,7 +2868,7 @@ def main():
     numWorkers=numProc-1
 
     if myrank==MASTER:
-        tam_poblacion=4000
+        tam_poblacion=2000
         tam_poblacionDiv=tam_poblacion//numWorkers
         tam_poblacion=tam_poblacionDiv*numWorkers
 
@@ -2876,11 +2876,11 @@ def main():
 
         # 0: Ruleta | 1: Torneo Determinista  | 2: Torneo Probabilístico | 3: Estocástico Universal 
         #           | 4: Truncamiento  | 5: Restos | 6: Ranking
-        seleccion_idx=0
+        seleccion_idx=1
         # 0: Basica | 1: Uniforme | 
         # 2: PMX    | 3: OX       | 4: OX-PP | 5: CX | 6: CO
         # 7: Intercambio
-        cruce_idx=0
+        cruce_idx=7
         prob_cruce=0.6
         # 0: Basica    |     
         # 1: Insercion | 2: Intercambio | 3: Inversion    | 4: Heuristica
@@ -2906,7 +2906,7 @@ def main():
         columnas=100
         # 0: Sin | 1: Tarpeian | 2: Poli and McPhee
         bloating_idx=0
-        ticks=100
+        ticks=1500
         
 
         if funcion_idx==0: funcion=Funcion1()

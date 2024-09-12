@@ -1,1 +1,1 @@
-Estos archivos son muy pesados por lo que he tenido que almacenarlo en [drive](https://drive.google.com/drive/folders/1Q78u0NYgQy-lbSvXrCoRkPoBMLTZobvR?usp=sharing)
+Estos archivos son muy pesados, por lo que la mayoría de ficheros estan en el siguiente enlace [drive](https://drive.google.com/drive/folders/1Q78u0NYgQy-lbSvXrCoRkPoBMLTZobvR?usp=sharing)
